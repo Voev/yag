@@ -48,7 +48,7 @@ static int GsGetParams(
         return 0;
     }
     p = OSSL_PARAM_locate( params, OSSL_PROV_PARAM_BUILDINFO );
-    if( p && !OSSL_PARAM_set_utf8_ptr(p, OPENSSL_FULL_VERSION_STR ) )
+    if( p && !OSSL_PARAM_set_utf8_ptr( p, OPENSSL_FULL_VERSION_STR ) )
     {
         return 0;
     }
@@ -67,6 +67,25 @@ static const OSSL_ALGORITHM gGsDigests[] =
     { NULL, NULL, NULL }
 };
 
+static const OSSL_ALGORITHM gGsKeyMgmts[] =
+{
+    { SN_id_GostR3410_2012_256, "provider=gostone", gGostR341012_256Funcs },
+    { SN_id_GostR3410_2012_512, "provider=gostone", gGostR341012_512Funcs },
+    { NULL, NULL, NULL }
+};
+
+static const OSSL_ALGORITHM gGsEncoders[] =
+{
+    { SN_id_GostR3410_2012_256, "provider=gostone", gGostR341012_256DerEncoderFuncs },
+    { SN_id_GostR3410_2012_256, "provider=gostone", gGostR341012_256PemEncoderFuncs },
+    { SN_id_GostR3410_2012_256, "provider=gostone", gGostR341012_256TextEncoderFuncs },
+    { SN_id_GostR3410_2012_512, "provider=gostone", gGostR341012_512DerEncoderFuncs },
+    { SN_id_GostR3410_2012_512, "provider=gostone", gGostR341012_512PemEncoderFuncs },
+    { SN_id_GostR3410_2012_512, "provider=gostone", gGostR341012_512TextEncoderFuncs },
+    { NULL, NULL, NULL }
+};
+
+
 static const OSSL_ALGORITHM* GsQuery(
     OSSL_PROVIDER* prov ossl_unused,
     int operation,
@@ -80,7 +99,13 @@ static const OSSL_ALGORITHM* GsQuery(
         return gGsDigests;
     }
     case OSSL_OP_KEYMGMT:
+    {
+        return gGsKeyMgmts;
+    }
     case OSSL_OP_ENCODER:
+    {
+        return gGsEncoders;
+    }
     case OSSL_OP_DECODER:
     case OSSL_OP_CIPHER:
     case OSSL_OP_MAC:

@@ -22,7 +22,7 @@ static int StreebogGetParams( OSSL_PARAM params[], const size_t digestSize );
 static int Streebog256GetParams( OSSL_PARAM params[] );
 static int Streebog512GetParams( OSSL_PARAM params[] );
 
-OSSL_DISPATCH gGostR341112_256Funcs[] =
+const OSSL_DISPATCH gGostR341112_256Funcs[] =
 {
     { OSSL_FUNC_DIGEST_INIT,            FUNC_PTR( Streebog256Init ) },
     { OSSL_FUNC_DIGEST_GET_PARAMS,      FUNC_PTR( Streebog256GetParams ) },
@@ -34,7 +34,7 @@ OSSL_DISPATCH gGostR341112_256Funcs[] =
     { OSSL_FUNC_DIGEST_GETTABLE_PARAMS, FUNC_PTR( StreebogGettableParams ) },
 };
 
-OSSL_DISPATCH gGostR341112_512Funcs[] =
+const OSSL_DISPATCH gGostR341112_512Funcs[] =
 {
     { OSSL_FUNC_DIGEST_INIT,            FUNC_PTR( Streebog512Init ) },
     { OSSL_FUNC_DIGEST_GET_PARAMS,      FUNC_PTR( Streebog512GetParams ) },
