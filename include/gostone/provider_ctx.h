@@ -5,6 +5,8 @@
 
 typedef struct gs_prov_ctx_st GsProvCtx;
 
+#define INTERPRET_AS_PROV_CTX( x ) (( GsProvCtx* )( x ))
+
 GsProvCtx* GsProvCtxNew( void );
 
 void GsProvCtxFree( GsProvCtx* ctx );

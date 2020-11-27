@@ -7,6 +7,7 @@
 #include <openssl/obj_mac.h>
 #include <gostone/common.h>
 #include <gostone/implementations.h>
+#include <gostone/provider_bio.h>
 #include <gostone/provider_ctx.h>
 
 OSSL_provider_init_fn OSSL_provider_init;
@@ -70,18 +71,18 @@ static const OSSL_ALGORITHM gGsDigests[] =
 static const OSSL_ALGORITHM gGsKeyMgmts[] =
 {
     { SN_id_GostR3410_2012_256, "provider=gostone", gGostR341012_256Funcs },
-    { SN_id_GostR3410_2012_512, "provider=gostone", gGostR341012_512Funcs },
+    //{ SN_id_GostR3410_2012_512, "provider=gostone", gGostR341012_512Funcs },
     { NULL, NULL, NULL }
 };
 
 static const OSSL_ALGORITHM gGsEncoders[] =
 {
-    { SN_id_GostR3410_2012_256, "provider=gostone", gGostR341012_256DerEncoderFuncs },
-    { SN_id_GostR3410_2012_256, "provider=gostone", gGostR341012_256PemEncoderFuncs },
-    { SN_id_GostR3410_2012_256, "provider=gostone", gGostR341012_256TextEncoderFuncs },
-    { SN_id_GostR3410_2012_512, "provider=gostone", gGostR341012_512DerEncoderFuncs },
-    { SN_id_GostR3410_2012_512, "provider=gostone", gGostR341012_512PemEncoderFuncs },
-    { SN_id_GostR3410_2012_512, "provider=gostone", gGostR341012_512TextEncoderFuncs },
+    //{ SN_id_GostR3410_2012_256, "provider=gostone", gGostR341012_256DerEncoderFuncs },
+    //{ SN_id_GostR3410_2012_256, "provider=gostone", gGostR341012_256PemEncoderFuncs },
+    //{ SN_id_GostR3410_2012_256, "provider=gostone", gGostR341012_256TextEncoderFuncs },
+    //{ SN_id_GostR3410_2012_512, "provider=gostone", gGostR341012_512DerEncoderFuncs },
+    //{ SN_id_GostR3410_2012_512, "provider=gostone", gGostR341012_512PemEncoderFuncs },
+    //{ SN_id_GostR3410_2012_512, "provider=gostone", gGostR341012_512TextEncoderFuncs },
     { NULL, NULL, NULL }
 };
 
@@ -95,17 +96,11 @@ static const OSSL_ALGORITHM* GsQuery(
     switch( operation )
     {
     case OSSL_OP_DIGEST:
-    {
         return gGsDigests;
-    }
     case OSSL_OP_KEYMGMT:
-    {
         return gGsKeyMgmts;
-    }
     case OSSL_OP_ENCODER:
-    {
         return gGsEncoders;
-    }
     case OSSL_OP_DECODER:
     case OSSL_OP_CIPHER:
     case OSSL_OP_MAC:
@@ -115,9 +110,7 @@ static const OSSL_ALGORITHM* GsQuery(
     case OSSL_OP_SIGNATURE:
     case OSSL_OP_ASYM_CIPHER:
     case OSSL_OP_KEM:
-    {
         return NULL;
-    }
     }
     if( noCache )
     {
@@ -141,6 +134,12 @@ int OSSL_provider_init(
     void** provCtx )
 {
     OSSL_FUNC_core_get_libctx_fn* CoreGetLibCtx = NULL;
+    BIO_METHOD* coreBioMeth;
+
+    if( !GsProvBioFromDispatch( in ) )
+    {
+        return 0;
+    }
 
     for( ; in->function_id != 0; ++in )
     {
@@ -170,7 +169,13 @@ int OSSL_provider_init(
     {
         return 0;
     }
-
+    coreBioMeth = GsProvBioInitBioMethod();
+    if( !coreBioMeth )
+    {
+        GsProvCtxFree( *provCtx );
+        return 0;
+    }
+    GsProvCtxSet0CoreBioMeth( *provCtx, coreBioMeth );
     GsProvCtxSet0LibCtx( *provCtx, ( OSSL_LIB_CTX* )CoreGetLibCtx( handle ) );
     GsProvCtxSet0Handle( *provCtx, handle );
 

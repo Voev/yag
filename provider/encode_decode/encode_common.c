@@ -22,11 +22,14 @@ struct gs_encoder_ctx_st
 
 static OSSL_FUNC_encoder_newctx_fn GsEncoderNewCtx;
 static OSSL_FUNC_encoder_freectx_fn GsEncoderFreeCtx;
-static OSSL_FUNC_encoder_gettable_params_fn GsEncoderGettableParams;
 static OSSL_FUNC_encoder_set_ctx_params_fn GsEncoderSetCtxParams;
 static OSSL_FUNC_encoder_settable_ctx_params_fn GsEncoderSettableCtxParams;
 static OSSL_FUNC_encoder_import_object_fn GsEncoderImportObject;
 static OSSL_FUNC_encoder_free_object_fn GsEncoderFreeObject;
+
+
+static OSSL_FUNC_encoder_gettable_params_fn GsEncoderGettableParams;
+
 
 static OSSL_FUNC_encoder_get_params_fn GsEncoderGetParamsKey256ToDer;
 static OSSL_FUNC_encoder_get_params_fn GsEncoderGetParamsKey256ToPem;
@@ -38,21 +41,21 @@ static OSSL_FUNC_encoder_encode_fn GsEncoderEncodeKey256ToPem;
 static OSSL_FUNC_encoder_encode_fn GsEncoderEncodeKey512ToDer;
 static OSSL_FUNC_encoder_encode_fn GsEncoderEncodeKey512ToPem;
 
-const OSSL_DISPATCH gGostR341012_256DerEncoderFuncs[] =
+const OSSL_DISPATCH gGostR341012_256ToPkcs8DerEncoderFuncs[] =
 {
     { OSSL_FUNC_ENCODER_NEWCTX, FUNC_PTR( GsEncoderNewCtx ) },
     { OSSL_FUNC_ENCODER_FREECTX, FUNC_PTR( GsEncoderFreeCtx ) },
     { OSSL_FUNC_ENCODER_GETTABLE_PARAMS, FUNC_PTR( GsEncoderGettableParams ) },
+    { OSSL_FUNC_ENCODER_GET_PARAMS, FUNC_PTR( GsEncoderGetParamsKey256ToDer ) },
     { OSSL_FUNC_ENCODER_SETTABLE_CTX_PARAMS, FUNC_PTR( GsEncoderSettableCtxParams ) },
     { OSSL_FUNC_ENCODER_SET_CTX_PARAMS, FUNC_PTR( GsEncoderSetCtxParams ) },
     { OSSL_FUNC_ENCODER_IMPORT_OBJECT, FUNC_PTR( GsEncoderImportObject ) },
     { OSSL_FUNC_ENCODER_FREE_OBJECT, FUNC_PTR( GsEncoderFreeObject ) },
-    { OSSL_FUNC_ENCODER_GET_PARAMS, FUNC_PTR( GsEncoderGetParamsKey256ToDer ) },
     { OSSL_FUNC_ENCODER_ENCODE, FUNC_PTR( GsEncoderEncodeKey256ToDer ) },
     { 0, NULL }
 };
 
-const OSSL_DISPATCH gGostR341012_256PemEncoderFuncs[] =
+const OSSL_DISPATCH gGostR341012_256ToPkcs8PemEncoderFuncs[] =
 {
     { OSSL_FUNC_ENCODER_NEWCTX, FUNC_PTR( GsEncoderNewCtx ) },
     { OSSL_FUNC_ENCODER_FREECTX, FUNC_PTR( GsEncoderFreeCtx ) },
@@ -63,34 +66,6 @@ const OSSL_DISPATCH gGostR341012_256PemEncoderFuncs[] =
     { OSSL_FUNC_ENCODER_FREE_OBJECT, FUNC_PTR( GsEncoderFreeObject ) },
     { OSSL_FUNC_ENCODER_GET_PARAMS, FUNC_PTR( GsEncoderGetParamsKey256ToPem ) },
     { OSSL_FUNC_ENCODER_ENCODE, FUNC_PTR( GsEncoderEncodeKey256ToPem ) },
-    { 0, NULL }
-};
-
-const OSSL_DISPATCH gGostR341012_512DerEncoderFuncs[] =
-{
-    { OSSL_FUNC_ENCODER_NEWCTX, FUNC_PTR( GsEncoderNewCtx ) },
-    { OSSL_FUNC_ENCODER_FREECTX, FUNC_PTR( GsEncoderFreeCtx ) },
-    { OSSL_FUNC_ENCODER_GETTABLE_PARAMS, FUNC_PTR( GsEncoderGettableParams ) },
-    { OSSL_FUNC_ENCODER_SETTABLE_CTX_PARAMS, FUNC_PTR( GsEncoderSettableCtxParams ) },
-    { OSSL_FUNC_ENCODER_SET_CTX_PARAMS, FUNC_PTR( GsEncoderSetCtxParams ) },
-    { OSSL_FUNC_ENCODER_IMPORT_OBJECT, FUNC_PTR( GsEncoderImportObject ) },
-    { OSSL_FUNC_ENCODER_FREE_OBJECT, FUNC_PTR( GsEncoderFreeObject ) },
-    { OSSL_FUNC_ENCODER_GET_PARAMS, FUNC_PTR( GsEncoderGetParamsKey512ToDer ) },
-    { OSSL_FUNC_ENCODER_ENCODE, FUNC_PTR( GsEncoderEncodeKey512ToDer ) },
-    { 0, NULL }
-};
-
-const OSSL_DISPATCH gGostR341012_512PemEncoderFuncs[] =
-{
-    { OSSL_FUNC_ENCODER_NEWCTX, FUNC_PTR( GsEncoderNewCtx ) },
-    { OSSL_FUNC_ENCODER_FREECTX, FUNC_PTR( GsEncoderFreeCtx ) },
-    { OSSL_FUNC_ENCODER_GETTABLE_PARAMS, FUNC_PTR( GsEncoderGettableParams ) },
-    { OSSL_FUNC_ENCODER_SETTABLE_CTX_PARAMS, FUNC_PTR( GsEncoderSettableCtxParams ) },
-    { OSSL_FUNC_ENCODER_SET_CTX_PARAMS, FUNC_PTR( GsEncoderSetCtxParams ) },
-    { OSSL_FUNC_ENCODER_IMPORT_OBJECT, FUNC_PTR( GsEncoderImportObject ) },
-    { OSSL_FUNC_ENCODER_FREE_OBJECT, FUNC_PTR( GsEncoderFreeObject ) },
-    { OSSL_FUNC_ENCODER_GET_PARAMS, FUNC_PTR( GsEncoderGetParamsKey512ToPem ) },
-    { OSSL_FUNC_ENCODER_ENCODE, FUNC_PTR( GsEncoderEncodeKey512ToPem ) },
     { 0, NULL }
 };
 
@@ -119,14 +94,58 @@ void GsEncoderFreeCtx( void* vctx )
     }
 }
 
-const OSSL_PARAM* GsEncoderGettableParams( ossl_unused void* provCtx )
+
+int key2any_check_selection(int selection, int selection_mask)
 {
-    static const OSSL_PARAM gGettablesParam[] =
+    /*
+     * The selections are kinda sorta "levels", i.e. each selection given
+     * here is assumed to include those following.
+     */
+    int checks[] = {
+        OSSL_KEYMGMT_SELECT_PRIVATE_KEY,
+        OSSL_KEYMGMT_SELECT_PUBLIC_KEY,
+        OSSL_KEYMGMT_SELECT_ALL_PARAMETERS
+    };
+    size_t i;
+
+    /* The decoder implementations made here support guessing */
+    if (selection == 0)
+        return 1;
+
+    for (i = 0; i < OSSL_NELEM(checks); i++) {
+        int check1 = (selection & checks[i]) != 0;
+        int check2 = (selection_mask & checks[i]) != 0;
+
+        /*
+         * If the caller asked for the currently checked bit(s), return
+         * whether the decoder description says it's supported.
+         */
+        if (check1)
+            return check2;
+    }
+
+    /* This should be dead code, but just to be safe... */
+    return 0;
+}
+
+const OSSL_PARAM* GsEncoderGettableParams( ossl_unused void* provCtx, int structure )
+{
+    static const OSSL_PARAM gGettableParams[] = 
     {
+        { OSSL_ENCODER_PARAM_INPUT_TYPE, OSSL_PARAM_UTF8_PTR, NULL, 0, 0 },
         { OSSL_ENCODER_PARAM_OUTPUT_TYPE, OSSL_PARAM_UTF8_PTR, NULL, 0, 0 },
         OSSL_PARAM_END,
     };
-    return gGettablesParam;
+
+    static const OSSL_PARAM gGettableParamsStructure[] = 
+    {
+        { OSSL_ENCODER_PARAM_INPUT_TYPE, OSSL_PARAM_UTF8_PTR, NULL, 0, 0 },
+        { OSSL_ENCODER_PARAM_OUTPUT_TYPE, OSSL_PARAM_UTF8_PTR, NULL, 0, 0 },
+        { OSSL_ENCODER_PARAM_OUTPUT_STRUCTURE, OSSL_PARAM_UTF8_PTR, NULL, 0, 0 },
+        OSSL_PARAM_END,
+    };
+
+    return structure ? gGettableParamsStructure : gGettableParams;
 }
 
 const OSSL_PARAM* GsEncoderSettableCtxParams( ossl_unused void* provCtx )
@@ -313,7 +332,8 @@ void GsEncoderFreeObject( void* key )
 
 static int GsEncoderGetParams( OSSL_PARAM params[],
                                const char* inputType,
-                               const char* outputType )
+                               const char* outputType,
+                               const char* outputStruct )
 {
     OSSL_PARAM* p = OSSL_PARAM_locate( params, OSSL_ENCODER_PARAM_INPUT_TYPE );
     if( p && !OSSL_PARAM_set_utf8_ptr( p, inputType ) )
@@ -325,39 +345,31 @@ static int GsEncoderGetParams( OSSL_PARAM params[],
     {
         return 0;
     }
+    p = OSSL_PARAM_locate( params, OSSL_ENCODER_PARAM_OUTPUT_TYPE );
+    if( p && !OSSL_PARAM_set_utf8_ptr( p, outputType ) )
+    {
+        return 0;
+    }
+    if( outputStruct ) 
+    {
+        p = OSSL_PARAM_locate(params, OSSL_ENCODER_PARAM_OUTPUT_STRUCTURE);
+        if( p && !OSSL_PARAM_set_utf8_ptr( p, outputStruct ) )
+        {
+            return 0;
+        }
+    }
     return 1;
 }
 
 int GsEncoderGetParamsKey256ToDer( OSSL_PARAM params[] )
 {
-    return GsEncoderGetParams( params, "GOST2012_256", "DER" );
+    return GsEncoderGetParams( params, "GOST2012_256", "DER", "pkcs8" );
 }
 
 int GsEncoderGetParamsKey256ToPem( OSSL_PARAM params[] )
 {
-    return GsEncoderGetParams( params, "GOST2012_256", "PEM" );
+    return GsEncoderGetParams( params, "GOST2012_256", "PEM", "pkcs8" );
 }
-
-int GsEncoderGetParamsKey256ToText( OSSL_PARAM params[] )
-{
-    return GsEncoderGetParams( params, "GOST2012_256", "TEXT" );
-}
-
-int GsEncoderGetParamsKey512ToDer( OSSL_PARAM params[] )
-{
-    return GsEncoderGetParams( params, "GOST2012_512", "DER" );
-}
-
-int GsEncoderGetParamsKey512ToPem( OSSL_PARAM params[] )
-{
-    return GsEncoderGetParams( params, "GOST2012_512", "PEM" );
-}
-
-int GsEncoderGetParamsKey512ToText( OSSL_PARAM params[] )
-{
-    return GsEncoderGetParams( params, "GOST2012_512", "TEXT" );
-}
-
 
 int GsEncodeKey( GsEncoderCtx* ctx, OSSL_CORE_BIO* cout,
                  const void* key, const int keyNid,
@@ -456,26 +468,3 @@ int GsEncoderEncodeKey256ToPem( void* ctx, OSSL_CORE_BIO* cout, const void* key,
                                GsEncodePublicKeyToPemBio,
                                GsEncodeParamsToPemBio );
 }
-
-int GsEncoderEncodeKey512ToDer( void* ctx, OSSL_CORE_BIO* cout, const void* key,
-                                const OSSL_PARAM keyAbstract[], int selection,
-                                OSSL_PASSPHRASE_CALLBACK* cb, void* cbArg )
-{
-    return GsEncoderEncodeKey( ctx, cout, key, keyAbstract, selection, cb, cbArg,
-                               NID_id_GostR3410_2012_512,
-                               GsEncodePrivateKeyToDerBio,
-                               GsEncodePublicKeyToDerBio,
-                               GsEncodeParamsToDerBio );
-}
-
-int GsEncoderEncodeKey512ToPem( void* ctx, OSSL_CORE_BIO* cout, const void* key,
-                                const OSSL_PARAM keyAbstract[], int selection,
-                                OSSL_PASSPHRASE_CALLBACK* cb, void* cbArg )
-{
-    return GsEncoderEncodeKey( ctx, cout, key, keyAbstract, selection, cb, cbArg,
-                               NID_id_GostR3410_2012_512,
-                               GsEncodePrivateKeyToPemBio,
-                               GsEncodePublicKeyToPemBio,
-                               GsEncodeParamsToPemBio );
-}
-

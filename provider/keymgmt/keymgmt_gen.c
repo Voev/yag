@@ -2,45 +2,47 @@
 #include <openssl/core_dispatch.h>
 #include <openssl/ec.h>
 #include <openssl/err.h>
-
-#include <gostone/common.h>
+#include <openssl/objects.h>
 #include <gostone/provider_ctx.h>
+#include <gostone/keymgmt/asymm_key.h>
 #include <gostone/keymgmt/keymgmt.h>
 
 struct gs_keymngm_gen_ctx
 {
     OSSL_LIB_CTX* libCtx;
+    int algorithm;
     char* group_name;
     int selection;
     EC_GROUP* genGroup;
 };
+typedef struct gs_keymngm_gen_ctx GsKeyGenCtx;
 
-typedef struct gs_keymngm_gen_ctx GsKeyMgmtGenCtx;
-
-void* GsKeyMgmtGenInit( void* provCtx, int selection )
+void* GsKeyMgmtGenInit( void* provData, int selection )
 {
-    OSSL_LIB_CTX* libCtx = GsProvCtxGet0LibCtx( ( GsProvCtx* )provCtx );
-    GsKeyMgmtGenCtx* gctx = OPENSSL_zalloc( sizeof( *gctx ) );
+    GsProvCtx* provCtx = INTERPRET_AS_PROV_CTX( provData );
+    GsKeyGenCtx* gctx = OPENSSL_zalloc( sizeof( *gctx ) );
     if( gctx )
     {
-        gctx->libCtx = libCtx;
+        gctx->libCtx = GsProvCtxGet0LibCtx( provCtx );
+        gctx->algorithm = NID_id_GostR3410_2012_256;
         gctx->selection = selection;
     }
     return gctx;
 }
 
-int GsKeyMgmtGenSetTemplate( void* genctx, void* templ )
+int GsKeyMgmtGenSetTemplate( void* genCtx, void* tmpl )
 {
-    GsKeyMgmtGenCtx* gctx = ( GsKeyMgmtGenCtx* )genctx;
-    EC_KEY* key = templ;
+    GsKeyGenCtx* ctx = ( GsKeyGenCtx* )genCtx;
+    GsAsymmKey* key = INTERPRET_AS_ASYMM_KEY( tmpl );
     const EC_GROUP* actualGroup;
     EC_GROUP* dupGroup;
 
-    if( !gctx )
+    if( !ctx )
     {
+        ERR_raise( ERR_LIB_PROV, ERR_R_PASSED_NULL_PARAMETER );
         return 0;
     }
-    actualGroup = EC_KEY_get0_group( key );
+    actualGroup = GsAsymmKeyGet0Group( key );
     if( !actualGroup )
     {
         return 0;
@@ -51,16 +53,15 @@ int GsKeyMgmtGenSetTemplate( void* genctx, void* templ )
         ERR_raise( ERR_LIB_PROV, ERR_R_MALLOC_FAILURE );
         return 0;
     }
-    EC_GROUP_free( gctx->genGroup );
-    gctx->genGroup = dupGroup;
+    EC_GROUP_free( ctx->genGroup );
+    ctx->genGroup = dupGroup;
+    ctx->algorithm = GsAsymmKeyGetAlgorithm( key );
     return 1;
 }
 
 int GsKeyMgmtGenSetParams( void* genCtx, const OSSL_PARAM params[] )
 {
-    int ret = 1;
-    GsKeyMgmtGenCtx* gctx = ( GsKeyMgmtGenCtx* )genCtx;
-
+    GsKeyGenCtx* gctx = ( GsKeyGenCtx* )genCtx;
     const OSSL_PARAM* p = OSSL_PARAM_locate_const( params,
                                                    OSSL_PKEY_PARAM_GROUP_NAME );
     if( p )
@@ -68,12 +69,10 @@ int GsKeyMgmtGenSetParams( void* genCtx, const OSSL_PARAM params[] )
         EC_GROUP* group = GsGetEcGroup( p );
         gctx->genGroup = group;
     }
-    return ret;
+    return 1;
 }
 
-const OSSL_PARAM* GsKeyMgmtGenSettableParams(
-    void* provCtx ossl_unused
-)
+const OSSL_PARAM* GsKeyMgmtGenSettableParams( void* provCtx ossl_unused )
 {
     static OSSL_PARAM gGenSettable[] =
     {
@@ -85,54 +84,47 @@ const OSSL_PARAM* GsKeyMgmtGenSettableParams(
     return gGenSettable;
 }
 
-void* GsKeyMgmtGen(
-    void* genCtx,
-    OSSL_CALLBACK* cb ossl_unused,
-    void* cbArg ossl_unused )
+void* GsKeyMgmtGen( void* genCtx, OSSL_CALLBACK* cb ossl_unused,
+                    void* cbArg ossl_unused )
 {
-    GsKeyMgmtGenCtx* gctx = ( GsKeyMgmtGenCtx* )genCtx;
-    EC_GROUP* group = NULL;
-    EC_KEY* key = NULL;
+    GsKeyGenCtx* ctx = ( GsKeyGenCtx* )genCtx;
+    GsAsymmKey* key = NULL;
     int ret = 0;
 
-    if( !gctx )
+    if( !ctx )
     {
+        ERR_raise( ERR_LIB_PROV, ERR_R_PASSED_NULL_PARAMETER );
         return NULL;
     }
-
-    key = EC_KEY_new_ex( gctx->libCtx, NULL );
+    key = ( GsAsymmKey* )GsAsymmKeyNewInit( ctx->libCtx, ctx->algorithm );
     if( !key )
     {
+        ERR_raise( ERR_LIB_PROV, ERR_R_MALLOC_FAILURE );
         return NULL;
     }
-
-    group = gctx->genGroup;
-    if( !group )
+    if( !GsAsymmKeySet1Group( key, ctx->genGroup ) )
     {
-        goto end;
+        goto err;
     }
-    if( !EC_KEY_set_group( key, group ) )
+    if( ctx->selection & OSSL_KEYMGMT_SELECT_KEYPAIR )
     {
-        return 0;
+        if( 0 >= GsAsymmKeyGenerate( key ) )
+        {
+            goto err;
+        }
     }
-
-    if( gctx->selection & OSSL_KEYMGMT_SELECT_KEYPAIR )
-    {
-        ret = EC_KEY_generate_key( key );
-    }
-    if( ret )
-    {
-        return key;
-    }
-end:
-    EC_KEY_free( key );
+    return key;
+err:
+    GsAsymmKeyFree( key );
     return NULL;
 }
 
-void GsKeyMgmtGenCleanup( void* genCtx )
+void GsKeyMgmtGenCleanup( void* genData )
 {
+    GsKeyGenCtx* genCtx = ( GsKeyGenCtx* )genData;
     if( genCtx )
     {
+        EC_GROUP_free( genCtx->genGroup );
         OPENSSL_free( genCtx );
     }
 }

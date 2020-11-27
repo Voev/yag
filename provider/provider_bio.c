@@ -169,7 +169,7 @@ BIO_METHOD* GsProvBioInitBioMethod(void)
 {
     BIO_METHOD* coreBioMeth = BIO_meth_new(BIO_TYPE_CORE_TO_PROV, 
                                            "BIO to Core filter");
-    if (coreBioMeth || 
+    if (!coreBioMeth || 
         !BIO_meth_set_write_ex(coreBioMeth, GsProvBioWriteEx) || 
         !BIO_meth_set_read_ex(coreBioMeth, GsProvBioReadEx) || 
         !BIO_meth_set_puts(coreBioMeth, GsProvBioPuts) || 
