@@ -253,7 +253,8 @@ end:
 int GsKeyMgmtImport( void* keyData, int selection, const OSSL_PARAM params[] )
 {
     GsAsymmKey* key = INTERPRET_AS_ASYMM_KEY( keyData );
-    const EC_GROUP *ecg = NULL;
+    const OSSL_PARAM* p = NULL;
+    EC_GROUP* group = NULL;
     int ok = 1;
 
     if( !key )
@@ -261,20 +262,43 @@ int GsKeyMgmtImport( void* keyData, int selection, const OSSL_PARAM params[] )
         return 0;
     }
 
-    if ((selection & OSSL_KEYMGMT_SELECT_DOMAIN_PARAMETERS) == 0)
+    if( selection & OSSL_KEYMGMT_SELECT_DOMAIN_PARAMETERS )
+    {
+        p = OSSL_PARAM_locate_const( params, OSSL_PKEY_PARAM_GROUP_NAME );
+        if( !p )
+        {
+            return 0;
+        }
+        group = GsGetEcGroup( p );
+        if( !GsAsymmKeySet1Group( key, group ) )
+        {
+            return 0;
+        }
+    }
+    else
+    {
         return 0;
-    if ((selection & OSSL_KEYMGMT_SELECT_PRIVATE_KEY) != 0
-            && (selection & OSSL_KEYMGMT_SELECT_PUBLIC_KEY) == 0)
-        return 0;
-
-    if ((selection & OSSL_KEYMGMT_SELECT_DOMAIN_PARAMETERS) != 0)
-        ok = ok && 0;//ec_group_fromdata(ec, params);
-
-    if ((selection & OSSL_KEYMGMT_SELECT_KEYPAIR) != 0) {
-        int include_private =
-            selection & OSSL_KEYMGMT_SELECT_PRIVATE_KEY ? 1 : 0;
-
-        ok = ok && 0;//ec_key_fromdata(ec, params, include_private);
+    }
+    if( selection & OSSL_KEYMGMT_SELECT_PRIVATE_KEY ) 
+    {
+        BIGNUM* privateKey = BN_secure_new();
+        p = OSSL_PARAM_locate_const( params, OSSL_PKEY_PARAM_PRIV_KEY );
+        OSSL_PARAM_get_BN( p, &privateKey );
+        if( GsAsymmKeySet1PrivateKey( key, privateKey ) )
+        {
+            return 0;
+        }
+    }
+    if( selection & OSSL_KEYMGMT_SELECT_PUBLIC_KEY ) 
+    {
+        unsigned char* publicKeyBuf = NULL;
+        size_t publicKeyLen = 0;
+        p = OSSL_PARAM_locate_const( params, OSSL_PKEY_PARAM_PUB_KEY );
+        OSSL_PARAM_get_octet_string( p, ( void** )&publicKeyBuf, 0, &publicKeyLen );
+        if( GsAsymmKeyDecodePublicKey( key, publicKeyBuf, publicKeyLen ) )
+        {
+            return 0;
+        }
     }
 
     return ok;
@@ -282,6 +306,7 @@ int GsKeyMgmtImport( void* keyData, int selection, const OSSL_PARAM params[] )
 
 static const OSSL_PARAM gKeyMgmtImportExportTypes[] = 
 {
+    OSSL_PARAM_octet_string( OSSL_PKEY_PARAM_GROUP_NAME, NULL, 0 ),
     OSSL_PARAM_octet_string( OSSL_PKEY_PARAM_PUB_KEY, NULL, 0 ),
     OSSL_PARAM_octet_string( OSSL_PKEY_PARAM_PRIV_KEY, NULL, 0 ),
     OSSL_PARAM_END
