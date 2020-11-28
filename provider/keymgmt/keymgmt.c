@@ -312,12 +312,12 @@ static const OSSL_PARAM gKeyMgmtImportExportTypes[] =
     OSSL_PARAM_END
 };
 
-const OSSL_PARAM* GsKeyMgmtImportTypes( int selection )
+const OSSL_PARAM* GsKeyMgmtImportTypes( ossl_unused int selection )
 {
     return gKeyMgmtImportExportTypes;
 }
 
-const OSSL_PARAM* GsKeyMgmtExportTypes( int selection )
+const OSSL_PARAM* GsKeyMgmtExportTypes( ossl_unused int selection )
 {
     return gKeyMgmtImportExportTypes;
 }
