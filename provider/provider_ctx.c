@@ -1,3 +1,4 @@
+#include <openssl/bio.h>
 #include <openssl/core.h>
 #include <openssl/crypto.h>
 #include <gostone/provider_ctx.h>
@@ -6,6 +7,7 @@ struct gs_prov_ctx_st
 {
     const OSSL_CORE_HANDLE* handle;
     OSSL_LIB_CTX* libCtx;
+    BIO_METHOD* coreBioMeth;
 };
 
 GsProvCtx* GsProvCtxNew( void )
@@ -34,6 +36,14 @@ void GsProvCtxSet0Handle( GsProvCtx* ctx, const OSSL_CORE_HANDLE* handle )
     }
 }
 
+void GsProvCtxSet0CoreBioMeth( GsProvCtx* ctx, BIO_METHOD* coreBioMeth )
+{
+    if( ctx )
+    {
+        ctx->coreBioMeth = coreBioMeth;
+    }
+}
+
 OSSL_LIB_CTX* GsProvCtxGet0LibCtx( GsProvCtx* ctx )
 {
     return ctx ? ctx->libCtx : NULL;
@@ -42,4 +52,9 @@ OSSL_LIB_CTX* GsProvCtxGet0LibCtx( GsProvCtx* ctx )
 const OSSL_CORE_HANDLE* GsProvCtxGet0Handle( GsProvCtx* ctx )
 {
     return ctx ? ctx->handle : NULL;
+}
+
+const BIO_METHOD* GsProvCtxGet0CoreBioMeth( GsProvCtx* ctx )
+{
+    return ctx ? ctx->coreBioMeth : NULL;
 }
