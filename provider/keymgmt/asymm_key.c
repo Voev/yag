@@ -79,7 +79,6 @@ int GsAsymmKeySet1PublicKey( GsAsymmKey* key, const EC_POINT* publicKey )
 
 int GsAsymmKeyDecodePublicKey( GsAsymmKey* key, const unsigned char* buf, size_t len )
 {
-    EC_POINT* publicKey;
     BN_CTX* ctx;
     int ret = 0;
 
@@ -88,7 +87,7 @@ int GsAsymmKeyDecodePublicKey( GsAsymmKey* key, const unsigned char* buf, size_t
     {
         return 0;
     }
-    if( !buf || 0 > len )
+    if( !buf || !len )
     {
         return 0;
     }
@@ -222,32 +221,32 @@ int GsAsymmKeyGenerate( GsAsymmKey* key )
 
     if( !group )
     {
-        return 0;
+        goto end;
     }
 
     BN_CTX_start( ctx );
     order = BN_CTX_get( ctx ); 
     if( !order || !d )
     {
-        return 0;
+        goto end;
     }
 
     if( !EC_GROUP_get_order( group, order, ctx ) )
     {
-        return 0;
+        goto end;
     }
     do
     {
         if( !BN_priv_rand_range( d, order ) )
         {
-            return 0;
+            goto end;
         }
     }
     while( BN_is_zero( d ) );
 
     if( !GsAsymmKeySet1PrivateKey( key, d ) )
     {
-        return 0;
+        goto end;
     }
     ret = GsAsymmKeyGeneratePublicKey( key, ctx );
 end:

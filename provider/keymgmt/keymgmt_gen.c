@@ -89,8 +89,7 @@ void* GsKeyMgmtGen( void* genCtx, OSSL_CALLBACK* cb ossl_unused,
 {
     GsKeyGenCtx* ctx = ( GsKeyGenCtx* )genCtx;
     GsAsymmKey* key = NULL;
-    int ret = 0;
-
+    
     if( !ctx )
     {
         ERR_raise( ERR_LIB_PROV, ERR_R_PASSED_NULL_PARAMETER );
