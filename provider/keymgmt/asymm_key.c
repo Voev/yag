@@ -32,7 +32,13 @@ GsAsymmKey* GsAsymmKeyNewInit( OSSL_LIB_CTX* libCtx, int algorithm )
 
 void GsAsymmKeyFree( GsAsymmKey* key )
 {
-    OPENSSL_free( key );
+    if( key )
+    {
+        EC_GROUP_free( key->group );
+        BN_clear_free( key->privateKey );
+        EC_POINT_clear_free( key->publicKey );
+        OPENSSL_free( key );
+    }
 }
 
 void GsAsymmKeySetAlgorithm( GsAsymmKey* key, int algorithm )
@@ -245,6 +251,7 @@ int GsAsymmKeyGenerate( GsAsymmKey* key )
     }
     ret = GsAsymmKeyGeneratePublicKey( key, ctx );
 end:
+    BN_clear_free( d );
     BN_CTX_end( ctx );
     BN_CTX_free( ctx );
     return ret;

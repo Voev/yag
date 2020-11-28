@@ -289,6 +289,7 @@ int GsSetEcGenerator( EC_GROUP* group, GostR3410Params* params, BN_CTX* ctx )
         EC_POINT_free( P );
         return 0;
     }
+    EC_POINT_free( P );
     return 1;
 }
 

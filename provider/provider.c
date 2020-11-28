@@ -119,11 +119,18 @@ static const OSSL_ALGORITHM* GsQuery(
     return NULL;
 }
 
+ static void GsTeardown( void* provData )
+ {
+     GsProvCtx* provCtx = INTERPRET_AS_PROV_CTX( provData );
+     GsProvCtxFree( provCtx );
+ }
+
 static const OSSL_DISPATCH gDispatchTable[] =
 {
     { OSSL_FUNC_PROVIDER_GETTABLE_PARAMS, FUNC_PTR( GsGettableParams ) },
     { OSSL_FUNC_PROVIDER_GET_PARAMS,      FUNC_PTR( GsGetParams ) },
     { OSSL_FUNC_PROVIDER_QUERY_OPERATION, FUNC_PTR( GsQuery ) },
+    { OSSL_FUNC_PROVIDER_TEARDOWN,        FUNC_PTR( GsTeardown ) },
     { 0, NULL }
 };
 
