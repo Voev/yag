@@ -11,14 +11,11 @@ class DigestTest : public testing::TestWithParam< const char* >
 {
 public:
     void SetUp()
-    {
-        prov_ = OSSL_PROVIDER_load( ossl::LibCtx::Get0(), "gostone" );
-        ASSERT_NE( prov_, nullptr );
-    }
+    {}
+
     void TearDown()
     {
         ERR_print_errors_fp( stderr );
-        OSSL_PROVIDER_unload( prov_ );
     }
 
 protected:
@@ -27,7 +24,7 @@ protected:
 
 TEST_P( DigestTest, DigestInit )
 {
-    ossl::EvpMdPtr md( EVP_MD_fetch( ossl::LibCtx::Get0(), GetParam(),
+    ossl::EvpMdPtr md( EVP_MD_fetch( nullptr, GetParam(),
                                      nullptr ) );
     ASSERT_NE( md.get(), nullptr );
 
@@ -38,7 +35,7 @@ TEST_P( DigestTest, DigestInit )
 
 TEST_P( DigestTest, DigestUpdate )
 {
-    ossl::EvpMdPtr md( EVP_MD_fetch( ossl::LibCtx::Get0(), GetParam(),
+    ossl::EvpMdPtr md( EVP_MD_fetch( nullptr, GetParam(),
                                      nullptr ) );
     ASSERT_NE( md.get(), nullptr );
 
@@ -52,7 +49,7 @@ TEST_P( DigestTest, DigestUpdate )
 
 TEST_P( DigestTest, DigestUpdateNullArgument )
 {
-    ossl::EvpMdPtr md( EVP_MD_fetch( ossl::LibCtx::Get0(), GetParam(),
+    ossl::EvpMdPtr md( EVP_MD_fetch( nullptr, GetParam(),
                                      nullptr ) );
     ASSERT_NE( md.get(), nullptr );
 
@@ -67,7 +64,7 @@ TEST_P( DigestTest, DigestUpdateNullArgument )
 
 TEST_P( DigestTest, DigestUpdateZeroLength )
 {
-    ossl::EvpMdPtr md( EVP_MD_fetch( ossl::LibCtx::Get0(), GetParam(),
+    ossl::EvpMdPtr md( EVP_MD_fetch( nullptr, GetParam(),
                                      nullptr ) );
     ASSERT_NE( md.get(), nullptr );
 
@@ -81,7 +78,7 @@ TEST_P( DigestTest, DigestUpdateZeroLength )
 
 TEST_P( DigestTest, DigestFinal )
 {
-    ossl::EvpMdPtr md( EVP_MD_fetch( ossl::LibCtx::Get0(), GetParam(),
+    ossl::EvpMdPtr md( EVP_MD_fetch( nullptr, GetParam(),
                                      nullptr ) );
     ASSERT_NE( md.get(), nullptr );
 
@@ -100,7 +97,7 @@ TEST_P( DigestTest, DigestFinal )
 
 TEST_P( DigestTest, DigestFinalNullArgument )
 {
-    ossl::EvpMdPtr md( EVP_MD_fetch( ossl::LibCtx::Get0(), GetParam(),
+    ossl::EvpMdPtr md( EVP_MD_fetch( nullptr, GetParam(),
                                      nullptr ) );
     ASSERT_NE( md.get(), nullptr );
 
@@ -118,7 +115,7 @@ TEST_P( DigestTest, DigestFinalNullArgument )
 
 TEST_P( DigestTest, DigestFinalZeroLength )
 {
-    ossl::EvpMdPtr md( EVP_MD_fetch( ossl::LibCtx::Get0(), GetParam(),
+    ossl::EvpMdPtr md( EVP_MD_fetch( nullptr, GetParam(),
                                      nullptr ) );
     ASSERT_NE( md.get(), nullptr );
 

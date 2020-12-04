@@ -52,22 +52,25 @@ int GsKeyMgmtMatch( const void* keyDataA, const void* keyDataB, int selection )
 int GsKeyMgmtHas( const void* keyData, int selection )
 {
     const GsAsymmKey* key = INTERPRET_AS_CASYMM_KEY( keyData );
-    int ret = 0;
+    int ret = 1;
 
-    if( key )
+    if( !key )
     {
-        if( selection & OSSL_KEYMGMT_SELECT_PUBLIC_KEY )
-        {
-            ret &= ( NULL != GsAsymmKeyGet0PublicKey( key ) );
-        }
-        if( selection & OSSL_KEYMGMT_SELECT_PRIVATE_KEY )
-        {
-            ret &= ( NULL != GsAsymmKeyGet0PrivateKey( key ) );
-        }
-        if( selection & OSSL_KEYMGMT_SELECT_DOMAIN_PARAMETERS )
-        {
-            ret &= ( NULL != GsAsymmKeyGet0Group( key ) );
-        }
+        ERR_raise( ERR_LIB_PROV, ERR_R_PASSED_NULL_PARAMETER );
+        return 0;
+    }
+    
+    if( selection & OSSL_KEYMGMT_SELECT_PUBLIC_KEY )
+    {
+        ret &= ( NULL != GsAsymmKeyGet0PublicKey( key ) );
+    }
+    if( selection & OSSL_KEYMGMT_SELECT_PRIVATE_KEY )
+    {
+        ret &= ( NULL != GsAsymmKeyGet0PrivateKey( key ) );
+    }
+    if( selection & OSSL_KEYMGMT_SELECT_DOMAIN_PARAMETERS )
+    {
+        ret &= ( NULL != GsAsymmKeyGet0Group( key ) );
     }
     return ret;
 }

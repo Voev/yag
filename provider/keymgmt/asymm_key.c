@@ -205,6 +205,7 @@ int GsAsymmKeyGeneratePublicKey( GsAsymmKey* key, BN_CTX* ctx )
     {
         goto end;
     }
+
     ret = GsAsymmKeySet1PublicKey( key, publicKey );
 end:
     EC_POINT_free( publicKey );

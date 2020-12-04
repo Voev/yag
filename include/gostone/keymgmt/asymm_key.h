@@ -1,4 +1,5 @@
 #pragma once
+#include <openssl/ec.h>
 
 typedef struct gs_asymm_key_st GsAsymmKey;
 

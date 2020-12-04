@@ -16,24 +16,66 @@ class KeymgmtTest
 {
 public:
     void SetUp()
-    {
-        prov_ = OSSL_PROVIDER_load( ossl::LibCtx::Get0(), "gostone" );
-        ASSERT_NE( prov_, nullptr );
-    }
+    {}
+
     void TearDown()
     {
         ERR_print_errors_fp( stderr );
-        OSSL_PROVIDER_unload( prov_ );
     }
 
 protected:
+    OSSL_PROVIDER* defaultProv_ = nullptr;
     OSSL_PROVIDER* prov_ = nullptr;
 };
 
-TEST_P( KeymgmtTest, Init )
+EVP_PKEY* GenerateKeyPair( const char* alg, const char* group )
+{
+    EVP_PKEY* pkey = nullptr;
+    ossl::EvpPkeyCtxPtr ctx( EVP_PKEY_CTX_new_from_name( nullptr, alg, nullptr ) );
+    if( !ctx.get() ||
+        !EVP_PKEY_keygen_init( ctx.get() ) ||
+        !EVP_PKEY_CTX_ctrl_str( ctx.get(), OSSL_PKEY_PARAM_GROUP_NAME, group ) ||
+        !EVP_PKEY_keygen( ctx.get(), &pkey ) )
+    {
+        return nullptr;
+    }
+    return pkey;
+}
+
+EVP_PKEY* GenerateParameters( const char* alg, const char* group )
+{
+    EVP_PKEY* pkey = nullptr;
+    ossl::EvpPkeyCtxPtr ctx( EVP_PKEY_CTX_new_from_name( nullptr, alg, nullptr ) );
+    if( !ctx.get() ||
+        !EVP_PKEY_paramgen_init( ctx.get() ) ||
+        !EVP_PKEY_CTX_ctrl_str( ctx.get(), OSSL_PKEY_PARAM_GROUP_NAME, group ) ||
+        !EVP_PKEY_paramgen( ctx.get(), &pkey ) )
+    {
+        return nullptr;
+    }
+    return pkey;
+}
+
+TEST_P( KeymgmtTest, PrivateKey )
 {
     auto param = GetParam();
-    ossl::EvpPkeyCtxPtr ctx( EVP_PKEY_CTX_new_from_name( ossl::LibCtx::Get0(),
+    ossl::EvpPkeyCtxPtr ctx( EVP_PKEY_CTX_new_from_name( nullptr,
+                                                         param.first, nullptr ) );
+    ASSERT_NE( ctx.get(), nullptr );
+    ASSERT_LT( 0, EVP_PKEY_keygen_init( ctx.get() ) );
+    ASSERT_LT( 0, EVP_PKEY_CTX_ctrl_str( ctx.get(), OSSL_PKEY_PARAM_GROUP_NAME,
+                                         param.second ) );
+
+    EVP_PKEY* generated = nullptr;
+    ASSERT_LT( 0, EVP_PKEY_keygen( ctx.get(), &generated ) );
+    ossl::EvpPkeyPtr pkey( generated );
+    ASSERT_NE( pkey.get(), nullptr );
+}
+
+TEST_P( KeymgmtTest, PublicKey )
+{
+    auto param = GetParam();
+    ossl::EvpPkeyCtxPtr ctx( EVP_PKEY_CTX_new_from_name( nullptr,
                                                          param.first, nullptr ) );
     ASSERT_NE( ctx.get(), nullptr );
     ASSERT_LT( 0, EVP_PKEY_keygen_init( ctx.get() ) );
@@ -45,10 +87,111 @@ TEST_P( KeymgmtTest, Init )
     ossl::EvpPkeyPtr pkey( generated );
     ASSERT_NE( pkey.get(), nullptr );
     
-    //EC_KEY_print_fp( stderr, (EC_KEY*)EVP_PKEY_get0( pkey.get()), 0 );
-   // BIO* b = BIO_new_fp( stderr, BIO_NOCLOSE );
-   //  ASSERT_LT( 0, i2d_PrivateKey_bio( b, pkey.get() ) );
-   //  BIO_free( b );
+    X509_PUBKEY* pubkey = nullptr;
+    X509_PUBKEY_set( &pubkey, pkey.get() );
+    ossl::X509PubKeyPtr pub( pubkey );
+    ASSERT_NE( pub.get(), nullptr );
+}
+
+TEST_P( KeymgmtTest, KeyParameters )
+{
+    auto param = GetParam();
+    ossl::EvpPkeyCtxPtr ctx( EVP_PKEY_CTX_new_from_name( nullptr,
+                                                         param.first, nullptr ) );
+    ASSERT_NE( ctx.get(), nullptr );
+    ASSERT_LT( 0, EVP_PKEY_paramgen_init( ctx.get() ) );
+    ASSERT_LT( 0, EVP_PKEY_CTX_ctrl_str( ctx.get(), OSSL_PKEY_PARAM_GROUP_NAME,
+                                         param.second ) );
+
+    EVP_PKEY* generated = nullptr;
+    ASSERT_LT( 0, EVP_PKEY_paramgen( ctx.get(), &generated ) );
+    ossl::EvpPkeyPtr pkey( generated );
+    ASSERT_NE( pkey.get(), nullptr );
+}
+
+TEST_P( KeymgmtTest, ParamMissing )
+{
+    auto param = GetParam();
+    ossl::EvpPkeyPtr pkey( GenerateKeyPair( param.first, param.second ) );
+    ASSERT_NE( pkey.get(), nullptr );
+    ASSERT_EQ( 0, EVP_PKEY_missing_parameters( pkey.get() ) );
+}
+
+TEST_P( KeymgmtTest, PrintPrivateKey )
+{
+    auto param = GetParam();
+    ossl::EvpPkeyPtr pkey( GenerateKeyPair( param.first, param.second ) );
+    ASSERT_NE( pkey.get(), nullptr );
+
+    ossl::BioPtr out( BIO_new( BIO_s_null() ) );
+    ASSERT_LT( 0, EVP_PKEY_print_private( out.get(), pkey.get(), 0, nullptr ) );
+}
+
+TEST_P( KeymgmtTest, PrintPublicKey )
+{
+    auto param = GetParam();
+    ossl::EvpPkeyPtr pkey( GenerateKeyPair( param.first, param.second ) );
+    ASSERT_NE( pkey.get(), nullptr );
+
+    ossl::BioPtr out( BIO_new( BIO_s_null() ) );
+    ASSERT_LT( 0, EVP_PKEY_print_public( out.get(), pkey.get(), 0, nullptr ) );
+}
+
+TEST_P( KeymgmtTest, PrintParameters )
+{
+    auto param = GetParam();
+    ossl::EvpPkeyPtr pkey( GenerateKeyPair( param.first, param.second ) );
+    ASSERT_NE( pkey.get(), nullptr );
+
+    ossl::BioPtr out( BIO_new( BIO_s_null() ) );
+    ASSERT_LT( 0, EVP_PKEY_print_params( out.get(), pkey.get(), 0, nullptr ) );
+}
+
+TEST_P( KeymgmtTest, EncodePrivateKey )
+{
+    auto param = GetParam();
+    ossl::EvpPkeyPtr pkey( GenerateKeyPair( param.first, param.second ) );
+    ASSERT_NE( pkey.get(), nullptr );
+    
+    ossl::BioPtr bio( BIO_new( BIO_s_mem() ) );
+    ASSERT_NE( bio.get(), nullptr );
+    ASSERT_LT( 0, i2d_PKCS8PrivateKeyInfo_bio( bio.get(), pkey.get() ) );
+}
+
+TEST_P( KeymgmtTest, EncodePublicKey )
+{
+    auto param = GetParam();
+    ossl::EvpPkeyPtr pkey( GenerateKeyPair( param.first, param.second ) );
+    ASSERT_NE( pkey.get(), nullptr );
+    
+    X509_PUBKEY* pubkey = nullptr;
+    X509_PUBKEY_set( &pubkey, pkey.get() );
+    ossl::X509PubKeyPtr pub( pubkey );
+    ASSERT_NE( pub.get(), nullptr );
+
+    ossl::BioPtr bio( BIO_new( BIO_s_mem() ) );
+    ASSERT_NE( bio.get(), nullptr );
+    ASSERT_LT( 0, i2d_X509_PUBKEY_bio( bio.get(), pub.get() ) );
+}
+
+TEST_P( KeymgmtTest, EncodeKeyParameters )
+{
+    auto param = GetParam();
+    ossl::EvpPkeyCtxPtr ctx( EVP_PKEY_CTX_new_from_name( nullptr,
+                                                         param.first, nullptr ) );
+    ASSERT_NE( ctx.get(), nullptr );
+    ASSERT_LT( 0, EVP_PKEY_paramgen_init( ctx.get() ) );
+    ASSERT_LT( 0, EVP_PKEY_CTX_ctrl_str( ctx.get(), OSSL_PKEY_PARAM_GROUP_NAME,
+                                         param.second ) );
+
+    EVP_PKEY* generated = nullptr;
+    ASSERT_LT( 0, EVP_PKEY_paramgen( ctx.get(), &generated ) );
+    ossl::EvpPkeyPtr pkey( generated );
+    ASSERT_NE( pkey.get(), nullptr );
+    
+    ossl::BioPtr bio( BIO_new( BIO_s_mem() ) );
+    ASSERT_NE( bio.get(), nullptr );
+    ASSERT_LT( 0, i2d_KeyParams_bio( bio.get(), pkey.get() ) );
 }
 
 const std::vector< TestParam > gTestParams =
