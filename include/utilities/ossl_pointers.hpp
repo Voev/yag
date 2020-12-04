@@ -4,6 +4,7 @@
 #include <openssl/types.h>
 #include <openssl/evp.h>
 #include <openssl/provider.h>
+#include <openssl/x509.h>
 
 template< typename T, void ( *f )( T* ) >
 struct static_function_deleter
@@ -29,5 +30,9 @@ OSSL_DEFINE_PTR_TYPE( EvpMdCtx, EVP_MD_CTX, EVP_MD_CTX_free );
 OSSL_DEFINE_PTR_TYPE( EvpPkey, EVP_PKEY, EVP_PKEY_free );
 OSSL_DEFINE_PTR_TYPE( EvpPkeyCtx, EVP_PKEY_CTX, EVP_PKEY_CTX_free );
 
+
+OSSL_DEFINE_PTR_TYPE( X509PubKey, X509_PUBKEY, X509_PUBKEY_free );
+
+OSSL_DEFINE_PTR_TYPE( Bio, BIO, BIO_free_all );
 
 } // ossl

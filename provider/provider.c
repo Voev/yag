@@ -39,7 +39,7 @@ static int GsGetParams(
 )
 {
     OSSL_PARAM* p = OSSL_PARAM_locate( params, OSSL_PROV_PARAM_NAME );
-    if( p && !OSSL_PARAM_set_utf8_ptr( p, "OpenSSL GoStone Provider" ) )
+    if( p && !OSSL_PARAM_set_utf8_ptr( p, "OpenSSL Gostone Provider" ) )
     {
         return 0;
     }
@@ -77,10 +77,14 @@ static const OSSL_ALGORITHM gGsKeyMgmts[] =
 
 static const OSSL_ALGORITHM gGsEncoders[] =
 {
-    //{ SN_id_GostR3410_2012_256, "provider=gostone", gGostR341012_256DerEncoderFuncs },
-    //{ SN_id_GostR3410_2012_256, "provider=gostone", gGostR341012_256PemEncoderFuncs },
-    //{ SN_id_GostR3410_2012_256, "provider=gostone", gGostR341012_256TextEncoderFuncs },
-    //{ SN_id_GostR3410_2012_512, "provider=gostone", gGostR341012_512DerEncoderFuncs },
+    { SN_id_GostR3410_2012_256, "provider=gostone", gGostR341012_256ToTextEncoderFuncs },
+    { SN_id_GostR3410_2012_256, "provider=gostone", gGostR341012_256ToPkcs8DerEncoderFuncs },
+    { SN_id_GostR3410_2012_256, "provider=gostone", gGostR341012_256ToPkcs8PemEncoderFuncs },
+    { SN_id_GostR3410_2012_256, "provider=gostone", gGostR341012_256ToSubjPubKeyInfoDerEncoderFuncs },
+    { SN_id_GostR3410_2012_256, "provider=gostone", gGostR341012_256ToSubjPubKeyInfoPemEncoderFuncs },
+    { SN_id_GostR3410_2012_256, "provider=gostone", gGostR341012_256ToTypeSpecificDerEncoderFuncs },
+    { SN_id_GostR3410_2012_256, "provider=gostone", gGostR341012_256ToTypeSpecificPemEncoderFuncs },
+    
     //{ SN_id_GostR3410_2012_512, "provider=gostone", gGostR341012_512PemEncoderFuncs },
     //{ SN_id_GostR3410_2012_512, "provider=gostone", gGostR341012_512TextEncoderFuncs },
     { NULL, NULL, NULL }
@@ -180,6 +184,7 @@ int OSSL_provider_init(
     if( !coreBioMeth )
     {
         GsProvCtxFree( *provCtx );
+        *provCtx = NULL;
         return 0;
     }
     GsProvCtxSet0CoreBioMeth( *provCtx, coreBioMeth );
@@ -187,6 +192,5 @@ int OSSL_provider_init(
     GsProvCtxSet0Handle( *provCtx, handle );
 
     *out = gDispatchTable;
-    *provCtx = ( void* )handle;
     return 1;
 }
