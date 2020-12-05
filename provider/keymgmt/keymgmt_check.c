@@ -111,6 +111,7 @@ static int GsKeyMgmtPairwiseCheck( const GsAsymmKey* key, BN_CTX* ctx )
     calcValue = EC_POINT_new( group );
     if( !calcValue )
     {
+        ERR_raise( ERR_LIB_PROV, ERR_R_MALLOC_FAILURE );
         goto err;
     }
 
@@ -146,7 +147,9 @@ static int GsKeyMgmtCheckPublicKeyRange( const GsAsymmKey* key, BN_CTX* ctx )
     }
 
     if (!EC_POINT_get_affine_coordinates( group, pubValue, x, y, ctx ) )
+    {
         goto err;
+    }
 
     field = EC_GROUP_get0_field( group );
     if( BN_is_negative( x ) || 
