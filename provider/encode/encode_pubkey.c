@@ -22,31 +22,49 @@ int GsSerializePublicKey( const void* keyData, unsigned char** buffer )
 {
     const GsAsymmKey* key = INTERPRET_AS_CASYMM_KEY( keyData );
     const EC_POINT* publicKey = GsAsymmKeyGet0PublicKey( key );
-    const EC_GROUP* group     = GsAsymmKeyGet0Group( key );
-    const BIGNUM*   order     = EC_GROUP_get0_order( group );
+    const EC_GROUP* group = GsAsymmKeyGet0Group( key );
+    const BIGNUM* order = EC_GROUP_get0_order( group );
+    unsigned char* encPoint;
+    int pointSize = 0;
+    BN_CTX* ctx = NULL;
+    BIGNUM* X;
+    BIGNUM* Y;
 
-    BIGNUM* X = BN_new();
-    BIGNUM* Y = BN_new();
-
-    if( !EC_POINT_get_affine_coordinates( group, publicKey, X, Y, NULL ) )
+    if( !buffer )
     {
-        return 0;
+        ERR_raise( ERR_LIB_PROV, ERR_R_PASSED_NULL_PARAMETER );
+        goto end;
+    }
+    *buffer = NULL;
+
+    ctx = BN_CTX_new_ex( GsAsymmKeyGet0LibCtx( key ) );
+    if( !ctx )
+    {
+        ERR_raise( ERR_LIB_PROV, ERR_R_MALLOC_FAILURE );
+        goto end;
+    }
+    BN_CTX_start( ctx );
+    X = BN_CTX_get( ctx );
+    Y = BN_CTX_get( ctx );
+    if( !Y || !EC_POINT_get_affine_coordinates( group, publicKey, X, Y, ctx ) )
+    {
+        goto end;
     }
 
-    int pointSize = 2 * BN_num_bytes( order );
-    unsigned char* encPoint = OPENSSL_zalloc( pointSize );
+    pointSize = 2 * BN_num_bytes( order );
+    encPoint = OPENSSL_zalloc( pointSize );
     if( !encPoint )
     {
         ERR_raise( ERR_LIB_PROV, ERR_R_MALLOC_FAILURE );
-        return 0;
+        goto end;
     }
     BN_bn2bin( X, encPoint + BN_num_bytes( order ) );
     BN_bn2bin( Y, encPoint );
     BUF_reverse( encPoint, NULL, pointSize );
-    if( buffer )
-    {
-        *buffer = encPoint;
-    }
+    *buffer = encPoint;
+end:
+    BN_CTX_end( ctx );
+    BN_CTX_free( ctx );
     return pointSize;
 }
 
