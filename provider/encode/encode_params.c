@@ -18,10 +18,10 @@
 #include "asn1_params.h"
 
 static
-int convertAlgToHashParam( const int algNid )
+int GsConvertAlgToHashParam( const int keyNid )
 {
     int hashParamNid = NID_undef;
-    switch( algNid )
+    switch( keyNid )
     {
     case NID_id_GostR3410_94:
     case NID_id_GostR3410_2001:
@@ -40,60 +40,78 @@ int convertAlgToHashParam( const int algNid )
 }
 
 static
-GostKeyParams* GsEncoderGetParams_( const void* keyData )
+int GsGetHashParam( const int keyNid, const int keyParamNid )
+{
+    if( ( keyNid == NID_id_GostR3410_2012_256 &&
+          keyParamNid == NID_id_tc26_gost_3410_2012_256_paramSetA ) ||
+        ( keyNid == NID_id_GostR3410_2012_512 &&
+          keyParamNid == NID_id_tc26_gost_3410_2012_512_paramSetC ) )
+    {
+        return NID_undef;
+    }
+    return GsConvertAlgToHashParam( keyNid );
+}
+
+static
+GostKeyParams* GsEncoderCreateParams( const void* keyData )
 {
     const GsAsymmKey* key = INTERPRET_AS_CASYMM_KEY( keyData );
     const EC_GROUP* group = GsAsymmKeyGet0Group( key );
     const int keyNid = GsAsymmKeyGetAlgorithm( key );
-    
+    GostKeyParams* params;
+    int hashParamNid;
+    int keyParamNid;
+
     if( !group )
     {
+        ERR_raise( ERR_LIB_PROV, ERR_R_PASSED_NULL_PARAMETER );
         return 0;
     }
     
-    int curveNid = EC_GROUP_get_curve_name(group);
-    GostKeyParams* gparams = GostKeyParams_new();
-    if( !gparams )
+    params = GostKeyParams_new();
+    if( !params )
     {
+        ERR_raise( ERR_LIB_PROV, ERR_R_MALLOC_FAILURE );
         return 0;
     }
-    gparams->keyParams  = OBJ_nid2obj( curveNid );
-    if( ( keyNid == NID_id_GostR3410_2012_256 &&
-          curveNid == NID_id_tc26_gost_3410_2012_256_paramSetA ) ||
-        ( keyNid == NID_id_GostR3410_2012_512 &&
-          curveNid == NID_id_tc26_gost_3410_2012_512_paramSetC ) )
-    {
-        gparams->hashParams = NULL;
-    }
-    else
-    {
-        gparams->hashParams = OBJ_nid2obj( convertAlgToHashParam( keyNid ) );
-    }
-    return gparams;
+    
+    keyParamNid = EC_GROUP_get_curve_name( group );
+    hashParamNid = GsGetHashParam( keyNid, keyParamNid );
+
+    params->keyParams  = OBJ_nid2obj( keyParamNid );
+    params->hashParams = hashParamNid == NID_undef ? NULL : OBJ_nid2obj( hashParamNid );
+    params->cipherParams = NULL;
+    return params;
 }
 
-int GsPrepareParams( const void* key, ASN1_STRING** params )
+int GsPrepareParams( const void* keyData, ASN1_STRING** params )
 {
-    GostKeyParams* gparams = GsEncoderGetParams_( key );
-    *params = ASN1_item_pack( gparams, ASN1_ITEM_rptr( GostKeyParams ), NULL );
-    GostKeyParams_free( gparams );
+    GostKeyParams* keyParams = GsEncoderCreateParams( keyData );
+    *params = ASN1_item_pack( keyParams, ASN1_ITEM_rptr( GostKeyParams ), NULL );
+    GostKeyParams_free( keyParams );
     return 1;
 }
 
-static int GsEncodeKeyParamsToDerBio( BIO* out, const void* key,
+static int GsEncodeKeyParamsToDerBio( BIO* out, const void* keyData,
                                       ossl_unused GsEncoderCtx* ctx,
                                       ossl_unused OSSL_PASSPHRASE_CALLBACK* cb, 
                                       ossl_unused void* cbArg  )
 {
-    return ASN1_item_i2d_bio( ASN1_ITEM_rptr( GostKeyParams ), out, GsEncoderGetParams_( key ) );
+    GostKeyParams* keyParams = GsEncoderCreateParams( keyData );
+    int ret = ASN1_item_i2d_bio( ASN1_ITEM_rptr( GostKeyParams ), out, keyParams );
+    GostKeyParams_free( keyParams );
+    return ret;
 }
 
-static int GsEncodeKeyParamsToPemBio( BIO* out, const void* key,
+static int GsEncodeKeyParamsToPemBio( BIO* out, const void* keyData,
                                       ossl_unused GsEncoderCtx* ctx,
                                       ossl_unused OSSL_PASSPHRASE_CALLBACK* cb, 
                                       ossl_unused void* cbArg )
 {
-    return PEM_write_bio_GostKeyParams( out, GsEncoderGetParams_( key ) );
+    GostKeyParams* keyParams = GsEncoderCreateParams( keyData );
+    int ret = PEM_write_bio_GostKeyParams( out, keyParams );
+    GostKeyParams_free( keyParams );
+    return ret;
 }
 
 int GsEncoderDoesKeyParamsSelection( ossl_unused void* ctx, int selection )
@@ -111,20 +129,20 @@ int GsEncoderGetKeyParams256ToPem( OSSL_PARAM params[] )
     return GsEncoderGetParams( params, "gost2012_256", "PEM", "type-specific" );
 }
 
-int GsEncoderEncodeKeyParamsToDer( void* ctx, OSSL_CORE_BIO* cout, const void* key,
+int GsEncoderEncodeKeyParamsToDer( void* ctx, OSSL_CORE_BIO* cout, const void* keyData,
                                    const OSSL_PARAM keyAbstract[], int selection,
                                    OSSL_PASSPHRASE_CALLBACK* cb, void* cbArg )
 {
-    return GsEncoderEncode( ctx, cout, key, keyAbstract, 
+    return GsEncoderEncode( ctx, cout, keyData, keyAbstract, 
                             selection, OSSL_KEYMGMT_SELECT_DOMAIN_PARAMETERS,
                             cb, cbArg, GsEncodeKeyParamsToDerBio );
 }
 
-int GsEncoderEncodeKeyParamsToPem( void* ctx, OSSL_CORE_BIO* cout, const void* key,
+int GsEncoderEncodeKeyParamsToPem( void* ctx, OSSL_CORE_BIO* cout, const void* keyData,
                                    const OSSL_PARAM keyAbstract[], int selection,
                                    OSSL_PASSPHRASE_CALLBACK* cb, void* cbArg )
 {
-    return GsEncoderEncode( ctx, cout, key, keyAbstract, 
+    return GsEncoderEncode( ctx, cout, keyData, keyAbstract, 
                             selection, OSSL_KEYMGMT_SELECT_DOMAIN_PARAMETERS,
                             cb, cbArg, GsEncodeKeyParamsToPemBio );
 }

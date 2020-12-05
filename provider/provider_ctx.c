@@ -17,7 +17,11 @@ GsProvCtx* GsProvCtxNew( void )
 
 void GsProvCtxFree( GsProvCtx* ctx )
 {
-    OPENSSL_free( ctx );
+    if( ctx )
+    {
+        BIO_meth_free( ctx->coreBioMeth );
+        OPENSSL_clear_free( ctx, sizeof( *ctx ) );
+    }
 }
 
 void GsProvCtxSet0LibCtx( GsProvCtx* ctx, OSSL_LIB_CTX* libCtx )

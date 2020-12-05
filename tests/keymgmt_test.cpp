@@ -22,10 +22,6 @@ public:
     {
         ERR_print_errors_fp( stderr );
     }
-
-protected:
-    OSSL_PROVIDER* defaultProv_ = nullptr;
-    OSSL_PROVIDER* prov_ = nullptr;
 };
 
 EVP_PKEY* GenerateKeyPair( const char* alg, const char* group )
