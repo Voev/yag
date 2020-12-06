@@ -2,7 +2,7 @@
 #include <openssl/ec.h>
 #include <openssl/err.h>
 #include <openssl/objects.h>
-#include <gostone/keymgmt/keymgmt.h>
+#include <gostone/keymgmt/keymgmt_params.h>
 
 struct GostR3410Params_st
 {
@@ -16,22 +16,6 @@ struct GostR3410Params_st
     const char* cofactor;
 };
 typedef struct GostR3410Params_st GostR3410Params;
-
-/*
-OSSL_PARAM gParamA[] = 
-{
-    OSSL_PARAM_utf8_string(OSSL_PKEY_PARAM_GROUP_NAME, NULL, 0),               
-    OSSL_PARAM_utf8_string(OSSL_PKEY_PARAM_EC_ENCODING, NULL, 0),              
-    OSSL_PARAM_utf8_string(OSSL_PKEY_PARAM_EC_FIELD_TYPE, NULL, 0),            
-    OSSL_PARAM_BN(OSSL_PKEY_PARAM_EC_P, NULL, 0),                              
-    OSSL_PARAM_BN(OSSL_PKEY_PARAM_EC_A, NULL, 0),                              
-    OSSL_PARAM_BN(OSSL_PKEY_PARAM_EC_B, NULL, 0),                              
-    OSSL_PARAM_octet_string(OSSL_PKEY_PARAM_EC_GENERATOR, NULL, 0),            
-    OSSL_PARAM_BN(OSSL_PKEY_PARAM_EC_ORDER, NULL, 0),                          
-    OSSL_PARAM_BN(OSSL_PKEY_PARAM_EC_COFACTOR, NULL, 0),                       
-    OSSL_PARAM_octet_string(OSSL_PKEY_PARAM_EC_SEED, NULL, 0),
-    OSSL_PARAM_END
-};*/
 
 static
 GostR3410Params gGostR3410_256_paramset[] =

@@ -9,8 +9,9 @@
 #include <gostone/common.h>
 #include <gostone/provider_ctx.h>
 #include <gostone/implementations.h>
-#include <gostone/keymgmt/keymgmt.h>
-#include <gostone/keymgmt/asymm_key.h>
+#include <gostone/keymgmt/keymgmt_akey.h>
+#include <gostone/keymgmt/keymgmt_impl.h>
+#include <gostone/keymgmt/keymgmt_params.h>
 #include <string.h>
 
 void* GsKeyMgmtNew( void* provData )
@@ -74,13 +75,13 @@ int GsKeyMgmtGetParams( void* keyData, OSSL_PARAM params[] )
     p = OSSL_PARAM_locate( params, OSSL_PKEY_PARAM_MAX_SIZE );
     if( p && !OSSL_PARAM_set_int( p, GsAsymmKeyGetKeySize( key ) ) )
     {
-        goto err;
+        goto end;
     }
 
     p = OSSL_PARAM_locate( params, OSSL_PKEY_PARAM_BITS );
     if( p && !OSSL_PARAM_set_int( p, GsAsymmKeyGetKeyBits( key ) ) )
     {
-        goto err;
+        goto end;
     }
 
     p = OSSL_PARAM_locate( params, OSSL_PKEY_PARAM_DEFAULT_DIGEST );
@@ -89,7 +90,7 @@ int GsKeyMgmtGetParams( void* keyData, OSSL_PARAM params[] )
         int nid = GsAsymmKeyGetDefaultDigest( key );
         if( !OSSL_PARAM_set_utf8_string( p, OBJ_nid2sn( nid ) ) )
         {
-            goto err;
+            goto end;
         }
     }
     
@@ -101,7 +102,7 @@ int GsKeyMgmtGetParams( void* keyData, OSSL_PARAM params[] )
                                              POINT_CONVERSION_UNCOMPRESSED,
                                              p->data, p->return_size, bnCtx );
         if (p->return_size == 0)
-            goto err;
+            goto end;
     }
 
     p = OSSL_PARAM_locate( params, OSSL_PKEY_PARAM_GROUP_NAME );
@@ -110,7 +111,7 @@ int GsKeyMgmtGetParams( void* keyData, OSSL_PARAM params[] )
         int nid = GsAsymmKeyGetParamset( key );
         if( !OSSL_PARAM_set_utf8_string( p, OBJ_nid2sn( nid ) ) )
         {
-            goto err;
+            goto end;
         }
     }
 
@@ -120,7 +121,7 @@ int GsKeyMgmtGetParams( void* keyData, OSSL_PARAM params[] )
         const BIGNUM* privateKey = GsAsymmKeyGet0PrivateKey( key );
         if( !OSSL_PARAM_set_BN( p, privateKey ) )
         {
-            goto err;
+            goto end;
         }
     }
 
@@ -135,14 +136,11 @@ int GsKeyMgmtGetParams( void* keyData, OSSL_PARAM params[] )
         
         if( !OSSL_PARAM_set_octet_string( p, publicKeyBuf, publicKeyLen ) )
         {
-            goto err;
+            goto end;
         }
     } 
-
     ret = 1;
-    /* 
-    key_to_params(eck, NULL, params, 1, &pub_key) */
-err:
+end:
     BN_CTX_end( bnCtx );
     BN_CTX_free( bnCtx );
     return ret;

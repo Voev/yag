@@ -14,7 +14,7 @@
 #include <gostone/encode/encode_impl.h>
 #include <gostone/encode/encode_common.h>
 #include <gostone/encode/encode_params.h>
-#include <gostone/keymgmt/asymm_key.h>
+#include <gostone/keymgmt/keymgmt_akey.h>
 
 static 
 int GsSerializePrivateKey( const GsAsymmKey* key, unsigned char** buffer )
