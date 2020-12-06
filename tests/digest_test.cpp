@@ -3,9 +3,7 @@
 #include <openssl/evp.h>
 #include <openssl/err.h>
 #include <openssl/provider.h>
-
 #include <utilities/ossl_pointers.hpp>
-#include "global.hpp"
 
 class DigestTest : public testing::TestWithParam< const char* >
 {
