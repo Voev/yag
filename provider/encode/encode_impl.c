@@ -99,7 +99,7 @@ const OSSL_DISPATCH gGostR341012_256ToTextEncoderFuncs[] =
     { OSSL_FUNC_ENCODER_GET_PARAMS, FUNC_PTR( GsEncoderToTextGetAllKeyParams256 ) },
     { OSSL_FUNC_ENCODER_GETTABLE_PARAMS, FUNC_PTR( GsEncoderToTextGettableParams ) },
     { OSSL_FUNC_ENCODER_ENCODE, FUNC_PTR( GsEncoderToTextEncode ) },
-    //{ OSSL_FUNC_ENCODER_IMPORT_OBJECT, FUNC_PTR( GsEncoderImportObject ) },
-    //{ OSSL_FUNC_ENCODER_FREE_OBJECT, FUNC_PTR( GsEncoderFreeObject ) },
+    { OSSL_FUNC_ENCODER_IMPORT_OBJECT, FUNC_PTR( GsEncoderImportObject ) },
+    { OSSL_FUNC_ENCODER_FREE_OBJECT, FUNC_PTR( GsEncoderFreeObject ) },
     { 0, NULL }
 };
