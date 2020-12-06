@@ -1,7 +1,7 @@
 #include <openssl/asn1t.h>
 #include <openssl/ossl_typ.h>
 #include <openssl/x509.h>
-#include "asn1_params.h"
+#include <gostone/encode/encdec_asn1.h>
 
 ASN1_NDEF_SEQUENCE( GostKeyParams ) =
 {

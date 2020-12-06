@@ -2,8 +2,10 @@
 
 #include <memory>
 #include <openssl/types.h>
-#include <openssl/evp.h>
+#include <openssl/encoder.h>
+#include <openssl/decoder.h>
 #include <openssl/provider.h>
+#include <openssl/evp.h>
 #include <openssl/x509.h>
 
 template< typename T, void ( *f )( T* ) >
@@ -24,12 +26,13 @@ namespace ossl
 
 OSSL_DEFINE_PTR_TYPE( LibCtx, OSSL_LIB_CTX, OSSL_LIB_CTX_free );
 
+OSSL_DEFINE_PTR_TYPE( EncoderCtx, OSSL_ENCODER_CTX, OSSL_ENCODER_CTX_free );
+OSSL_DEFINE_PTR_TYPE( DecoderCtx, OSSL_DECODER_CTX, OSSL_DECODER_CTX_free );
+
 OSSL_DEFINE_PTR_TYPE( EvpMd, EVP_MD, EVP_MD_free );
 OSSL_DEFINE_PTR_TYPE( EvpMdCtx, EVP_MD_CTX, EVP_MD_CTX_free );
-
 OSSL_DEFINE_PTR_TYPE( EvpPkey, EVP_PKEY, EVP_PKEY_free );
 OSSL_DEFINE_PTR_TYPE( EvpPkeyCtx, EVP_PKEY_CTX, EVP_PKEY_CTX_free );
-
 
 OSSL_DEFINE_PTR_TYPE( X509PubKey, X509_PUBKEY, X509_PUBKEY_free );
 

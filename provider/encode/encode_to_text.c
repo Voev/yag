@@ -25,12 +25,19 @@ static int GsEncodeToText( BIO* out, const void* keyData, int selection )
     {
         const BIGNUM* privateKey = GsAsymmKeyGet0PrivateKey( key );
         BIO_printf( out, "Private key:\n" );
-        BN_print( out, privateKey );
-        BIO_printf( out, "\n" );
+        if( privateKey )
+        {
+            BN_print( out, privateKey );
+            BIO_printf( out, "\n" );
+        }
+        else
+        {
+            BIO_printf( out, "<undefined>\n" );
+        }
     } 
     if( selection & OSSL_KEYMGMT_SELECT_PUBLIC_KEY ) 
     {
-        
+#pragma message "TODO: print public key"
     }
     if( selection & OSSL_KEYMGMT_SELECT_DOMAIN_PARAMETERS )
     {
