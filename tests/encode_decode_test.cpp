@@ -1,9 +1,11 @@
 #include <vector>
 #include <gtest/gtest.h>
+#include <openssl/core_dispatch.h>
 #include <openssl/core_names.h>
 #include <openssl/evp.h>
-#include <openssl/err.h>
+#include <openssl/encoder.h>
 #include <openssl/provider.h>
+#include <openssl/err.h>
 #include <openssl/pem.h>
 #include <openssl/x509.h>
 
@@ -133,6 +135,20 @@ TEST_P( EncodeDecodeTest, EncodeKeyParametersToDer )
     ASSERT_LT( 0, i2d_KeyParams_bio( bio.get(), pkey.get() ) );
 }
 
+TEST_P( EncodeDecodeTest, DISABLED_DecodeKeyParametersFromDer )
+{
+    auto param = GetParam();
+    ossl::EvpPkeyPtr pkey( ossl::GenerateParameters( param.first, param.second ) );
+    ASSERT_NE( pkey.get(), nullptr );
+
+    ossl::BioPtr bio( BIO_new( BIO_s_mem() ) );
+    ASSERT_NE( bio.get(), nullptr );
+    ASSERT_LT( 0, i2d_KeyParams_bio( bio.get(), pkey.get() ) );
+
+    pkey.reset( d2i_KeyParams_bio( OBJ_sn2nid( param.first ), nullptr, bio.get() ) );
+    ASSERT_NE( pkey.get(), nullptr );
+}
+
 const std::vector< BaseParam > gTestParams =
 {
     { SN_id_GostR3410_2012_256, SN_id_tc26_gost_3410_2012_256_paramSetA },
@@ -146,4 +162,72 @@ INSTANTIATE_TEST_SUITE_P(
     EncodeDecodeTest,
     testing::ValuesIn( gTestParams ),
     BaseNameGenerator
+);
+
+struct EncoderOutParam
+{
+    const char* outputType = nullptr;
+    const char* outputStructure = nullptr;
+    const int selection = 0;
+};
+
+static const std::vector< EncoderOutParam > gTestEncoderOutParams =
+{
+    { "TEXT", nullptr,                OSSL_KEYMGMT_SELECT_PRIVATE_KEY },
+    { "PEM",  "pkcs8",                OSSL_KEYMGMT_SELECT_PRIVATE_KEY },
+    { "DER",  "pkcs8",                OSSL_KEYMGMT_SELECT_PRIVATE_KEY },
+    { "TEXT", nullptr,                OSSL_KEYMGMT_SELECT_PUBLIC_KEY },
+    { "PEM",  "SubjectPublicKeyInfo", OSSL_KEYMGMT_SELECT_PUBLIC_KEY },
+    { "DER",  "SubjectPublicKeyInfo", OSSL_KEYMGMT_SELECT_PUBLIC_KEY },
+    { "TEXT", nullptr,                OSSL_KEYMGMT_SELECT_DOMAIN_PARAMETERS },
+    { "PEM",  "type-specific",        OSSL_KEYMGMT_SELECT_DOMAIN_PARAMETERS },
+    { "DER",  "type-specific",        OSSL_KEYMGMT_SELECT_DOMAIN_PARAMETERS }
+};
+
+using ProvidedEncodeTestParam = std::tuple< BaseParam, EncoderOutParam >;
+
+class ProvidedEncodeTest 
+    : public testing::TestWithParam< ProvidedEncodeTestParam >
+{
+public:
+    void SetUp()
+    {}
+
+    void TearDown()
+    {
+        ERR_print_errors_fp( stderr );
+    }
+};
+
+TEST_P( ProvidedEncodeTest, ProvidedEncodeToBio )
+{
+    auto param = GetParam();
+    auto& algParam = std::get< 0 >( param );
+    auto& outParam = std::get< 1 >( param );
+    
+    ossl::EvpPkeyPtr pkey( ossl::GenerateKeyPair( algParam.first, algParam.second ) );
+    ASSERT_NE( pkey.get(), nullptr );
+
+    ossl::BioPtr bio( BIO_new( BIO_s_mem() ) );
+    ASSERT_NE( bio.get(), nullptr );
+    
+    ossl::EncoderCtxPtr ctx( 
+        OSSL_ENCODER_CTX_new_by_EVP_PKEY( pkey.get(), 
+                                          outParam.selection,
+                                          outParam.outputType,
+                                          outParam.outputStructure,
+                                          nullptr, nullptr ) 
+    );
+    ASSERT_NE( ctx.get(), nullptr );
+    ASSERT_NE( 0, OSSL_ENCODER_CTX_get_num_encoders( ctx.get() ) );
+    ASSERT_LT( 0, OSSL_ENCODER_to_bio( ctx.get(), bio.get() ) );
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    ProvidedEncodeTests,
+    ProvidedEncodeTest,
+    testing::Combine(
+        testing::ValuesIn( gTestParams ),
+        testing::ValuesIn( gTestEncoderOutParams )
+    )
 );

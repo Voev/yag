@@ -20,55 +20,100 @@ static
 int GsSerializePrivateKey( const GsAsymmKey* key, unsigned char** buffer )
 {
     const BIGNUM* privateKey = GsAsymmKeyGet0PrivateKey( key );
-    int bufSize = BN_num_bytes( privateKey );
-    unsigned char* buf = ( unsigned char* )OPENSSL_zalloc( bufSize );
+    unsigned char* buf;
+    int bufSize;
+    
+    if( !buffer )
+    {
+        ERR_raise( ERR_LIB_PROV, ERR_R_PASSED_INVALID_ARGUMENT );
+        return 0;
+    }
+    *buffer = NULL;
+
+    if( !privateKey )
+    {
+        ERR_raise( ERR_LIB_PROV, ERR_R_PASSED_NULL_PARAMETER );
+        return 0;
+    }
+
+    bufSize = BN_num_bytes( privateKey );
+    buf = ( unsigned char* )OPENSSL_zalloc( bufSize );
     if( !buf )
     {
+        ERR_raise( ERR_LIB_PROV, ERR_R_MALLOC_FAILURE );
         return 0;
     }
     bufSize = BN_bn2bin( privateKey, buf );
-    if( buffer )
-    {
-        *buffer = buf;
-    }
+    *buffer = buf;
     return bufSize;
 }
-
 
 static
 PKCS8_PRIV_KEY_INFO* GsEncodeKeyAsKeyBag( const void* keyData, ASN1_STRING* params )
 {
-    PKCS8_PRIV_KEY_INFO* p8info = PKCS8_PRIV_KEY_INFO_new();
-    unsigned char* der = NULL;
     const GsAsymmKey* key = INTERPRET_AS_CASYMM_KEY( keyData );
-    int derlen = GsSerializePrivateKey( key, &der );
-    PKCS8_pkey_set0( p8info, OBJ_nid2obj( GsAsymmKeyGetAlgorithm( key ) ), 0, 
-                     V_ASN1_SEQUENCE, params, der, derlen );
+    PKCS8_PRIV_KEY_INFO* p8info = NULL;
+    unsigned char* der = NULL;
+    int derlen, keyNid;
+    int ret = 0;
+
+    if( !key )
+    {
+        ERR_raise( ERR_LIB_PROV, ERR_R_PASSED_NULL_PARAMETER );
+        goto end;
+    }
+    keyNid = GsAsymmKeyGetAlgorithm( key );
+
+    p8info = PKCS8_PRIV_KEY_INFO_new();
+    if( !p8info )
+    {
+        ERR_raise( ERR_LIB_PROV, ERR_R_MALLOC_FAILURE );
+        goto end;
+    }
+
+    derlen = GsSerializePrivateKey( key, &der );
+    if( !PKCS8_pkey_set0( p8info, OBJ_nid2obj( keyNid ), 0, 
+                          V_ASN1_SEQUENCE, params, der, derlen ) )
+    {
+        goto end;
+    }
+
+    ret = 1;
+end:
+    if( !ret )
+    {
+        PKCS8_PRIV_KEY_INFO_free( p8info );
+        p8info = NULL;
+    }
     return p8info;
 }
 
 static
-X509_SIG* GsEncodeKeyAsShroudedKeyBag(const void *key,
-                                      ASN1_STRING* params, GsEncoderCtx* ctx )
+X509_SIG* GsEncodeKeyAsShroudedKeyBag( const void* keyData,
+                                       ASN1_STRING* params, 
+                                       GsEncoderCtx* ctx )
 {
-    PKCS8_PRIV_KEY_INFO* p8info = GsEncodeKeyAsKeyBag( key, params );
-    X509_SIG *p8 = NULL;
-    char kstr[PEM_BUFSIZE];
+    const EVP_CIPHER* cipher = GsEncoderCtxGet0Cipher( ctx );
+    PKCS8_PRIV_KEY_INFO* p8info = NULL;
+    char kstr[ PEM_BUFSIZE ] = { 0 };
+    X509_SIG* p8 = NULL;
     size_t klen = 0;
 
-    if( !GsEncoderCtxGet0Cipher( ctx ) )
+    if( !cipher )
     {
-        return NULL;
+        ERR_raise( ERR_LIB_PROV, ERR_R_PASSED_INVALID_ARGUMENT );
+        goto end;
     }
 
-    //if (!ossl_pw_get_passphrase(kstr, sizeof(kstr), &klen, NULL, 1,
-    //                            &ctx->pwdata)) {
-    //    ERR_raise(ERR_LIB_PROV, PROV_R_READ_KEY);
-    //    return NULL;
-    //}
-    p8 = PKCS8_encrypt(-1, GsEncoderCtxGet0Cipher( ctx ), kstr, klen, NULL, 0, 0, p8info);
-    OPENSSL_cleanse(kstr, klen);
-    PKCS8_PRIV_KEY_INFO_free(p8info);
+    p8info = GsEncodeKeyAsKeyBag( keyData, params );
+    if( !p8info )
+    {
+        goto end;
+    }
+    p8 = PKCS8_encrypt( -1, cipher, kstr, klen, NULL, 0, 0, p8info );
+end:
+    OPENSSL_cleanse( kstr, klen );
+    PKCS8_PRIV_KEY_INFO_free( p8info );
     return p8;
 }
 

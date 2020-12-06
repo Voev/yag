@@ -130,7 +130,6 @@ OSSL_LIB_CTX* GsAsymmKeyGet0LibCtx( const GsAsymmKey* key )
     return key->libCtx;
 }
 
-
 const EC_GROUP* GsAsymmKeyGet0Group( const GsAsymmKey* key )
 {
     OPENSSL_assert( key );
@@ -183,7 +182,6 @@ int GsAsymmKeyGetDefaultDigest( const GsAsymmKey* key )
     }
     return NID_undef;
 }
-
 
 int GsAsymmKeyGeneratePublicKey( GsAsymmKey* key, BN_CTX* ctx )
 {
