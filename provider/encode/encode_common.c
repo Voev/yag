@@ -66,12 +66,12 @@ int GsEncoderCheckSelection( int selection, int selectionMask )
 
     for( i = 0; i < size; i++ ) 
     {
-        int check1 = (selection & checks[i]) != 0;
-        int check2 = (selectionMask & checks[i]) != 0;
+        int check = ( selection & checks[ i ] ) != 0;
+        int checkMask = ( selectionMask & checks[ i ] ) != 0;
 
-        if (check1)
+        if( check )
         {
-            return check2;
+            return checkMask;
         }
     }
     return 0;
@@ -191,133 +191,12 @@ int GsEncoderEncode( GsEncoderCtx* ctx, OSSL_CORE_BIO* cout, const void* keyData
     return ret;
 }
 
-
-int ec_key_fromdata(EC_KEY *ec, const OSSL_PARAM params[], int include_private)
-{
-    const OSSL_PARAM *param_priv_key = NULL, *param_pub_key = NULL;
-    BN_CTX *ctx = NULL;
-    BIGNUM *priv_key = NULL;
-    unsigned char *pub_key = NULL;
-    size_t pub_key_len;
-    const EC_GROUP *ecg = NULL;
-    EC_POINT *pub_point = NULL;
-    int ok = 0;
-
-    ecg = EC_KEY_get0_group(ec);
-    if (ecg == NULL)
-        return 0;
-
-    param_pub_key =
-        OSSL_PARAM_locate_const(params, OSSL_PKEY_PARAM_PUB_KEY);
-    if (include_private)
-        param_priv_key =
-            OSSL_PARAM_locate_const(params, OSSL_PKEY_PARAM_PRIV_KEY);
-
-    ctx = BN_CTX_new_ex(NULL);
-    if (ctx == NULL)
-        goto err;
-
-    if (param_pub_key != NULL)
-        if (!OSSL_PARAM_get_octet_string(param_pub_key,
-                                         (void **)&pub_key, 0, &pub_key_len)
-            || (pub_point = EC_POINT_new(ecg)) == NULL
-            || !EC_POINT_oct2point(ecg, pub_point, pub_key, pub_key_len, ctx))
-        goto err;
-
-    if (param_priv_key != NULL && include_private) {
-        const BIGNUM *order;
-
-        order = EC_GROUP_get0_order(ecg);
-        if (order == NULL || BN_is_zero(order))
-            goto err;
-
-        BN_set_flags(priv_key, BN_FLG_CONSTTIME);
-
-        if (!OSSL_PARAM_get_BN(param_priv_key, &priv_key))
-            goto err;
-    }
-
-    if (priv_key != NULL
-        && !EC_KEY_set_private_key(ec, priv_key))
-        goto err;
-
-    if (pub_point != NULL
-        && !EC_KEY_set_public_key(ec, pub_point))
-        goto err;
-
-    ok = 1;
-
- err:
-    BN_CTX_free(ctx);
-    BN_clear_free(priv_key);
-    OPENSSL_free(pub_key);
-    EC_POINT_free(pub_point);
-    return ok;
-}
-
-int ec_group_fromdata(EC_KEY *ec, const OSSL_PARAM params[])
-{
-    EC_GROUP* group = NULL;
-    int ret = 0;
-
-    const OSSL_PARAM* groupName = OSSL_PARAM_locate_const(params, OSSL_PKEY_PARAM_GROUP_NAME);
-    if( !groupName ) 
-    {
-        goto end;
-    }
-
-    group = GsGetEcGroup( groupName );
-    if( !group )
-    {
-        goto end;
-    }
-    ret = EC_KEY_set_group(ec, group);
-end:
-    EC_GROUP_free(group);
-    return ret;
-}
-
 void* GsEncoderImportObject( void* vctx, int selection, const OSSL_PARAM params[] )
 {
-    EC_KEY *ec = vctx;
-    int ok = 1;
-
-    if( !ec )
-    {
-        return 0;
-    }
-
-    /*
-     * In this implementation, we can export/import only keydata in the
-     * following combinations:
-     *   - domain parameters (+optional other params)
-     *   - public key with associated domain parameters (+optional other params)
-     *   - private key with associated public key and domain parameters
-     *         (+optional other params)
-     *
-     * This means:
-     *   - domain parameters must always be requested
-     *   - private key must be requested alongside public key
-     *   - other parameters are always optional
-     */
-    if ((selection & OSSL_KEYMGMT_SELECT_DOMAIN_PARAMETERS) == 0)
-        return 0;
-    if ((selection & OSSL_KEYMGMT_SELECT_PRIVATE_KEY) != 0
-            && (selection & OSSL_KEYMGMT_SELECT_PUBLIC_KEY) == 0)
-        return 0;
-
-    if ((selection & OSSL_KEYMGMT_SELECT_DOMAIN_PARAMETERS) != 0)
-        ok = ok && ec_group_fromdata(ec, params);
-
-    if ((selection & OSSL_KEYMGMT_SELECT_KEYPAIR) != 0) {
-        int include_private =
-            selection & OSSL_KEYMGMT_SELECT_PRIVATE_KEY ? 1 : 0;
-
-        ok = ok && ec_key_fromdata(ec, params, include_private);
-    }
-    if ((selection & OSSL_KEYMGMT_SELECT_OTHER_PARAMETERS) != 0)
-        ok = ok && 1;//ec_key_otherparams_fromdata(ec, params);
-
+    (void)vctx;
+    (void)selection;
+    (void)params;
+#pragma message "TODO: make import implementation"
     return NULL;
 }
 
