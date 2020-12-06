@@ -9,7 +9,6 @@
 #include <utilities/ossl_pointers.hpp>
 #include <utilities/ossl_tool.hpp>
 #include <utilities/name_generator.hpp>
-#include "global.hpp"
 
 using BaseParam = std::pair< const char*, const char* >;
 
