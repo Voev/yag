@@ -4,6 +4,15 @@
 #include <openssl/err.h>
 #include <openssl/provider.h>
 #include <utilities/ossl_pointers.hpp>
+#include <utilities/name_generator.hpp>
+
+static 
+std::string NameGenerator( const testing::TestParamInfo< const char* >& info )
+{
+    std::string name = info.param;
+    NameGeneratorFiltering( name );
+    return name;
+}
 
 class DigestTest : public testing::TestWithParam< const char* >
 {
@@ -134,5 +143,6 @@ INSTANTIATE_TEST_SUITE_P(
     testing::Values(
         SN_id_GostR3411_2012_256,
         SN_id_GostR3411_2012_512
-    )
+    ),
+    NameGenerator
 );
