@@ -28,4 +28,3 @@ OSSL_LIB_CTX* GsAsymmKeyGet0LibCtx( const GsAsymmKey* key );
 const EC_GROUP* GsAsymmKeyGet0Group( const GsAsymmKey* key );
 const EC_POINT* GsAsymmKeyGet0PublicKey( const GsAsymmKey* key );
 const BIGNUM* GsAsymmKeyGet0PrivateKey( const GsAsymmKey* key );
-
