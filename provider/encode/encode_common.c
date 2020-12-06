@@ -13,8 +13,9 @@
 #include <gostone/provider_ctx.h>
 #include <gostone/encode/encode_impl.h>
 #include <gostone/encode/encode_common.h>
-#include <gostone/keymgmt/asymm_key.h>
-#include <gostone/keymgmt/keymgmt.h>
+#include <gostone/keymgmt/keymgmt_impl.h>
+#include <gostone/keymgmt/keymgmt_akey.h>
+#include <gostone/keymgmt/keymgmt_params.h>
 
 struct gs_encoder_ctx_st
 {

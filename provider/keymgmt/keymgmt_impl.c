@@ -1,6 +1,6 @@
 #include <openssl/core_dispatch.h>
 #include <gostone/common.h>
-#include <gostone/keymgmt/keymgmt.h>
+#include <gostone/keymgmt/keymgmt_impl.h>
 
 const OSSL_DISPATCH gGostR341012_256Funcs[] =
 {

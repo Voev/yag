@@ -11,7 +11,7 @@
 
 #include <gostone/common.h>
 #include <gostone/provider_ctx.h>
-#include <gostone/keymgmt/asymm_key.h>
+#include <gostone/keymgmt/keymgmt_akey.h>
 #include <gostone/encode/encdec_asn1.h>
 #include <gostone/encode/encode_impl.h>
 #include <gostone/encode/encode_common.h>

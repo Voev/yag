@@ -1,5 +1,4 @@
 #pragma once
-#include <openssl/ec.h>
 #include <openssl/core_dispatch.h>
 
 /* Key management (base) */
@@ -30,5 +29,3 @@ OSSL_FUNC_keymgmt_gen_set_params_fn GsKeyMgmtGenSetParams;
 OSSL_FUNC_keymgmt_gen_settable_params_fn GsKeyMgmtGenSettableParams;
 OSSL_FUNC_keymgmt_gen_fn GsKeyMgmtGen;
 OSSL_FUNC_keymgmt_gen_cleanup_fn GsKeyMgmtGenCleanup;
-
-EC_GROUP* GsGetEcGroup( const OSSL_PARAM* param );

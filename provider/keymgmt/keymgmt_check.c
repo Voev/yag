@@ -6,13 +6,14 @@
 
 #include <gostone/common.h>
 #include <gostone/provider_ctx.h>
-#include <gostone/keymgmt/asymm_key.h>
-#include <gostone/keymgmt/keymgmt.h>
+#include <gostone/keymgmt/keymgmt_akey.h>
+#include <gostone/keymgmt/keymgmt_impl.h>
 
 int GsKeyMgmtMatch( const void* keyDataA, const void* keyDataB, int selection )
 {
     const GsAsymmKey* keyA = INTERPRET_AS_CASYMM_KEY( keyDataA );
     const GsAsymmKey* keyB = INTERPRET_AS_CASYMM_KEY( keyDataB );
+    BN_CTX* ctx;
     int ret = 1;
 
     if( !keyA || !keyB )
@@ -20,7 +21,7 @@ int GsKeyMgmtMatch( const void* keyDataA, const void* keyDataB, int selection )
         return 0;
     }
 
-    BN_CTX* ctx = BN_CTX_new_ex( GsAsymmKeyGet0LibCtx( keyA ) );
+    ctx = BN_CTX_new_ex( GsAsymmKeyGet0LibCtx( keyA ) );
     if( !ctx )
     {
         return 0;

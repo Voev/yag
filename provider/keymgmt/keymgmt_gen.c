@@ -4,8 +4,9 @@
 #include <openssl/err.h>
 #include <openssl/objects.h>
 #include <gostone/provider_ctx.h>
-#include <gostone/keymgmt/asymm_key.h>
-#include <gostone/keymgmt/keymgmt.h>
+#include <gostone/keymgmt/keymgmt_impl.h>
+#include <gostone/keymgmt/keymgmt_akey.h>
+#include <gostone/keymgmt/keymgmt_params.h>
 
 struct gs_keymngm_gen_ctx
 {
