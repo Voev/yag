@@ -15,6 +15,7 @@
 #include <gostone/encode/encode_impl.h>
 #include <gostone/encode/encode_common.h>
 #include <gostone/encode/encode_params.h>
+#include <gostone/encode/encode_pubkey.h>
 
 typedef int ( *EncodePublicKeyFn )( BIO* bio, const X509_PUBKEY* x );
 
