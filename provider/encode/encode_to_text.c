@@ -10,6 +10,7 @@
 #include <gostone/keymgmt/keymgmt_akey.h>
 #include <gostone/encode/encode_impl.h>
 #include <gostone/encode/encode_common.h>
+#include <gostone/encode/encode_pubkey.h>
 
 static int GsEncodeToText( BIO* out, const void* keyData, int selection )
 {
@@ -37,7 +38,23 @@ static int GsEncodeToText( BIO* out, const void* keyData, int selection )
     } 
     if( selection & OSSL_KEYMGMT_SELECT_PUBLIC_KEY ) 
     {
-#pragma message "TODO: print public key"
+        unsigned char* rawValue = NULL;
+        int rawSize = GsSerializePublicKey( key, &rawSize );
+        BIO_printf( out, "Public key:\n" );
+        if( rawSize && 0 < rawSize )
+        {
+            int half = rawSize / 2;
+            BIO_printf( out, "X: " );
+            BIO_hex_string( out, -1, 16, rawValue, half );
+            BIO_printf( out, "\nY: " );
+            BIO_hex_string( out, -1, 16, rawValue + half, half );
+            BIO_printf( out, "\n" );
+            OPENSSL_free( rawSize );
+        }
+        else
+        {
+            BIO_printf( out, "<undefined>\n" );
+        }
     }
     if( selection & OSSL_KEYMGMT_SELECT_DOMAIN_PARAMETERS )
     {

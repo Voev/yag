@@ -138,13 +138,10 @@ int GsEncoderGetParams( OSSL_PARAM params[],
     {
         return 0;
     }
-    if( outputStruct ) 
+    p = OSSL_PARAM_locate(params, OSSL_ENCODER_PARAM_OUTPUT_STRUCTURE);
+    if( p && !OSSL_PARAM_set_utf8_ptr( p, outputStruct ) )
     {
-        p = OSSL_PARAM_locate(params, OSSL_ENCODER_PARAM_OUTPUT_STRUCTURE);
-        if( p && !OSSL_PARAM_set_utf8_ptr( p, outputStruct ) )
-        {
-            return 0;
-        }
+        return 0;
     }
     return 1;
 }
