@@ -90,6 +90,12 @@ static const OSSL_ALGORITHM gGsEncoders[] =
     { NULL, NULL, NULL }
 };
 
+static const OSSL_ALGORITHM gGsSignatures[] =
+{
+    { SN_id_GostR3410_2012_256, "provider=gostone", gGostR341012_SignatureFunctions },
+    { NULL, NULL, NULL }
+};
+
 
 static const OSSL_ALGORITHM* GsQuery(
     OSSL_PROVIDER* prov ossl_unused,
@@ -97,30 +103,39 @@ static const OSSL_ALGORITHM* GsQuery(
     int* noCache
 )
 {
+    const OSSL_ALGORITHM* alg = NULL;
     switch( operation )
     {
     case OSSL_OP_DIGEST:
-        return gGsDigests;
+        alg = gGsDigests;
+        break;
     case OSSL_OP_KEYMGMT:
-        return gGsKeyMgmts;
+        alg = gGsKeyMgmts;
+        break;
     case OSSL_OP_ENCODER:
-        return gGsEncoders;
+        alg = gGsEncoders;
+        break;
+    case OSSL_OP_SIGNATURE:
+        alg = gGsSignatures;
+        break;
     case OSSL_OP_DECODER:
     case OSSL_OP_CIPHER:
     case OSSL_OP_MAC:
     case OSSL_OP_KDF:
     case OSSL_OP_RAND:
     case OSSL_OP_KEYEXCH:
-    case OSSL_OP_SIGNATURE:
+        break;
     case OSSL_OP_ASYM_CIPHER:
     case OSSL_OP_KEM:
-        return NULL;
+    default:
+        alg = NULL;
+        break;
     }
     if( noCache )
     {
         *noCache = 0;
     }
-    return NULL;
+    return alg;
 }
 
  static void GsTeardown( void* provData )

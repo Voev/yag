@@ -5,7 +5,8 @@ file(GLOB SOURCES
      *.c
      digests/*.c
      keymgmt/*.c
-     encode/*.c)
+     encode/*.c
+     signature/*.c)
 
 add_library(${LIB_NAME} SHARED ${SOURCES})
 set_target_properties(${LIB_NAME} PROPERTIES PREFIX "")

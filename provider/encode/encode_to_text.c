@@ -39,7 +39,7 @@ static int GsEncodeToText( BIO* out, const void* keyData, int selection )
     if( selection & OSSL_KEYMGMT_SELECT_PUBLIC_KEY ) 
     {
         unsigned char* rawValue = NULL;
-        int rawSize = GsSerializePublicKey( key, &rawSize );
+        int rawSize = GsSerializePublicKey( key, &rawValue );
         BIO_printf( out, "Public key:\n" );
         if( rawSize && 0 < rawSize )
         {
@@ -49,7 +49,7 @@ static int GsEncodeToText( BIO* out, const void* keyData, int selection )
             BIO_printf( out, "\nY: " );
             BIO_hex_string( out, -1, 16, rawValue + half, half );
             BIO_printf( out, "\n" );
-            OPENSSL_free( rawSize );
+            OPENSSL_free( rawValue );
         }
         else
         {
