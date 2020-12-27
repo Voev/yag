@@ -14,3 +14,5 @@ extern const OSSL_DISPATCH gGostR341012_256ToSubjPubKeyInfoPemEncoderFuncs[];
 extern const OSSL_DISPATCH gGostR341012_256ToTypeSpecificDerEncoderFuncs[];
 extern const OSSL_DISPATCH gGostR341012_256ToTypeSpecificPemEncoderFuncs[];
 extern const OSSL_DISPATCH gGostR341012_256ToTextEncoderFuncs[];
+
+extern const OSSL_DISPATCH gGostR341012_SignatureFunctions[];

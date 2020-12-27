@@ -8,6 +8,7 @@ typedef struct gs_asymm_key_st GsAsymmKey;
 
 GsAsymmKey* GsAsymmKeyNew( void );
 GsAsymmKey* GsAsymmKeyNewInit( OSSL_LIB_CTX* libCtx, int algorithm );
+GsAsymmKey* GsAsymmKeyDuplicate( GsAsymmKey* key );
 void GsAsymmKeyFree( GsAsymmKey* key );
 void GsAsymmKeySetAlgorithm( GsAsymmKey* key, int algorithm );
 void GsAsymmKeySet0LibCtx( GsAsymmKey* key, OSSL_LIB_CTX* ctx );
