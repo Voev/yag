@@ -84,6 +84,31 @@ TEST_P( SignatureTest, SignAndVerifyMessageDigest )
     ASSERT_LT( 0, EVP_PKEY_verify( ctx.get(), sig.data(), sig.size(), msg.data(), msg.size() ) );
 }
 
+TEST_P( SignatureTest, OneCorruptedByte )
+{
+    auto param = GetParam();
+    ossl::EvpPkeyPtr pkey( ossl::GenerateKeyPair( param.alg, param.group ) );
+    ASSERT_NE( pkey.get(), nullptr );
+
+    size_t siglen = 0;
+    std::vector< uint8_t > sig( param.sigSize );
+    std::vector< uint8_t > msg( param.msgSize );
+    ASSERT_LT( 0, RAND_bytes( msg.data(), static_cast< int >( msg.size() ) ) );
+
+    ossl::EvpPkeyCtxPtr ctx( EVP_PKEY_CTX_new_from_pkey( nullptr, pkey.get(), nullptr ) );
+    ASSERT_NE( ctx.get(), nullptr );
+    ASSERT_LT( 0, EVP_PKEY_sign_init( ctx.get() ) );
+    ASSERT_LT( 0, EVP_PKEY_sign( ctx.get(), sig.data(), &siglen, msg.data(), msg.size() ) );
+
+    sig[ 0 ] += 1;
+
+    ctx.reset( EVP_PKEY_CTX_new_from_pkey( nullptr, pkey.get(), nullptr ) );
+    ASSERT_NE( ctx.get(), nullptr );
+    ASSERT_LT( 0, EVP_PKEY_verify_init( ctx.get() ) );
+    ASSERT_EQ( 0, EVP_PKEY_verify( ctx.get(), sig.data(), sig.size(), msg.data(), msg.size() ) );
+    ERR_clear_error();
+}
+
 const std::vector< BaseParam > gTestParams =
 {
     { SN_id_GostR3410_2012_256, SN_id_tc26_gost_3410_2012_256_paramSetA, 32, 64  },
