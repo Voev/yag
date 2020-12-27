@@ -99,11 +99,8 @@ void* GsSignatureDupCtx( void* vctx )
 
     if( srcCtx->key )
     {
-        if( 1 ) //EVP_MD_up_ref( srcCtx->md ) )
-        {
-            dstCtx->key = srcCtx->key;
-        }
-        else
+        dstCtx->key = GsAsymmKeyDuplicate( srcCtx->key );
+        if( !dstCtx->key )
         {
             goto err;
         }
@@ -179,7 +176,13 @@ int GsSignatureSign( void* vctx,
         ERR_raise( ERR_LIB_PROV, ERR_R_PASSED_NULL_PARAMETER );
         return 0;
     }
-    OPENSSL_assert( tbslen == 32 || tbslen == 64 );
+    
+    if( tbslen != 32 && tbslen != 64 )
+    {
+        ERR_raise( ERR_LIB_PROV, ERR_R_PASSED_INVALID_ARGUMENT );
+        ERR_add_error_data( 1, "incorrect to be signed message length" );
+        return 0;
+    }
 
     *siglen = 2 * tbslen;
 
@@ -609,7 +612,6 @@ const OSSL_PARAM* GsSignatureSettableCtxParams( ossl_unused void* provCtx )
     {
         OSSL_PARAM_size_t( OSSL_SIGNATURE_PARAM_DIGEST_SIZE, NULL ),
         OSSL_PARAM_utf8_string( OSSL_SIGNATURE_PARAM_DIGEST, NULL, 0 ),
-        OSSL_PARAM_uint( OSSL_SIGNATURE_PARAM_KAT, NULL ),
         OSSL_PARAM_END
     };
     return gSignatureSettableCtxParams;

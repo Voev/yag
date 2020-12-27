@@ -71,7 +71,7 @@ static const OSSL_ALGORITHM gGsDigests[] =
 static const OSSL_ALGORITHM gGsKeyMgmts[] =
 {
     { SN_id_GostR3410_2012_256, "provider=gostone", gGostR341012_256Funcs },
-    //{ SN_id_GostR3410_2012_512, "provider=gostone", gGostR341012_512Funcs },
+    { SN_id_GostR3410_2012_512, "provider=gostone", gGostR341012_512Funcs },
     { NULL, NULL, NULL }
 };
 
@@ -93,6 +93,7 @@ static const OSSL_ALGORITHM gGsEncoders[] =
 static const OSSL_ALGORITHM gGsSignatures[] =
 {
     { SN_id_GostR3410_2012_256, "provider=gostone", gGostR341012_SignatureFunctions },
+    { SN_id_GostR3410_2012_512, "provider=gostone", gGostR341012_SignatureFunctions },
     { NULL, NULL, NULL }
 };
 

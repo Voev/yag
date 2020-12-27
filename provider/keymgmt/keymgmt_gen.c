@@ -18,17 +18,27 @@ struct gs_keymngm_gen_ctx
 };
 typedef struct gs_keymngm_gen_ctx GsKeyGenCtx;
 
-void* GsKeyMgmtGenInit( void* provData, int selection )
+void* GsKeyMgmtGenInit_( void* provData, int selection, int algorithm )
 {
     GsProvCtx* provCtx = INTERPRET_AS_PROV_CTX( provData );
     GsKeyGenCtx* gctx = OPENSSL_zalloc( sizeof( *gctx ) );
     if( gctx )
     {
         gctx->libCtx = GsProvCtxGet0LibCtx( provCtx );
-        gctx->algorithm = NID_id_GostR3410_2012_256;
+        gctx->algorithm = algorithm;
         gctx->selection = selection;
     }
     return gctx;
+}
+
+void* GsKeyMgmtGenInit( void* provData, int selection )
+{
+    return GsKeyMgmtGenInit_( provData, selection, NID_id_GostR3410_2012_256 );
+}
+
+void* GsKeyMgmtGenInit512( void* provData, int selection )
+{
+    return GsKeyMgmtGenInit_( provData, selection, NID_id_GostR3410_2012_512 );
 }
 
 int GsKeyMgmtGenSetTemplate( void* genCtx, void* tmpl )

@@ -14,11 +14,21 @@
 #include <gostone/keymgmt/keymgmt_params.h>
 #include <string.h>
 
-void* GsKeyMgmtNew( void* provData )
+void* GsKeyMgmtNew_( void* provData, int algorithm )
 {
     GsProvCtx* provCtx = INTERPRET_AS_PROV_CTX( provData );
     OSSL_LIB_CTX* libCtx = GsProvCtxGet0LibCtx( provCtx );
-    return GsAsymmKeyNewInit( libCtx, NID_id_GostR3410_2012_256 );
+    return GsAsymmKeyNewInit( libCtx, algorithm );
+}
+
+void* GsKeyMgmtNew( void* provData )
+{
+    return GsKeyMgmtNew_( provData, NID_id_GostR3410_2012_256 );
+}
+
+void* GsKeyMgmtNew512( void* provData )
+{
+    return GsKeyMgmtNew_( provData, NID_id_GostR3410_2012_512 );
 }
 
 void GsKeyMgmtFree( void* keyData )
