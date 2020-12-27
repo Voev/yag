@@ -185,7 +185,6 @@ int GsSignatureSign( void* vctx,
     }
 
     *siglen = 2 * tbslen;
-
     if( sigSize < *siglen )
     {
         ERR_raise( ERR_LIB_PROV, ERR_R_PASSED_INVALID_ARGUMENT );
@@ -195,6 +194,11 @@ int GsSignatureSign( void* vctx,
     if( !sig )
     {
         return 1;
+    }
+
+    if( !tbs )
+    {
+        return 0;
     }
 
     bctx = BN_CTX_new();
@@ -471,9 +475,16 @@ int GsSignatureDigestSignFinal( void* vctx, unsigned char* sig, size_t* siglen,
         ERR_raise( ERR_LIB_PROV, ERR_R_PASSED_NULL_PARAMETER );
         return 0;
     }
-    if( sig && !EVP_DigestFinal_ex( ctx->mdCtx, digest, &dlen ) )
+    if( sig )
     {
-        return 0;
+        if( !EVP_DigestFinal_ex( ctx->mdCtx, digest, &dlen ) )
+        {
+            return 0;
+        }
+    }
+    else
+    {
+        dlen = ( size_t )EVP_MD_CTX_size( ctx->mdCtx );
     }
     return GsSignatureSign( vctx, sig, siglen, sigsize,
                             digest, ( size_t )dlen );
