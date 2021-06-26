@@ -5,6 +5,7 @@ Language: Cpp
 DerivePointerAlignment: false
 PointerAlignment: Left
 ColumnLimit: 80
+AllowShortBlocksOnASingleLine: false
 BreakBeforeBraces: Custom
 BraceWrapping:
   AfterClass: true

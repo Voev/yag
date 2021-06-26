@@ -119,16 +119,6 @@ int GsEncoderDoesKeyParamsSelection( ossl_unused void* ctx, int selection )
     return GsEncoderCheckSelection( selection, OSSL_KEYMGMT_SELECT_DOMAIN_PARAMETERS );
 }
 
-int GsEncoderGetKeyParams256ToDer( OSSL_PARAM params[] )
-{
-    return GsEncoderGetParams( params, "gost2012_256", "DER", "type-specific" );
-}
-
-int GsEncoderGetKeyParams256ToPem( OSSL_PARAM params[] )
-{
-    return GsEncoderGetParams( params, "gost2012_256", "PEM", "type-specific" );
-}
-
 int GsEncoderEncodeKeyParamsToDer( void* ctx, OSSL_CORE_BIO* cout, const void* keyData,
                                    const OSSL_PARAM keyAbstract[], int selection,
                                    OSSL_PASSPHRASE_CALLBACK* cb, void* cbArg )

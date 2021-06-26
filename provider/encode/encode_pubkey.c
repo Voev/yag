@@ -158,16 +158,6 @@ int GsEncoderDoesPublicKeySelection( ossl_unused void* ctx, int selection )
     return GsEncoderCheckSelection( selection, OSSL_KEYMGMT_SELECT_PUBLIC_KEY );
 }
 
-int GsEncoderGetPublicKeyParams256ToDer( OSSL_PARAM params[] )
-{
-    return GsEncoderGetParams( params, "gost2012_256", "DER", "SubjectPublicKeyInfo" );
-}
-
-int GsEncoderGetPublicKeyParams256ToPem( OSSL_PARAM params[] )
-{
-    return GsEncoderGetParams( params, "gost2012_256", "PEM", "SubjectPublicKeyInfo" );
-}
-
 int GsEncodePublicKeyToDerBio( BIO* out, const void* key, 
                                ossl_unused GsEncoderCtx* ctx,
                                ossl_unused OSSL_PASSPHRASE_CALLBACK* cb, 

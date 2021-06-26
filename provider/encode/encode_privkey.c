@@ -159,16 +159,6 @@ int GsEncoderDoesPrivateKeySelection( ossl_unused void* ctx, int selection )
     return GsEncoderCheckSelection( selection, OSSL_KEYMGMT_SELECT_PRIVATE_KEY );
 }
 
-int GsEncoderGetPrivateKeyParams256ToDer( OSSL_PARAM params[] )
-{
-    return GsEncoderGetParams( params, "gost2012_256", "DER", "pkcs8" );
-}
-
-int GsEncoderGetPrivateKeyParams256ToPem( OSSL_PARAM params[] )
-{
-    return GsEncoderGetParams( params, "gost2012_256", "PEM", "pkcs8" );
-}
-
 int GsEncodePrivateKeyToDerBio( BIO* out, const void* key, 
                                 GsEncoderCtx* ctx,
                                 ossl_unused OSSL_PASSPHRASE_CALLBACK* cb, 

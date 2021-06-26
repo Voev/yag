@@ -221,10 +221,11 @@ err:
     return ret;
 }
 
-int GsKeyMgmtValidate( const void* keyData, int selection )
+int GsKeyMgmtValidate( const void* keyData, int selection, int checktype )
 {
     const GsAsymmKey* key = INTERPRET_AS_CASYMM_KEY( keyData );
     int ret = 1;
+    (void)checktype;
 
     BN_CTX* ctx = BN_CTX_new_ex( GsAsymmKeyGet0LibCtx( key ) );
     if( !ctx )
