@@ -6,8 +6,6 @@ const OSSL_DISPATCH gGostR341012_256ToPkcs8DerEncoderFuncs[] =
 {
     { OSSL_FUNC_ENCODER_NEWCTX, FUNC_PTR( GsEncoderNewCtx ) },
     { OSSL_FUNC_ENCODER_FREECTX, FUNC_PTR( GsEncoderFreeCtx ) },
-    { OSSL_FUNC_ENCODER_GET_PARAMS, FUNC_PTR( GsEncoderGetPrivateKeyParams256ToDer ) },
-    { OSSL_FUNC_ENCODER_GETTABLE_PARAMS, FUNC_PTR( GsEncoderGettableParams ) },
     { OSSL_FUNC_ENCODER_SET_CTX_PARAMS, FUNC_PTR( GsEncoderSetCtxParams ) },
     { OSSL_FUNC_ENCODER_SETTABLE_CTX_PARAMS, FUNC_PTR( GsEncoderSettableCtxParams ) },
     { OSSL_FUNC_ENCODER_DOES_SELECTION, FUNC_PTR( GsEncoderDoesPrivateKeySelection ) },
@@ -21,8 +19,6 @@ const OSSL_DISPATCH gGostR341012_256ToPkcs8PemEncoderFuncs[] =
 {
     { OSSL_FUNC_ENCODER_NEWCTX, FUNC_PTR( GsEncoderNewCtx ) },
     { OSSL_FUNC_ENCODER_FREECTX, FUNC_PTR( GsEncoderFreeCtx ) },
-    { OSSL_FUNC_ENCODER_GET_PARAMS, FUNC_PTR( GsEncoderGetPrivateKeyParams256ToPem ) },
-    { OSSL_FUNC_ENCODER_GETTABLE_PARAMS, FUNC_PTR( GsEncoderGettableParams ) },
     { OSSL_FUNC_ENCODER_SET_CTX_PARAMS, FUNC_PTR( GsEncoderSetCtxParams ) },
     { OSSL_FUNC_ENCODER_SETTABLE_CTX_PARAMS, FUNC_PTR( GsEncoderSettableCtxParams ) },
     { OSSL_FUNC_ENCODER_DOES_SELECTION, FUNC_PTR( GsEncoderDoesPrivateKeySelection ) },
@@ -36,8 +32,6 @@ const OSSL_DISPATCH gGostR341012_256ToSubjPubKeyInfoDerEncoderFuncs[] =
 {
     { OSSL_FUNC_ENCODER_NEWCTX, FUNC_PTR( GsEncoderNewCtx ) },
     { OSSL_FUNC_ENCODER_FREECTX, FUNC_PTR( GsEncoderFreeCtx ) },
-    { OSSL_FUNC_ENCODER_GET_PARAMS, FUNC_PTR( GsEncoderGetPublicKeyParams256ToDer ) },
-    { OSSL_FUNC_ENCODER_GETTABLE_PARAMS, FUNC_PTR( GsEncoderGettableParams ) },
     { OSSL_FUNC_ENCODER_SET_CTX_PARAMS, FUNC_PTR( GsEncoderSetCtxParams ) },
     { OSSL_FUNC_ENCODER_SETTABLE_CTX_PARAMS, FUNC_PTR( GsEncoderSettableCtxParams ) },
     { OSSL_FUNC_ENCODER_DOES_SELECTION, FUNC_PTR( GsEncoderDoesPublicKeySelection ) },
@@ -51,8 +45,6 @@ const OSSL_DISPATCH gGostR341012_256ToSubjPubKeyInfoPemEncoderFuncs[] =
 {
     { OSSL_FUNC_ENCODER_NEWCTX, FUNC_PTR( GsEncoderNewCtx ) },
     { OSSL_FUNC_ENCODER_FREECTX, FUNC_PTR( GsEncoderFreeCtx ) },
-    { OSSL_FUNC_ENCODER_GET_PARAMS, FUNC_PTR( GsEncoderGetPublicKeyParams256ToPem ) },
-    { OSSL_FUNC_ENCODER_GETTABLE_PARAMS, FUNC_PTR( GsEncoderGettableParams ) },
     { OSSL_FUNC_ENCODER_SET_CTX_PARAMS, FUNC_PTR( GsEncoderSetCtxParams ) },
     { OSSL_FUNC_ENCODER_SETTABLE_CTX_PARAMS, FUNC_PTR( GsEncoderSettableCtxParams ) },
     { OSSL_FUNC_ENCODER_DOES_SELECTION, FUNC_PTR( GsEncoderDoesPublicKeySelection ) },
@@ -66,8 +58,6 @@ const OSSL_DISPATCH gGostR341012_256ToTypeSpecificDerEncoderFuncs[] =
 {
     { OSSL_FUNC_ENCODER_NEWCTX, FUNC_PTR( GsEncoderNewCtx ) },
     { OSSL_FUNC_ENCODER_FREECTX, FUNC_PTR( GsEncoderFreeCtx ) },
-    { OSSL_FUNC_ENCODER_GET_PARAMS, FUNC_PTR( GsEncoderGetKeyParams256ToDer ) },
-    { OSSL_FUNC_ENCODER_GETTABLE_PARAMS, FUNC_PTR( GsEncoderGettableParams ) },
     { OSSL_FUNC_ENCODER_SET_CTX_PARAMS, FUNC_PTR( GsEncoderSetCtxParams ) },
     { OSSL_FUNC_ENCODER_SETTABLE_CTX_PARAMS, FUNC_PTR( GsEncoderSettableCtxParams ) },
     { OSSL_FUNC_ENCODER_DOES_SELECTION, FUNC_PTR( GsEncoderDoesKeyParamsSelection ) },
@@ -81,8 +71,6 @@ const OSSL_DISPATCH gGostR341012_256ToTypeSpecificPemEncoderFuncs[] =
 {
     { OSSL_FUNC_ENCODER_NEWCTX, FUNC_PTR( GsEncoderNewCtx ) },
     { OSSL_FUNC_ENCODER_FREECTX, FUNC_PTR( GsEncoderFreeCtx ) },
-    { OSSL_FUNC_ENCODER_GET_PARAMS, FUNC_PTR( GsEncoderGetKeyParams256ToPem ) },
-    { OSSL_FUNC_ENCODER_GETTABLE_PARAMS, FUNC_PTR( GsEncoderGettableParams ) },
     { OSSL_FUNC_ENCODER_SET_CTX_PARAMS, FUNC_PTR( GsEncoderSetCtxParams ) },
     { OSSL_FUNC_ENCODER_SETTABLE_CTX_PARAMS, FUNC_PTR( GsEncoderSettableCtxParams ) },
     { OSSL_FUNC_ENCODER_DOES_SELECTION, FUNC_PTR( GsEncoderDoesKeyParamsSelection ) },
@@ -96,8 +84,6 @@ const OSSL_DISPATCH gGostR341012_256ToTextEncoderFuncs[] =
 {
     { OSSL_FUNC_ENCODER_NEWCTX, FUNC_PTR( GsEncoderToTextNewCtx ) },
     { OSSL_FUNC_ENCODER_FREECTX, FUNC_PTR( GsEncoderToTextFreeCtx ) },
-    { OSSL_FUNC_ENCODER_GET_PARAMS, FUNC_PTR( GsEncoderToTextGetAllKeyParams256 ) },
-    { OSSL_FUNC_ENCODER_GETTABLE_PARAMS, FUNC_PTR( GsEncoderToTextGettableParams ) },
     { OSSL_FUNC_ENCODER_ENCODE, FUNC_PTR( GsEncoderToTextEncode ) },
     { OSSL_FUNC_ENCODER_IMPORT_OBJECT, FUNC_PTR( GsEncoderImportObject ) },
     { OSSL_FUNC_ENCODER_FREE_OBJECT, FUNC_PTR( GsEncoderFreeObject ) },

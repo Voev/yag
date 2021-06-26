@@ -111,7 +111,7 @@ const OSSL_PARAM* StreebogGettableParams( void )
     {
         OSSL_PARAM_size_t( OSSL_DIGEST_PARAM_BLOCK_SIZE, NULL ),
         OSSL_PARAM_size_t( OSSL_DIGEST_PARAM_SIZE,       NULL ),
-        OSSL_PARAM_size_t( OSSL_DIGEST_PARAM_FLAGS,      NULL ),
+        OSSL_PARAM_int( OSSL_DIGEST_PARAM_ALGID_ABSENT,  NULL ),
         OSSL_PARAM_END
     };
     return table;
@@ -129,8 +129,8 @@ int StreebogGetParams( OSSL_PARAM params[], const size_t digestSize )
     {
         return 0;
     }
-    p = OSSL_PARAM_locate( params, OSSL_DIGEST_PARAM_FLAGS );
-    if( p && !OSSL_PARAM_set_size_t( p, EVP_MD_FLAG_DIGALGID_ABSENT ) )
+    p = OSSL_PARAM_locate( params, OSSL_DIGEST_PARAM_ALGID_ABSENT );
+    if( p && !OSSL_PARAM_set_int( p, 1 ) )
     {
         return 0;
     }

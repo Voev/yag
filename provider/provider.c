@@ -63,38 +63,52 @@ static int GsGetParams(
 
 static const OSSL_ALGORITHM gGsDigests[] =
 {
-    { SN_id_GostR3411_2012_256, "provider=gostone", gGostR341112_256Funcs },
-    { SN_id_GostR3411_2012_512, "provider=gostone", gGostR341112_512Funcs },
-    { NULL, NULL, NULL }
+    { SN_id_GostR3411_2012_256, 
+      "provider=gostone", gGostR341112_256Funcs, 
+      LN_id_GostR3411_2012_256 },
+    { SN_id_GostR3411_2012_512, 
+      "provider=gostone", gGostR341112_512Funcs, 
+      LN_id_GostR3411_2012_512 },
+    { NULL, NULL, NULL, NULL }
 };
 
 static const OSSL_ALGORITHM gGsKeyMgmts[] =
 {
-    { SN_id_GostR3410_2012_256, "provider=gostone", gGostR341012_256Funcs },
-    { SN_id_GostR3410_2012_512, "provider=gostone", gGostR341012_512Funcs },
-    { NULL, NULL, NULL }
+    { SN_id_GostR3410_2012_256, 
+      "provider=gostone", gGostR341012_256Funcs,
+      LN_id_GostR3410_2012_256 },
+    { SN_id_GostR3410_2012_512,
+      "provider=gostone", gGostR341012_512Funcs,
+      LN_id_GostR3410_2012_512 },
+    { NULL, NULL, NULL, NULL }
 };
 
 static const OSSL_ALGORITHM gGsEncoders[] =
 {
-    { SN_id_GostR3410_2012_256, "provider=gostone", gGostR341012_256ToTextEncoderFuncs },
-    { SN_id_GostR3410_2012_256, "provider=gostone", gGostR341012_256ToPkcs8DerEncoderFuncs },
-    { SN_id_GostR3410_2012_256, "provider=gostone", gGostR341012_256ToPkcs8PemEncoderFuncs },
-    { SN_id_GostR3410_2012_256, "provider=gostone", gGostR341012_256ToSubjPubKeyInfoDerEncoderFuncs },
-    { SN_id_GostR3410_2012_256, "provider=gostone", gGostR341012_256ToSubjPubKeyInfoPemEncoderFuncs },
-    { SN_id_GostR3410_2012_256, "provider=gostone", gGostR341012_256ToTypeSpecificDerEncoderFuncs },
-    { SN_id_GostR3410_2012_256, "provider=gostone", gGostR341012_256ToTypeSpecificPemEncoderFuncs },
+    { SN_id_GostR3410_2012_256, 
+      "provider=gostone", gGostR341012_256ToTextEncoderFuncs,
+      LN_id_GostR3410_2012_256 },
+    { SN_id_GostR3410_2012_256, "provider=gostone", gGostR341012_256ToPkcs8DerEncoderFuncs, LN_id_GostR3410_2012_256 },
+    { SN_id_GostR3410_2012_256, "provider=gostone", gGostR341012_256ToPkcs8PemEncoderFuncs, LN_id_GostR3410_2012_256 },
+    { SN_id_GostR3410_2012_256, "provider=gostone", gGostR341012_256ToSubjPubKeyInfoDerEncoderFuncs, LN_id_GostR3410_2012_256 },
+    { SN_id_GostR3410_2012_256, "provider=gostone", gGostR341012_256ToSubjPubKeyInfoPemEncoderFuncs, LN_id_GostR3410_2012_256 },
+    { SN_id_GostR3410_2012_256, "provider=gostone", gGostR341012_256ToTypeSpecificDerEncoderFuncs, LN_id_GostR3410_2012_256 },
+    { SN_id_GostR3410_2012_256, "provider=gostone", gGostR341012_256ToTypeSpecificPemEncoderFuncs, LN_id_GostR3410_2012_256 },
     
     //{ SN_id_GostR3410_2012_512, "provider=gostone", gGostR341012_512PemEncoderFuncs },
     //{ SN_id_GostR3410_2012_512, "provider=gostone", gGostR341012_512TextEncoderFuncs },
-    { NULL, NULL, NULL }
+    { NULL, NULL, NULL, NULL }
 };
 
 static const OSSL_ALGORITHM gGsSignatures[] =
 {
-    { SN_id_GostR3410_2012_256, "provider=gostone", gGostR341012_SignatureFunctions },
-    { SN_id_GostR3410_2012_512, "provider=gostone", gGostR341012_SignatureFunctions },
-    { NULL, NULL, NULL }
+    { SN_id_GostR3410_2012_256, 
+      "provider=gostone", gGostR341012_SignatureFunctions,
+      LN_id_GostR3410_2012_256 },
+    { SN_id_GostR3410_2012_512, 
+      "provider=gostone", gGostR341012_SignatureFunctions,
+      LN_id_GostR3410_2012_512 },
+    { NULL, NULL, NULL, NULL }
 };
 
 

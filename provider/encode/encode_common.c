@@ -123,41 +123,6 @@ const OSSL_PARAM* GsEncoderSettableCtxParams( ossl_unused void* provCtx )
     return gSettableCtxParams;
 }
 
-int GsEncoderGetParams( OSSL_PARAM params[], 
-                        const char* inputType,
-                        const char* outputType, 
-                        const char* outputStruct )
-{
-    OSSL_PARAM* p = OSSL_PARAM_locate( params, OSSL_ENCODER_PARAM_INPUT_TYPE );
-    if( p && !OSSL_PARAM_set_utf8_ptr( p, inputType ) )
-    {
-        return 0;
-    }
-    p = OSSL_PARAM_locate( params, OSSL_ENCODER_PARAM_OUTPUT_TYPE );
-    if( p && !OSSL_PARAM_set_utf8_ptr( p, outputType ) )
-    {
-        return 0;
-    }
-    p = OSSL_PARAM_locate(params, OSSL_ENCODER_PARAM_OUTPUT_STRUCTURE);
-    if( p && !OSSL_PARAM_set_utf8_ptr( p, outputStruct ) )
-    {
-        return 0;
-    }
-    return 1;
-}
-
-const OSSL_PARAM* GsEncoderGettableParams( ossl_unused void* provCtx )
-{
-    static const OSSL_PARAM gGettableParams[] = 
-    {
-        { OSSL_ENCODER_PARAM_INPUT_TYPE, OSSL_PARAM_UTF8_PTR, NULL, 0, 0 },
-        { OSSL_ENCODER_PARAM_OUTPUT_TYPE, OSSL_PARAM_UTF8_PTR, NULL, 0, 0 },
-        { OSSL_ENCODER_PARAM_OUTPUT_STRUCTURE, OSSL_PARAM_UTF8_PTR, NULL, 0, 0 },
-        OSSL_PARAM_END,
-    };
-    return gGettableParams;
-}
-
 int GsEncoderEncode( GsEncoderCtx* ctx, OSSL_CORE_BIO* cout, const void* keyData,
                      const OSSL_PARAM keyAbstract[], 
                      int selection, int selectionMask,

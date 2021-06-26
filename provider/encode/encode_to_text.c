@@ -74,36 +74,6 @@ void* GsEncoderToTextNewCtx( void* provCtx )
 void GsEncoderToTextFreeCtx( ossl_unused void* vctx )
 {}
 
-const OSSL_PARAM* GsEncoderToTextGettableParams( ossl_unused void* provCtx )
-{
-    static const OSSL_PARAM gTextGettablePrams[] = 
-    {
-        { OSSL_ENCODER_PARAM_OUTPUT_TYPE, OSSL_PARAM_UTF8_PTR, NULL, 0, 0 },
-        OSSL_PARAM_END
-    };
-    return gTextGettablePrams;
-}
-
-static int GsEncoderToTextGetParams( OSSL_PARAM params[], const char *input_type)
-{
-    OSSL_PARAM *p;
-
-    p = OSSL_PARAM_locate(params, OSSL_ENCODER_PARAM_INPUT_TYPE);
-    if (p != NULL && !OSSL_PARAM_set_utf8_ptr(p, input_type))
-        return 0;
-
-    p = OSSL_PARAM_locate(params, OSSL_ENCODER_PARAM_OUTPUT_TYPE);
-    if (p != NULL && !OSSL_PARAM_set_utf8_ptr(p, "TEXT"))
-        return 0;
-
-    return 1;
-}
-
-int GsEncoderToTextGetAllKeyParams256( OSSL_PARAM params[] )
-{
-    return GsEncoderToTextGetParams( params, "gost2012_256" );
-}
-
 int GsEncoderToTextEncode( void *vctx, OSSL_CORE_BIO *cout,
                            const void *key,
                            const OSSL_PARAM key_abstract[],

@@ -31,12 +31,14 @@ void* GsKeyMgmtGenInit_( void* provData, int selection, int algorithm )
     return gctx;
 }
 
-void* GsKeyMgmtGenInit( void* provData, int selection )
+void* GsKeyMgmtGenInit( void* provData, int selection,
+                        ossl_unused const OSSL_PARAM params[] )
 {
     return GsKeyMgmtGenInit_( provData, selection, NID_id_GostR3410_2012_256 );
 }
 
-void* GsKeyMgmtGenInit512( void* provData, int selection )
+void* GsKeyMgmtGenInit512( void* provData, int selection,
+                           ossl_unused const OSSL_PARAM params[] )
 {
     return GsKeyMgmtGenInit_( provData, selection, NID_id_GostR3410_2012_512 );
 }
@@ -83,7 +85,8 @@ int GsKeyMgmtGenSetParams( void* genCtx, const OSSL_PARAM params[] )
     return 1;
 }
 
-const OSSL_PARAM* GsKeyMgmtGenSettableParams( void* provCtx ossl_unused )
+const OSSL_PARAM* GsKeyMgmtGenSettableParams( ossl_unused void* genctx,
+                                              ossl_unused void* provCtx )
 {
     static OSSL_PARAM gGenSettable[] =
     {

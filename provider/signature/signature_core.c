@@ -133,7 +133,8 @@ err:
     return NULL;
 }
 
-int GsSignatureSignVerifyInit( void* vctx, void* keyData )
+int GsSignatureSignVerifyInit( void* vctx, void* keyData, 
+                               ossl_unused const OSSL_PARAM params[] )
 {
     GsSignCtx* ctx = INTERPRET_AS_SIGNCTX( vctx );
     if( !ctx )
@@ -422,12 +423,12 @@ end:
 }
 
 int GsSignatureDigestSignVerifyInit( void* vctx, const char* mdName,
-                                     void* keyData )
+                                     void* keyData, const OSSL_PARAM params[] )
 {
     GsSignCtx* ctx = INTERPRET_AS_SIGNCTX( vctx );
     GsSignatureDigestFree( ctx );
 
-    if( !GsSignatureSignVerifyInit( vctx, keyData ) )
+    if( !GsSignatureSignVerifyInit( vctx, keyData, params ) )
     {
         return 0;
     }
@@ -441,7 +442,7 @@ int GsSignatureDigestSignVerifyInit( void* vctx, const char* mdName,
         goto err;
     }
 
-    if( !EVP_DigestInit_ex( ctx->mdCtx, ctx->md, NULL ) )
+    if( !EVP_DigestInit_ex2( ctx->mdCtx, ctx->md, params ) )
     {
         goto err;
     }
@@ -542,7 +543,8 @@ int GsSignatureGetCtxParams( void* vctx, OSSL_PARAM* params )
     return 1;
 }
 
-const OSSL_PARAM* GsSignatureGettableCtxParams( ossl_unused void* provCtx )
+const OSSL_PARAM* GsSignatureGettableCtxParams( ossl_unused void *ctx,
+                                                ossl_unused void *provctx )
 {
     static const OSSL_PARAM gSignatureGettableCtxParams[] = 
     {
@@ -617,7 +619,8 @@ int GsSignatureSetCtxParams( void* vctx, const OSSL_PARAM params[] )
     return 1;
 }
 
-const OSSL_PARAM* GsSignatureSettableCtxParams( ossl_unused void* provCtx )
+const OSSL_PARAM* GsSignatureSettableCtxParams( ossl_unused void *vpeddsactx,
+                                                ossl_unused void *provctx )
 {
     static const OSSL_PARAM gSignatureSettableCtxParams[] = 
     {
