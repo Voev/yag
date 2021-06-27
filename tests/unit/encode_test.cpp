@@ -160,8 +160,8 @@ struct EncoderOutParam
 
 static const std::vector<EncoderOutParam> gTestEncoderOutParams = {
     {"TEXT", nullptr, OSSL_KEYMGMT_SELECT_PRIVATE_KEY},
-    {"PEM", "pkcs8", OSSL_KEYMGMT_SELECT_PRIVATE_KEY},
-    {"DER", "pkcs8", OSSL_KEYMGMT_SELECT_PRIVATE_KEY},
+    {"PEM", "PrivateKeyInfo", OSSL_KEYMGMT_SELECT_PRIVATE_KEY},
+    {"DER", "PrivateKeyInfo", OSSL_KEYMGMT_SELECT_PRIVATE_KEY},
     {"TEXT", nullptr, OSSL_KEYMGMT_SELECT_PUBLIC_KEY},
     {"PEM", "SubjectPublicKeyInfo", OSSL_KEYMGMT_SELECT_PUBLIC_KEY},
     {"DER", "SubjectPublicKeyInfo", OSSL_KEYMGMT_SELECT_PUBLIC_KEY},

@@ -16,184 +16,180 @@
 #include <gostone/encode/encode_params.h>
 #include <gostone/keymgmt/keymgmt_akey.h>
 
-static 
-int GsSerializePrivateKey( const GsAsymmKey* key, unsigned char** buffer )
+static int GsSerializePrivateKey(const GsAsymmKey* key, unsigned char** buffer)
 {
-    const BIGNUM* privateKey = GsAsymmKeyGet0PrivateKey( key );
+    const BIGNUM* privateKey = GsAsymmKeyGet0PrivateKey(key);
     unsigned char* buf;
     int bufSize;
-    
-    if( !buffer )
+
+    if (!buffer)
     {
-        ERR_raise( ERR_LIB_PROV, ERR_R_PASSED_INVALID_ARGUMENT );
+        ERR_raise(ERR_LIB_PROV, ERR_R_PASSED_INVALID_ARGUMENT);
         return 0;
     }
     *buffer = NULL;
 
-    if( !privateKey )
+    if (!privateKey)
     {
-        ERR_raise( ERR_LIB_PROV, ERR_R_PASSED_NULL_PARAMETER );
+        ERR_raise(ERR_LIB_PROV, ERR_R_PASSED_NULL_PARAMETER);
         return 0;
     }
 
-    bufSize = BN_num_bytes( privateKey );
-    buf = ( unsigned char* )OPENSSL_zalloc( bufSize );
-    if( !buf )
+    bufSize = BN_num_bytes(privateKey);
+    buf = (unsigned char*)OPENSSL_zalloc(bufSize);
+    if (!buf)
     {
-        ERR_raise( ERR_LIB_PROV, ERR_R_MALLOC_FAILURE );
+        ERR_raise(ERR_LIB_PROV, ERR_R_MALLOC_FAILURE);
         return 0;
     }
-    bufSize = BN_bn2bin( privateKey, buf );
+    bufSize = BN_bn2bin(privateKey, buf);
     *buffer = buf;
     return bufSize;
 }
 
-static
-PKCS8_PRIV_KEY_INFO* GsEncodeKeyAsKeyBag( const void* keyData, ASN1_STRING* params )
+static PKCS8_PRIV_KEY_INFO* GsEncodeKeyAsKeyBag(const void* keyData,
+                                                ASN1_STRING* params)
 {
-    const GsAsymmKey* key = INTERPRET_AS_CASYMM_KEY( keyData );
+    const GsAsymmKey* key = INTERPRET_AS_CASYMM_KEY(keyData);
     PKCS8_PRIV_KEY_INFO* p8info = NULL;
     unsigned char* der = NULL;
     int derlen, keyNid;
     int ret = 0;
 
-    if( !key )
+    if (!key)
     {
-        ERR_raise( ERR_LIB_PROV, ERR_R_PASSED_NULL_PARAMETER );
+        ERR_raise(ERR_LIB_PROV, ERR_R_PASSED_NULL_PARAMETER);
         goto end;
     }
-    keyNid = GsAsymmKeyGetAlgorithm( key );
+    keyNid = GsAsymmKeyGetAlgorithm(key);
 
     p8info = PKCS8_PRIV_KEY_INFO_new();
-    if( !p8info )
+    if (!p8info)
     {
-        ERR_raise( ERR_LIB_PROV, ERR_R_MALLOC_FAILURE );
+        ERR_raise(ERR_LIB_PROV, ERR_R_MALLOC_FAILURE);
         goto end;
     }
 
-    derlen = GsSerializePrivateKey( key, &der );
-    if( !PKCS8_pkey_set0( p8info, OBJ_nid2obj( keyNid ), 0, 
-                          V_ASN1_SEQUENCE, params, der, derlen ) )
+    derlen = GsSerializePrivateKey(key, &der);
+    if (!PKCS8_pkey_set0(p8info, OBJ_nid2obj(keyNid), 0, V_ASN1_SEQUENCE,
+                         params, der, derlen))
     {
         goto end;
     }
 
     ret = 1;
 end:
-    if( !ret )
+    if (!ret)
     {
-        PKCS8_PRIV_KEY_INFO_free( p8info );
+        PKCS8_PRIV_KEY_INFO_free(p8info);
         p8info = NULL;
     }
     return p8info;
 }
 
-static
-X509_SIG* GsEncodeKeyAsShroudedKeyBag( const void* keyData,
-                                       ASN1_STRING* params, 
-                                       GsEncoderCtx* ctx )
+static X509_SIG* GsEncodeKeyAsShroudedKeyBag(const void* keyData,
+                                             ASN1_STRING* params,
+                                             GsEncoderCtx* ctx)
 {
-    const EVP_CIPHER* cipher = GsEncoderCtxGet0Cipher( ctx );
+    const EVP_CIPHER* cipher = GsEncoderCtxGet0Cipher(ctx);
     PKCS8_PRIV_KEY_INFO* p8info = NULL;
-    char kstr[ PEM_BUFSIZE ] = { 0 };
+    char kstr[PEM_BUFSIZE] = {0};
     X509_SIG* p8 = NULL;
     size_t klen = 0;
 
-    if( !cipher )
+    if (!cipher)
     {
-        ERR_raise( ERR_LIB_PROV, ERR_R_PASSED_INVALID_ARGUMENT );
+        ERR_raise(ERR_LIB_PROV, ERR_R_PASSED_INVALID_ARGUMENT);
         goto end;
     }
 
-    p8info = GsEncodeKeyAsKeyBag( keyData, params );
-    if( !p8info )
+    p8info = GsEncodeKeyAsKeyBag(keyData, params);
+    if (!p8info)
     {
         goto end;
     }
-    p8 = PKCS8_encrypt( -1, cipher, kstr, klen, NULL, 0, 0, p8info );
+    p8 = PKCS8_encrypt(-1, cipher, kstr, klen, NULL, 0, 0, p8info);
 end:
-    OPENSSL_cleanse( kstr, klen );
-    PKCS8_PRIV_KEY_INFO_free( p8info );
+    OPENSSL_cleanse(kstr, klen);
+    PKCS8_PRIV_KEY_INFO_free(p8info);
     return p8;
 }
 
-typedef int ( *EncodeShroudedKeyBagFn )( BIO* bio, const X509_SIG* x );
-typedef int ( *EncodeKeyBagFn )( BIO* bio, const PKCS8_PRIV_KEY_INFO* x );
+typedef int (*EncodeShroudedKeyBagFn)(BIO* bio, const X509_SIG* x);
+typedef int (*EncodeKeyBagFn)(BIO* bio, const PKCS8_PRIV_KEY_INFO* x);
 
-static int GsEncodeKeyToBio( BIO* out, const void* key,
-                             GsEncoderCtx* ctx,
-                             EncodeShroudedKeyBagFn encodeShrKeyBag,
-                             EncodeKeyBagFn encodeKeyBag )
+static int GsEncodeKeyToBio(BIO* out, const void* key, GsEncoderCtx* ctx,
+                            EncodeShroudedKeyBagFn encodeShrKeyBag,
+                            EncodeKeyBagFn encodeKeyBag)
 {
     int ret = 0;
     ASN1_STRING* params = NULL;
-    
-    if( !GsPrepareParams( key, &params ) )
+
+    if (!GsPrepareParams(key, &params))
     {
         return 0;
     }
-     
-    if( GsEncoderCtxGet0Cipher( ctx ) ) 
+
+    if (GsEncoderCtxGet0Cipher(ctx))
     {
-        X509_SIG* p8 = GsEncodeKeyAsShroudedKeyBag( key, params, ctx );
-        if( p8 )
+        X509_SIG* p8 = GsEncodeKeyAsShroudedKeyBag(key, params, ctx);
+        if (p8)
         {
-            ret = encodeShrKeyBag( out, p8 );
+            ret = encodeShrKeyBag(out, p8);
         }
-        X509_SIG_free( p8 );
-    } 
-    else 
+        X509_SIG_free(p8);
+    }
+    else
     {
-        PKCS8_PRIV_KEY_INFO* p8info = GsEncodeKeyAsKeyBag( key, params );
-        if( p8info )
+        PKCS8_PRIV_KEY_INFO* p8info = GsEncodeKeyAsKeyBag(key, params);
+        if (p8info)
         {
-            ret = encodeKeyBag( out, p8info );
+            ret = encodeKeyBag(out, p8info);
         }
-        PKCS8_PRIV_KEY_INFO_free( p8info );
+        PKCS8_PRIV_KEY_INFO_free(p8info);
     }
     return ret;
 }
 
-int GsEncoderDoesPrivateKeySelection( ossl_unused void* ctx, int selection )
+int GsEncoderDoesPrivateKeySelection(ossl_unused void* ctx, int selection)
 {
-    return GsEncoderCheckSelection( selection, OSSL_KEYMGMT_SELECT_PRIVATE_KEY );
+    return GsEncoderCheckSelection(selection, OSSL_KEYMGMT_SELECT_PRIVATE_KEY);
 }
 
-int GsEncodePrivateKeyToDerBio( BIO* out, const void* key, 
-                                GsEncoderCtx* ctx,
-                                ossl_unused OSSL_PASSPHRASE_CALLBACK* cb, 
-                                ossl_unused void* cbArg )
+int GsEncodePrivateKeyToDerBio(BIO* out, const void* key, GsEncoderCtx* ctx,
+                               ossl_unused OSSL_PASSPHRASE_CALLBACK* cb,
+                               ossl_unused void* cbArg)
 {
-    return GsEncodeKeyToBio( out, key, ctx,
-                             i2d_PKCS8_bio,
-                             i2d_PKCS8_PRIV_KEY_INFO_bio );
+    return GsEncodeKeyToBio(out, key, ctx, i2d_PKCS8_bio,
+                            i2d_PKCS8_PRIV_KEY_INFO_bio);
 }
 
-int GsEncodePrivateKeyToPemBio( BIO* out, const void* key, 
-                                GsEncoderCtx* ctx,
-                                ossl_unused OSSL_PASSPHRASE_CALLBACK* cb, 
-                                ossl_unused void* cbArg )
+int GsEncodePrivateKeyToPemBio(BIO* out, const void* key, GsEncoderCtx* ctx,
+                               ossl_unused OSSL_PASSPHRASE_CALLBACK* cb,
+                               ossl_unused void* cbArg)
 {
-    return GsEncodeKeyToBio( out, key, ctx,
-                             PEM_write_bio_PKCS8,
-                             PEM_write_bio_PKCS8_PRIV_KEY_INFO );
+    return GsEncodeKeyToBio(out, key, ctx, PEM_write_bio_PKCS8,
+                            PEM_write_bio_PKCS8_PRIV_KEY_INFO);
 }
 
-int GsEncoderEncodePrivateKeyToDer( void* ctx, OSSL_CORE_BIO* cout, const void* key,
-                                    const OSSL_PARAM keyAbstract[], int selection,
-                                    OSSL_PASSPHRASE_CALLBACK* cb, void* cbArg )
+int GsEncoderEncodePrivateKeyToDer(void* ctx, OSSL_CORE_BIO* cout,
+                                   const void* key,
+                                   const OSSL_PARAM keyAbstract[],
+                                   int selection, OSSL_PASSPHRASE_CALLBACK* cb,
+                                   void* cbArg)
 {
-    return GsEncoderEncode( ctx, cout, key, keyAbstract, 
-                            selection, OSSL_KEYMGMT_SELECT_PRIVATE_KEY,
-                            cb, cbArg, GsEncodePrivateKeyToDerBio );
+    return GsEncoderEncode(ctx, cout, key, keyAbstract, selection,
+                           OSSL_KEYMGMT_SELECT_PRIVATE_KEY, cb, cbArg,
+                           GsEncodePrivateKeyToDerBio);
 }
 
-int GsEncoderEncodePrivateKeyToPem( void* ctx, OSSL_CORE_BIO* cout, const void* key,
-                                    const OSSL_PARAM keyAbstract[], int selection,
-                                    OSSL_PASSPHRASE_CALLBACK* cb, void* cbArg )
+int GsEncoderEncodePrivateKeyToPem(void* ctx, OSSL_CORE_BIO* cout,
+                                   const void* key,
+                                   const OSSL_PARAM keyAbstract[],
+                                   int selection, OSSL_PASSPHRASE_CALLBACK* cb,
+                                   void* cbArg)
 {
-    return GsEncoderEncode( ctx, cout, key, keyAbstract, 
-                            selection, OSSL_KEYMGMT_SELECT_PRIVATE_KEY,
-                            cb, cbArg, GsEncodePrivateKeyToPemBio );
+    return GsEncoderEncode(ctx, cout, key, keyAbstract, selection,
+                           OSSL_KEYMGMT_SELECT_PRIVATE_KEY, cb, cbArg,
+                           GsEncodePrivateKeyToPemBio);
 }
-
