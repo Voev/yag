@@ -1,19 +1,17 @@
 ---
-BasedOnStyle: LLVM
-IndentWidth: 4
-Language: Cpp
-DerivePointerAlignment: false
+AlignAfterOpenBracket: Align
+AllowShortFunctionsOnASingleLine: false
+BreakBeforeBraces: Allman
+ColumnLimit: '80'
+IndentWidth: '4'
 PointerAlignment: Left
-ColumnLimit: 80
-AllowShortBlocksOnASingleLine: false
-BreakBeforeBraces: Custom
-BraceWrapping:
-  AfterClass: true
-  AfterFunction: true
-  AfterEnum: true
-  AfterStruct: true
-  AfterNamespace: true
-  BeforeElse: true
-  SplitEmptyRecord: true
-  SplitEmptyFunction: true
----
+SortIncludes: 'false'
+SortUsingDeclarations: 'false'
+SpacesInAngles: 'false'
+SpacesInCStyleCastParentheses: 'false'
+SpacesInParentheses: 'false'
+SpacesInSquareBrackets: 'false'
+Standard: Auto
+UseTab: Never
+
+...

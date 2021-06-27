@@ -6,6 +6,10 @@ if(ENABLE_TEST)
     add_executable(${APP_NAME} ${SOURCE_FILES})
     target_link_libraries(${APP_NAME} ${OPENSSL_LIBRARIES})
     target_link_libraries(${APP_NAME} GTest::GTest)
+    add_custom_target(check
+        COMMAND ${APP_NAME}
+        VERBATIM
+    )
 endif()
 
 
