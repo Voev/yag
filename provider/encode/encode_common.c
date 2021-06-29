@@ -19,18 +19,18 @@
 
 struct gs_encoder_ctx_st
 {
-    GsProvCtx *provCtx;
-    EVP_CIPHER *cipher;
+    GsProvCtx* provCtx;
+    EVP_CIPHER* cipher;
 };
 
-const EVP_CIPHER *GsEncoderCtxGet0Cipher(GsEncoderCtx *ctx)
+const EVP_CIPHER* GsEncoderCtxGet0Cipher(GsEncoderCtx* ctx)
 {
     return ctx ? ctx->cipher : NULL;
 }
 
-void *GsEncoderNewCtx(void *provCtx)
+void* GsEncoderNewCtx(void* provCtx)
 {
-    GsEncoderCtx *ctx = OPENSSL_zalloc(sizeof(*ctx));
+    GsEncoderCtx* ctx = OPENSSL_zalloc(sizeof(*ctx));
     if (ctx)
     {
         ctx->provCtx = provCtx;
@@ -38,9 +38,9 @@ void *GsEncoderNewCtx(void *provCtx)
     return ctx;
 }
 
-void GsEncoderFreeCtx(void *vctx)
+void GsEncoderFreeCtx(void* vctx)
 {
-    GsEncoderCtx *ctx = (GsEncoderCtx *)vctx;
+    GsEncoderCtx* ctx = (GsEncoderCtx*)vctx;
     if (ctx)
     {
         EVP_CIPHER_free(ctx->cipher);
@@ -74,22 +74,22 @@ int GsEncoderCheckSelection(int selection, int selectionMask)
     return 0;
 }
 
-int GsEncoderSetCtxParams(void *vctx, const OSSL_PARAM params[])
+int GsEncoderSetCtxParams(void* vctx, const OSSL_PARAM params[])
 {
-    GsEncoderCtx *ctx = (GsEncoderCtx *)vctx;
-    OSSL_LIB_CTX *libCtx = GsProvCtxGet0LibCtx(ctx->provCtx);
-    const OSSL_PARAM *cipherParam =
+    GsEncoderCtx* ctx = (GsEncoderCtx*)vctx;
+    OSSL_LIB_CTX* libCtx = GsProvCtxGet0LibCtx(ctx->provCtx);
+    const OSSL_PARAM* cipherParam =
         OSSL_PARAM_locate_const(params, OSSL_ENCODER_PARAM_CIPHER);
 
     if (cipherParam)
     {
-        const OSSL_PARAM *propsParam;
+        const OSSL_PARAM* propsParam;
 
         propsParam =
             OSSL_PARAM_locate_const(params, OSSL_ENCODER_PARAM_PROPERTIES);
 
-        const char *cipherName = NULL;
-        const char *props = NULL;
+        const char* cipherName = NULL;
+        const char* props = NULL;
 
         if (!OSSL_PARAM_get_utf8_string_ptr(cipherParam, &cipherName))
         {
@@ -110,7 +110,7 @@ int GsEncoderSetCtxParams(void *vctx, const OSSL_PARAM params[])
     return 1;
 }
 
-const OSSL_PARAM *GsEncoderSettableCtxParams(ossl_unused void *provCtx)
+const OSSL_PARAM* GsEncoderSettableCtxParams(ossl_unused void* provCtx)
 {
     static const OSSL_PARAM gSettableCtxParams[] = {
         OSSL_PARAM_utf8_string(OSSL_ENCODER_PARAM_CIPHER, NULL, 0),
@@ -120,10 +120,10 @@ const OSSL_PARAM *GsEncoderSettableCtxParams(ossl_unused void *provCtx)
     return gSettableCtxParams;
 }
 
-int GsEncoderEncode(GsEncoderCtx *ctx, OSSL_CORE_BIO *cout, const void *keyData,
+int GsEncoderEncode(GsEncoderCtx* ctx, OSSL_CORE_BIO* cout, const void* keyData,
                     const OSSL_PARAM keyAbstract[], int selection,
-                    int selectionMask, OSSL_PASSPHRASE_CALLBACK *cb,
-                    void *cbArg, GsEncodeToBioFn encoderToBio)
+                    int selectionMask, OSSL_PASSPHRASE_CALLBACK* cb,
+                    void* cbArg, GsEncodeToBioFn encoderToBio)
 {
     OPENSSL_assert(ctx);
     int ret = 0;
@@ -139,7 +139,7 @@ int GsEncoderEncode(GsEncoderCtx *ctx, OSSL_CORE_BIO *cout, const void *keyData,
     }
     else
     {
-        BIO *out = GsProvBioNewFromCoreBio(ctx->provCtx, cout);
+        BIO* out = GsProvBioNewFromCoreBio(ctx->provCtx, cout);
         if (out)
         {
             ret = encoderToBio(out, keyData, ctx, cb, cbArg);
@@ -149,7 +149,7 @@ int GsEncoderEncode(GsEncoderCtx *ctx, OSSL_CORE_BIO *cout, const void *keyData,
     return ret;
 }
 
-void *GsEncoderImportObject(void *vctx, int selection,
+void* GsEncoderImportObject(void* vctx, int selection,
                             const OSSL_PARAM params[])
 {
     (void)vctx;
@@ -159,8 +159,8 @@ void *GsEncoderImportObject(void *vctx, int selection,
     return NULL;
 }
 
-void GsEncoderFreeObject(void *keyData)
+void GsEncoderFreeObject(void* keyData)
 {
-    GsAsymmKey *key = INTERPRET_AS_ASYMM_KEY(keyData);
+    GsAsymmKey* key = INTERPRET_AS_ASYMM_KEY(keyData);
     GsAsymmKeyFree(key);
 }

@@ -13,8 +13,8 @@
 OSSL_provider_init_fn OSSL_provider_init;
 
 /* Functions provided by the core */
-static OSSL_FUNC_core_gettable_params_fn *CoreGettableParams = NULL;
-static OSSL_FUNC_core_get_params_fn *CoreGetParams = NULL;
+static OSSL_FUNC_core_gettable_params_fn* CoreGettableParams = NULL;
+static OSSL_FUNC_core_get_params_fn* CoreGetParams = NULL;
 
 /* Parameters provided to the core */
 static const OSSL_PARAM gGettableParams[] = {
@@ -24,15 +24,15 @@ static const OSSL_PARAM gGettableParams[] = {
     OSSL_PARAM_DEFN(OSSL_PROV_PARAM_STATUS, OSSL_PARAM_INTEGER, NULL, 0),
     OSSL_PARAM_END};
 
-static const OSSL_PARAM *GsGettableParams(const OSSL_PROVIDER *prov ossl_unused)
+static const OSSL_PARAM* GsGettableParams(const OSSL_PROVIDER* prov ossl_unused)
 {
     return gGettableParams;
 }
 
-static int GsGetParams(const OSSL_PROVIDER *prov ossl_unused,
+static int GsGetParams(const OSSL_PROVIDER* prov ossl_unused,
                        OSSL_PARAM params[])
 {
-    OSSL_PARAM *p = OSSL_PARAM_locate(params, OSSL_PROV_PARAM_NAME);
+    OSSL_PARAM* p = OSSL_PARAM_locate(params, OSSL_PROV_PARAM_NAME);
     if (p && !OSSL_PARAM_set_utf8_ptr(p, "OpenSSL Gostone Provider"))
     {
         return 0;
@@ -70,31 +70,23 @@ static const OSSL_ALGORITHM gGsKeyMgmts[] = {
     {NULL, NULL, NULL, NULL}};
 
 static const OSSL_ALGORITHM gGsEncoders[] = {
-    {SN_id_GostR3410_2012_256, "provider=gostone,output=text",
-     gGostR341012_256ToTextEncoderFuncs, LN_id_GostR3410_2012_256},
-    {SN_id_GostR3410_2012_256,
-     "provider=gostone,output=der,structure=PrivateKeyInfo",
-     gGostR341012_256ToPkcs8DerEncoderFuncs, LN_id_GostR3410_2012_256},
-    {SN_id_GostR3410_2012_256,
-     "provider=gostone,output=pem,structure=PrivateKeyInfo",
-     gGostR341012_256ToPkcs8PemEncoderFuncs, LN_id_GostR3410_2012_256},
-    {SN_id_GostR3410_2012_256,
-     "provider=gostone,output=der,structure=SubjectPublicKeyInfo",
-     gGostR341012_256ToSubjPubKeyInfoDerEncoderFuncs, LN_id_GostR3410_2012_256},
-    {SN_id_GostR3410_2012_256,
-     "provider=gostone,output=pem,structure=SubjectPublicKeyInfo",
-     gGostR341012_256ToSubjPubKeyInfoPemEncoderFuncs, LN_id_GostR3410_2012_256},
-    {SN_id_GostR3410_2012_256,
-     "provider=gostone,output=der,structure=type-specific",
-     gGostR341012_256ToTypeSpecificDerEncoderFuncs, LN_id_GostR3410_2012_256},
-    {SN_id_GostR3410_2012_256,
-     "provider=gostone,output=pem,structure=type-specific",
-     gGostR341012_256ToTypeSpecificPemEncoderFuncs, LN_id_GostR3410_2012_256},
-
-    //{ SN_id_GostR3410_2012_512, "provider=gostone",
-    // gGostR341012_512PemEncoderFuncs }, { SN_id_GostR3410_2012_512,
-    //"provider=gostone", gGostR341012_512TextEncoderFuncs },
+    ENCODER_FOR_STRUCTURE(GostR3410_2012_256, PrivateKeyInfo, Der),
+    ENCODER_FOR_STRUCTURE(GostR3410_2012_256, PrivateKeyInfo, Pem),
+    ENCODER_FOR_STRUCTURE(GostR3410_2012_256, SubjectPublicKeyInfo, Der),
+    ENCODER_FOR_STRUCTURE(GostR3410_2012_256, SubjectPublicKeyInfo, Pem),
+    ENCODER_FOR_STRUCTURE(GostR3410_2012_256, TypeSpecific, Der),
+    ENCODER_FOR_STRUCTURE(GostR3410_2012_256, TypeSpecific, Pem),
+    ENCODER_FOR_STRUCTURE(GostR3410_2012_512, PrivateKeyInfo, Der),
+    ENCODER_FOR_STRUCTURE(GostR3410_2012_512, PrivateKeyInfo, Pem),
+    ENCODER_FOR_STRUCTURE(GostR3410_2012_512, SubjectPublicKeyInfo, Der),
+    ENCODER_FOR_STRUCTURE(GostR3410_2012_512, SubjectPublicKeyInfo, Pem),
+    ENCODER_FOR_STRUCTURE(GostR3410_2012_512, TypeSpecific, Der),
+    ENCODER_FOR_STRUCTURE(GostR3410_2012_512, TypeSpecific, Pem),
+    TEXT_ENCODER(GostR3410_2012_256),
+    TEXT_ENCODER(GostR3410_2012_512),
     {NULL, NULL, NULL, NULL}};
+
+static const OSSL_ALGORITHM gGsDecoders[] = {{NULL, NULL, NULL, NULL}};
 
 static const OSSL_ALGORITHM gGsSignatures[] = {
     {SN_id_GostR3410_2012_256, "provider=gostone",
@@ -103,10 +95,10 @@ static const OSSL_ALGORITHM gGsSignatures[] = {
      gGostR341012_SignatureFunctions, LN_id_GostR3410_2012_512},
     {NULL, NULL, NULL, NULL}};
 
-static const OSSL_ALGORITHM *GsQuery(OSSL_PROVIDER *prov ossl_unused,
-                                     int operation, int *noCache)
+static const OSSL_ALGORITHM* GsQuery(OSSL_PROVIDER* prov ossl_unused,
+                                     int operation, int* noCache)
 {
-    const OSSL_ALGORITHM *alg = NULL;
+    const OSSL_ALGORITHM* alg = NULL;
     switch (operation)
     {
     case OSSL_OP_DIGEST:
@@ -122,6 +114,8 @@ static const OSSL_ALGORITHM *GsQuery(OSSL_PROVIDER *prov ossl_unused,
         alg = gGsSignatures;
         break;
     case OSSL_OP_DECODER:
+        alg = gGsDecoders;
+        break;
     case OSSL_OP_CIPHER:
     case OSSL_OP_MAC:
     case OSSL_OP_KDF:
@@ -141,9 +135,9 @@ static const OSSL_ALGORITHM *GsQuery(OSSL_PROVIDER *prov ossl_unused,
     return alg;
 }
 
-static void GsTeardown(void *provData)
+static void GsTeardown(void* provData)
 {
-    GsProvCtx *provCtx = INTERPRET_AS_PROV_CTX(provData);
+    GsProvCtx* provCtx = INTERPRET_AS_PROV_CTX(provData);
     GsProvCtxFree(provCtx);
 }
 
@@ -154,11 +148,11 @@ static const OSSL_DISPATCH gDispatchTable[] = {
     {OSSL_FUNC_PROVIDER_TEARDOWN, FUNC_PTR(GsTeardown)},
     {0, NULL}};
 
-int OSSL_provider_init(const OSSL_CORE_HANDLE *handle, const OSSL_DISPATCH *in,
-                       const OSSL_DISPATCH **out, void **provCtx)
+int OSSL_provider_init(const OSSL_CORE_HANDLE* handle, const OSSL_DISPATCH* in,
+                       const OSSL_DISPATCH** out, void** provCtx)
 {
-    OSSL_FUNC_core_get_libctx_fn *CoreGetLibCtx = NULL;
-    BIO_METHOD *coreBioMeth;
+    OSSL_FUNC_core_get_libctx_fn* CoreGetLibCtx = NULL;
+    BIO_METHOD* coreBioMeth;
 
     if (!GsProvBioFromDispatch(in))
     {
@@ -201,7 +195,7 @@ int OSSL_provider_init(const OSSL_CORE_HANDLE *handle, const OSSL_DISPATCH *in,
         return 0;
     }
     GsProvCtxSet0CoreBioMeth(*provCtx, coreBioMeth);
-    GsProvCtxSet0LibCtx(*provCtx, (OSSL_LIB_CTX *)CoreGetLibCtx(handle));
+    GsProvCtxSet0LibCtx(*provCtx, (OSSL_LIB_CTX*)CoreGetLibCtx(handle));
     GsProvCtxSet0Handle(*provCtx, handle);
 
     *out = gDispatchTable;
