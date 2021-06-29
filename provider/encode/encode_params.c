@@ -112,26 +112,28 @@ static int GsEncodeKeyParamsToPemBio(BIO* out, const void* keyData,
     return ret;
 }
 
-int GsEncoderDoesKeyParamsSelection(ossl_unused void* ctx, int selection)
+int GsEncoderDoesTypeSpecificSelection(ossl_unused void* ctx, int selection)
 {
     return GsEncoderCheckSelection(selection,
                                    OSSL_KEYMGMT_SELECT_DOMAIN_PARAMETERS);
 }
 
-int GsEncoderEncodeKeyParamsToDer(void* ctx, OSSL_CORE_BIO* cout,
-                                  const void* keyData,
-                                  const OSSL_PARAM keyAbstract[], int selection,
-                                  OSSL_PASSPHRASE_CALLBACK* cb, void* cbArg)
+int GsEncoderEncodeTypeSpecificToDer(void* ctx, OSSL_CORE_BIO* cout,
+                                     const void* keyData,
+                                     const OSSL_PARAM keyAbstract[],
+                                     int selection,
+                                     OSSL_PASSPHRASE_CALLBACK* cb, void* cbArg)
 {
     return GsEncoderEncode(ctx, cout, keyData, keyAbstract, selection,
                            OSSL_KEYMGMT_SELECT_DOMAIN_PARAMETERS, cb, cbArg,
                            GsEncodeKeyParamsToDerBio);
 }
 
-int GsEncoderEncodeKeyParamsToPem(void* ctx, OSSL_CORE_BIO* cout,
-                                  const void* keyData,
-                                  const OSSL_PARAM keyAbstract[], int selection,
-                                  OSSL_PASSPHRASE_CALLBACK* cb, void* cbArg)
+int GsEncoderEncodeTypeSpecificToPem(void* ctx, OSSL_CORE_BIO* cout,
+                                     const void* keyData,
+                                     const OSSL_PARAM keyAbstract[],
+                                     int selection,
+                                     OSSL_PASSPHRASE_CALLBACK* cb, void* cbArg)
 {
     return GsEncoderEncode(ctx, cout, keyData, keyAbstract, selection,
                            OSSL_KEYMGMT_SELECT_DOMAIN_PARAMETERS, cb, cbArg,

@@ -27,9 +27,14 @@ BaseNameGenerator(const testing::TestParamInfo<BaseParam>& info)
 class EncodeDecodeTest : public testing::TestWithParam<BaseParam>
 {
   public:
-    void SetUp() {}
+    void SetUp()
+    {
+    }
 
-    void TearDown() { ERR_print_errors_fp(stderr); }
+    void TearDown()
+    {
+        ERR_print_errors_fp(stderr);
+    }
 };
 
 TEST_P(EncodeDecodeTest, EncodePrivateKeyToText)
@@ -146,7 +151,10 @@ const std::vector<BaseParam> gTestParams = {
     {SN_id_GostR3410_2012_256, SN_id_tc26_gost_3410_2012_256_paramSetA},
     {SN_id_GostR3410_2012_256, SN_id_tc26_gost_3410_2012_256_paramSetB},
     {SN_id_GostR3410_2012_256, SN_id_tc26_gost_3410_2012_256_paramSetC},
-    {SN_id_GostR3410_2012_256, SN_id_tc26_gost_3410_2012_256_paramSetD}};
+    {SN_id_GostR3410_2012_256, SN_id_tc26_gost_3410_2012_256_paramSetD},
+    {SN_id_GostR3410_2012_512, SN_id_tc26_gost_3410_2012_512_paramSetA},
+    {SN_id_GostR3410_2012_512, SN_id_tc26_gost_3410_2012_512_paramSetB},
+    {SN_id_GostR3410_2012_512, SN_id_tc26_gost_3410_2012_512_paramSetC}};
 
 INSTANTIATE_TEST_SUITE_P(EncodeDecodeTests, EncodeDecodeTest,
                          testing::ValuesIn(gTestParams), BaseNameGenerator);
@@ -175,9 +183,14 @@ class ProvidedEncodeTest
     : public testing::TestWithParam<ProvidedEncodeTestParam>
 {
   public:
-    void SetUp() {}
+    void SetUp()
+    {
+    }
 
-    void TearDown() { ERR_print_errors_fp(stderr); }
+    void TearDown()
+    {
+        ERR_print_errors_fp(stderr);
+    }
 };
 
 TEST_P(ProvidedEncodeTest, ProvidedEncodeToBio)

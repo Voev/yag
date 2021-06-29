@@ -151,7 +151,8 @@ static int GsEncodeKeyToBio(BIO* out, const void* key,
     return ret;
 }
 
-int GsEncoderDoesPublicKeySelection(ossl_unused void* ctx, int selection)
+int GsEncoderDoesSubjectPublicKeyInfoSelection(ossl_unused void* ctx,
+                                               int selection)
 {
     return GsEncoderCheckSelection(selection, OSSL_KEYMGMT_SELECT_PUBLIC_KEY);
 }
@@ -172,20 +173,24 @@ int GsEncodePublicKeyToPemBio(BIO* out, const void* key,
     return GsEncodeKeyToBio(out, key, PEM_write_bio_X509_PUBKEY);
 }
 
-int GsEncoderEncodePublicKeyToDer(void* ctx, OSSL_CORE_BIO* cout,
-                                  const void* key,
-                                  const OSSL_PARAM keyAbstract[], int selection,
-                                  OSSL_PASSPHRASE_CALLBACK* cb, void* cbArg)
+int GsEncoderEncodeSubjectPublicKeyInfoToDer(void* ctx, OSSL_CORE_BIO* cout,
+                                             const void* key,
+                                             const OSSL_PARAM keyAbstract[],
+                                             int selection,
+                                             OSSL_PASSPHRASE_CALLBACK* cb,
+                                             void* cbArg)
 {
     return GsEncoderEncode(ctx, cout, key, keyAbstract, selection,
                            OSSL_KEYMGMT_SELECT_PUBLIC_KEY, cb, cbArg,
                            GsEncodePublicKeyToDerBio);
 }
 
-int GsEncoderEncodePublicKeyToPem(void* ctx, OSSL_CORE_BIO* cout,
-                                  const void* key,
-                                  const OSSL_PARAM keyAbstract[], int selection,
-                                  OSSL_PASSPHRASE_CALLBACK* cb, void* cbArg)
+int GsEncoderEncodeSubjectPublicKeyInfoToPem(void* ctx, OSSL_CORE_BIO* cout,
+                                             const void* key,
+                                             const OSSL_PARAM keyAbstract[],
+                                             int selection,
+                                             OSSL_PASSPHRASE_CALLBACK* cb,
+                                             void* cbArg)
 {
     return GsEncoderEncode(ctx, cout, key, keyAbstract, selection,
                            OSSL_KEYMGMT_SELECT_PUBLIC_KEY, cb, cbArg,
