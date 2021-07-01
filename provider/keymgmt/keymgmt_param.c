@@ -1,3 +1,4 @@
+#include <strings.h>
 #include <openssl/bn.h>
 #include <openssl/ec.h>
 #include <openssl/err.h>
@@ -17,63 +18,44 @@ struct GostR3410Params_st
 };
 typedef struct GostR3410Params_st GostR3410Params;
 
-static
-GostR3410Params gGostR3410_256_paramset[] =
-{
+static GostR3410Params gGostR3410_256_paramset[] = {
     /* 1.2.643.2.2.35.0 */
-    {NID_id_GostR3410_2001_TestParamSet,
-     "7",
+    {NID_id_GostR3410_2001_TestParamSet, "7",
      "5FBFF498AA938CE739B8E022FBAFEF40563F6E6A3472FC2A514C0CE9DAE23B7E",
      "8000000000000000000000000000000000000000000000000000000000000431",
-     "8000000000000000000000000000000150FE8A1892976154C59CFC193ACCF5B3",
-     "2",
-     "08E2A8A0E65147D4BD6316030E16D19C85C97F0A9CA267122B96ABBCEA7E8FC8",
-     "1"},
+     "8000000000000000000000000000000150FE8A1892976154C59CFC193ACCF5B3", "2",
+     "08E2A8A0E65147D4BD6316030E16D19C85C97F0A9CA267122B96ABBCEA7E8FC8", "1"},
     /* 1.2.643.2.2.35.1 */
     {NID_id_GostR3410_2001_CryptoPro_A_ParamSet,
-     "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFD94",
-     "a6",
+     "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFD94", "a6",
      "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFD97",
-     "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF6C611070995AD10045841B09B761B893",
-     "1",
-     "8D91E471E0989CDA27DF505A453F2B7635294F2DDF23E3B122ACC99C9E9F1E14",
-     "1"},
+     "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF6C611070995AD10045841B09B761B893", "1",
+     "8D91E471E0989CDA27DF505A453F2B7635294F2DDF23E3B122ACC99C9E9F1E14", "1"},
     /* 1.2.643.2.2.35.2 */
     {NID_id_GostR3410_2001_CryptoPro_B_ParamSet,
      "8000000000000000000000000000000000000000000000000000000000000C96",
      "3E1AF419A269A5F866A7D3C25C3DF80AE979259373FF2B182F49D4CE7E1BBC8B",
      "8000000000000000000000000000000000000000000000000000000000000C99",
-     "800000000000000000000000000000015F700CFFF1A624E5E497161BCC8A198F",
-     "1",
-     "3FA8124359F96680B83D1C3EB2C070E5C545C9858D03ECFB744BF8D717717EFC",
-     "1"},
+     "800000000000000000000000000000015F700CFFF1A624E5E497161BCC8A198F", "1",
+     "3FA8124359F96680B83D1C3EB2C070E5C545C9858D03ECFB744BF8D717717EFC", "1"},
     /* 1.2.643.2.2.35.3 */
     {NID_id_GostR3410_2001_CryptoPro_C_ParamSet,
-     "9B9F605F5A858107AB1EC85E6B41C8AACF846E86789051D37998F7B9022D7598",
-     "805a",
+     "9B9F605F5A858107AB1EC85E6B41C8AACF846E86789051D37998F7B9022D7598", "805a",
      "9B9F605F5A858107AB1EC85E6B41C8AACF846E86789051D37998F7B9022D759B",
-     "9B9F605F5A858107AB1EC85E6B41C8AA582CA3511EDDFB74F02F3A6598980BB9",
-     "0",
-     "41ECE55743711A8C3CBF3783CD08C0EE4D4DC440D4641A8F366E550DFDB3BB67",
-     "1"},
+     "9B9F605F5A858107AB1EC85E6B41C8AA582CA3511EDDFB74F02F3A6598980BB9", "0",
+     "41ECE55743711A8C3CBF3783CD08C0EE4D4DC440D4641A8F366E550DFDB3BB67", "1"},
     /* 1.2.643.2.2.36.0 */
     {NID_id_GostR3410_2001_CryptoPro_XchA_ParamSet,
-     "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFD94",
-     "a6",
+     "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFD94", "a6",
      "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFD97",
-     "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF6C611070995AD10045841B09B761B893",
-     "1",
-     "8D91E471E0989CDA27DF505A453F2B7635294F2DDF23E3B122ACC99C9E9F1E14",
-     "1"},
+     "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF6C611070995AD10045841B09B761B893", "1",
+     "8D91E471E0989CDA27DF505A453F2B7635294F2DDF23E3B122ACC99C9E9F1E14", "1"},
     /* 1.2.643.2.2.36.1 */
     {NID_id_GostR3410_2001_CryptoPro_XchB_ParamSet,
-     "9B9F605F5A858107AB1EC85E6B41C8AACF846E86789051D37998F7B9022D7598",
-     "805a",
+     "9B9F605F5A858107AB1EC85E6B41C8AACF846E86789051D37998F7B9022D7598", "805a",
      "9B9F605F5A858107AB1EC85E6B41C8AACF846E86789051D37998F7B9022D759B",
-     "9B9F605F5A858107AB1EC85E6B41C8AA582CA3511EDDFB74F02F3A6598980BB9",
-     "0",
-     "41ECE55743711A8C3CBF3783CD08C0EE4D4DC440D4641A8F366E550DFDB3BB67",
-     "1"},
+     "9B9F605F5A858107AB1EC85E6B41C8AA582CA3511EDDFB74F02F3A6598980BB9", "0",
+     "41ECE55743711A8C3CBF3783CD08C0EE4D4DC440D4641A8F366E550DFDB3BB67", "1"},
     {NID_id_tc26_gost_3410_2012_256_paramSetA,
      /* a */
      "C2173F1513981673AF4892C23035A27CE25E2013BF95AA33B22C656F277E7335",
@@ -86,13 +68,9 @@ GostR3410Params gGostR3410_256_paramset[] =
      /* x */
      "91E38443A5E82C0D880923425712B2BB658B9196932E02C78B2582FE742DAA28",
      /* y */
-     "32879423AB1A0375895786C4BB46E9565FDE0B5344766740AF268ADB32322E5C",
-     "4"}
-};
+     "32879423AB1A0375895786C4BB46E9565FDE0B5344766740AF268ADB32322E5C", "4"}};
 
-static
-GostR3410Params gGostR3410_512_paramset[] =
-{
+static GostR3410Params gGostR3410_512_paramset[] = {
     {NID_id_tc26_gost_3410_2012_512_paramSetA,
      /* a */
      "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
@@ -111,8 +89,7 @@ GostR3410Params gGostR3410_512_paramset[] =
      /* y */
      "7503CFE87A836AE3A61B8816E25450E6CE5E1C93ACF1ABC1778064FDCBEFA921DF16"
      "26BE4FD036E93D75E6A50E3A41E98028FE5FC235F5B889A589CB5215F2A4",
-     "1"}
-    ,
+     "1"},
     {NID_id_tc26_gost_3410_2012_512_paramSetB,
      /* a */
      "8000000000000000000000000000000000000000000000000000000000000000"
@@ -151,16 +128,33 @@ GostR3410Params gGostR3410_512_paramset[] =
      /* y */
      "F5CE40D95B5EB899ABBCCFF5911CB8577939804D6527378B8C108C3D2090FF9B"
      "E18E2D33E3021ED2EF32D85822423B6304F726AA854BAE07D0396E9A9ADDC40F",
-     "4"}
-};
+     "4"}};
 
-static
-GostR3410Params* GsGetEcGroupParams( const char* name )
+int GsParseGroupName(const char* name)
+{
+    if (0 == strcasecmp(name, "GC256A"))
+        return NID_id_tc26_gost_3410_2012_256_paramSetA;
+    else if (0 == strcasecmp(name, "GC256B"))
+        return NID_id_tc26_gost_3410_2012_256_paramSetB;
+    else if (0 == strcasecmp(name, "GC256C"))
+        return NID_id_tc26_gost_3410_2012_256_paramSetC;
+    else if (0 == strcasecmp(name, "GC256D"))
+        return NID_id_tc26_gost_3410_2012_256_paramSetD;
+    else if (0 == strcasecmp(name, "GC512A"))
+        return NID_id_tc26_gost_3410_2012_512_paramSetA;
+    else if (0 == strcasecmp(name, "GC512B"))
+        return NID_id_tc26_gost_3410_2012_512_paramSetB;
+    else if (0 == strcasecmp(name, "GC512C"))
+        return NID_id_tc26_gost_3410_2012_512_paramSetC;
+    return NID_undef;
+}
+
+static GostR3410Params* GsGetEcGroupParams(const char* name)
 {
     GostR3410Params* params;
-    int nid = OBJ_sn2nid( name );
+    int nid = OBJ_sn2nid(name);
 
-    switch( nid )
+    switch (nid)
     {
     case NID_id_tc26_gost_3410_2012_256_paramSetB:
     {
@@ -178,23 +172,24 @@ GostR3410Params* GsGetEcGroupParams( const char* name )
         break;
     }
     default:
+        nid = GsParseGroupName(name);
         break;
     }
-    if( NID_undef != nid )
+    if (NID_undef != nid)
     {
         params = gGostR3410_512_paramset;
-        while( NID_undef != params->nid ) 
+        while (NID_undef != params->nid)
         {
-            if( nid == params->nid )
+            if (nid == params->nid)
             {
                 return params;
             }
             params++;
         }
         params = gGostR3410_256_paramset;
-        while( NID_undef != params->nid ) 
+        while (NID_undef != params->nid)
         {
-            if( nid == params->nid )
+            if (nid == params->nid)
             {
                 return params;
             }
@@ -204,14 +199,13 @@ GostR3410Params* GsGetEcGroupParams( const char* name )
     return NULL;
 }
 
-static 
-GostR3410Params* GsExtractEcGroupParams( const OSSL_PARAM* param )
+static GostR3410Params* GsExtractEcGroupParams(const OSSL_PARAM* param)
 {
-    if( param )
+    if (param)
     {
         const char* curveName = NULL;
 
-        switch( param->data_type )
+        switch (param->data_type)
         {
         case OSSL_PARAM_UTF8_STRING:
         {
@@ -220,117 +214,113 @@ GostR3410Params* GsExtractEcGroupParams( const OSSL_PARAM* param )
         }
         case OSSL_PARAM_UTF8_PTR:
         {
-            OSSL_PARAM_get_utf8_ptr( param, &curveName );
+            OSSL_PARAM_get_utf8_ptr(param, &curveName);
             break;
         }
         default:
             break;
         }
-        return GsGetEcGroupParams( curveName );
+        return GsGetEcGroupParams(curveName);
     }
     return NULL;
 }
 
-static 
-EC_GROUP* GsCreateEcGroup( GostR3410Params* params, BN_CTX* ctx )
+static EC_GROUP* GsCreateEcGroup(GostR3410Params* params, BN_CTX* ctx)
 {
-    BIGNUM* p = BN_CTX_get( ctx );
-    BIGNUM* a = BN_CTX_get( ctx ); 
-    BIGNUM* b = BN_CTX_get( ctx );
+    BIGNUM* p = BN_CTX_get(ctx);
+    BIGNUM* a = BN_CTX_get(ctx);
+    BIGNUM* b = BN_CTX_get(ctx);
 
-    if( !p || !a || !b )
+    if (!p || !a || !b)
     {
-        ERR_raise( ERR_LIB_PROP, ERR_R_MALLOC_FAILURE );
+        ERR_raise(ERR_LIB_PROP, ERR_R_MALLOC_FAILURE);
         return NULL;
     }
-    
-    if( !BN_hex2bn( &p, params->p ) ||
-        !BN_hex2bn( &a, params->a ) ||
-        !BN_hex2bn( &b, params->b ) )
+
+    if (!BN_hex2bn(&p, params->p) || !BN_hex2bn(&a, params->a) ||
+        !BN_hex2bn(&b, params->b))
     {
         return NULL;
     }
-    return EC_GROUP_new_curve_GFp( p, a, b, ctx );
+    return EC_GROUP_new_curve_GFp(p, a, b, ctx);
 }
 
-static
-int GsSetEcGenerator( EC_GROUP* group, GostR3410Params* params, BN_CTX* ctx )
+static int GsSetEcGenerator(EC_GROUP* group, GostR3410Params* params,
+                            BN_CTX* ctx)
 {
-    BIGNUM* x = BN_CTX_get( ctx ); 
-    BIGNUM* y = BN_CTX_get( ctx );
-    BIGNUM* q = BN_CTX_get( ctx ); 
-    BIGNUM* cofactor = BN_CTX_get( ctx );
+    BIGNUM* x = BN_CTX_get(ctx);
+    BIGNUM* y = BN_CTX_get(ctx);
+    BIGNUM* q = BN_CTX_get(ctx);
+    BIGNUM* cofactor = BN_CTX_get(ctx);
     EC_POINT* P;
 
-    if( !x || !y || !q || !cofactor )
+    if (!x || !y || !q || !cofactor)
     {
-        ERR_raise( ERR_LIB_PROP, ERR_R_MALLOC_FAILURE );
+        ERR_raise(ERR_LIB_PROP, ERR_R_MALLOC_FAILURE);
         return 0;
     }
 
-    if( !BN_hex2bn( &x, params->x ) ||
-        !BN_hex2bn( &y, params->y ) ||
-        !BN_hex2bn( &q, params->q ) ||
-        !BN_hex2bn( &cofactor, params->cofactor ) )
+    if (!BN_hex2bn(&x, params->x) || !BN_hex2bn(&y, params->y) ||
+        !BN_hex2bn(&q, params->q) || !BN_hex2bn(&cofactor, params->cofactor))
     {
         return 0;
     }
 
-    P = EC_POINT_new( group );
-    if( !P )
+    P = EC_POINT_new(group);
+    if (!P)
     {
-        ERR_raise( ERR_LIB_PROP, ERR_R_MALLOC_FAILURE );
+        ERR_raise(ERR_LIB_PROP, ERR_R_MALLOC_FAILURE);
         return 0;
     }
-    
-    if( !EC_POINT_set_affine_coordinates( group, P, x, y, ctx ) ||
-        !EC_GROUP_set_generator( group, P, q, cofactor ) )
+
+    if (!EC_POINT_set_affine_coordinates(group, P, x, y, ctx) ||
+        !EC_GROUP_set_generator(group, P, q, cofactor))
     {
-        EC_POINT_free( P );
+        EC_POINT_free(P);
         return 0;
     }
-    EC_POINT_free( P );
+    EC_POINT_free(P);
     return 1;
 }
 
-EC_GROUP* GsGetEcGroup( const OSSL_PARAM* param )
+EC_GROUP* GsGetEcGroup(const OSSL_PARAM* param)
 {
     GostR3410Params* params = NULL;
     EC_GROUP* group = NULL;
     BN_CTX* ctx = NULL;
     int ret = 0;
 
-    params = GsExtractEcGroupParams( param );
-    if( !params )
+    params = GsExtractEcGroupParams(param);
+    if (!params)
     {
         goto end;
     }
 
-    ctx = BN_CTX_new_ex( NULL );
-    if( !ctx )
+    ctx = BN_CTX_new_ex(NULL);
+    if (!ctx)
     {
         goto end;
     }
 
-    group = GsCreateEcGroup( params, ctx );
-    if( !group )
+    group = GsCreateEcGroup(params, ctx);
+    if (!group)
     {
         goto end;
     }
 
-    if( !GsSetEcGenerator( group, params, ctx ) )
+    if (!GsSetEcGenerator(group, params, ctx))
     {
         goto end;
     }
 
-    EC_GROUP_set_curve_name( group, params->nid );
+    EC_GROUP_set_curve_name(group, params->nid);
     ret = 1;
 end:
-    if( !ret )
+    if (!ret)
     {
-        EC_GROUP_free( group );
+        EC_GROUP_free(group);
         group = NULL;
     }
-    BN_CTX_free( ctx );
+    BN_CTX_free(ctx);
     return group;
 }
