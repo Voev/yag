@@ -11,6 +11,7 @@
 
 #include <gostone/common.h>
 #include <gostone/provider_ctx.h>
+#include <gostone/asn1/asn1.h>
 #include <gostone/encode/encode_impl.h>
 #include <gostone/encode/encode_common.h>
 #include <gostone/encode/encode_params.h>
@@ -125,7 +126,7 @@ static int GsEncodeKeyToBio(BIO* out, const void* key, GsEncoderCtx* ctx,
     int ret = 0;
     ASN1_STRING* params = NULL;
 
-    if (!GsPrepareParams(key, &params))
+    if (!GsPackKeyParams(key, &params))
     {
         return 0;
     }

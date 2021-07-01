@@ -149,14 +149,16 @@ int GsEncoderEncode(GsEncoderCtx* ctx, OSSL_CORE_BIO* cout, const void* keyData,
     return ret;
 }
 
-void* GsEncoderImportObject(void* vctx, int selection,
+void* GsEncoderImportObject(ossl_unused void* vctx, int selection,
                             const OSSL_PARAM params[])
 {
-    (void)vctx;
-    (void)selection;
-    (void)params;
-#pragma message "TODO: make import implementation"
-    return NULL;
+    GsAsymmKey* key = GsAsymmKeyNew();
+    if (!GsKeyMgmtImport(key, selection, params))
+    {
+        GsAsymmKeyFree(key);
+        key = NULL;
+    }
+    return key;
 }
 
 void GsEncoderFreeObject(void* keyData)

@@ -11,6 +11,7 @@
 
 #include <gostone/common.h>
 #include <gostone/provider_ctx.h>
+#include <gostone/asn1/asn1.h>
 #include <gostone/keymgmt/keymgmt_akey.h>
 #include <gostone/encode/encode_impl.h>
 #include <gostone/encode/encode_common.h>
@@ -137,7 +138,7 @@ static int GsEncodeKeyToBio(BIO* out, const void* key,
     X509_PUBKEY* xpk = NULL;
     int ret = 0;
 
-    if (!GsPrepareParams(key, &params))
+    if (!GsPackKeyParams(key, &params))
     {
         return 0;
     }
