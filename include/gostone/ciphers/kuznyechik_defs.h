@@ -7,7 +7,7 @@ enum
     NumberOfRoundsInKeySchedule = 8,
 
     BlockLengthInBytes = 128 / 8,
-    KeyLengthInBytes   = 256 / 8,
+    KeyLengthInBytes = 256 / 8,
 };
 
 extern const uint8_t gConstants[];
