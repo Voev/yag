@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.10)
 set(LIB_NAME gostone)
 file(GLOB SOURCES
      *.c
+     ciphers/*.c
      digests/*.c
      keymgmt/*.c
      encode/*.c
