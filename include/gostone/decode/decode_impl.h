@@ -1,0 +1,18 @@
+#pragma once
+#include <openssl/core_dispatch.h>
+
+OSSL_FUNC_decoder_newctx_fn GsDecoderNewCtx;
+OSSL_FUNC_decoder_freectx_fn GsDecoderFreeCtx;
+
+OSSL_FUNC_decoder_does_selection_fn GsDecoderDoesPrivateKeyInfoSelection;
+OSSL_FUNC_decoder_does_selection_fn GsDecoderDoesSubjectPublicKeyInfoSelection;
+OSSL_FUNC_decoder_does_selection_fn GsDecoderDoesTypeSpecificSelection;
+
+OSSL_FUNC_decoder_decode_fn GsDecoderDecodePrivateKeyInfoFromDer;
+// OSSL_FUNC_decoder_decode_fn GsDecoderDecodePrivateKeyInfoFromPem;
+// OSSL_FUNC_decoder_decode_fn GsDecoderDecodeSubjectPublicKeyInfoFromDer;
+// OSSL_FUNC_decoder_decode_fn GsDecoderDecodeSubjectPublicKeyInfoFromPem;
+OSSL_FUNC_decoder_decode_fn GsDecoderDecodeTypeSpecificFromDer;
+// OSSL_FUNC_decoder_decode_fn GsDecoderDecodeTypeSpecificFromPem;
+
+OSSL_FUNC_decoder_export_object_fn GsDecoderExportObject;

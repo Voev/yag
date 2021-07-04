@@ -86,7 +86,10 @@ static const OSSL_ALGORITHM gGsEncoders[] = {
     TEXT_ENCODER(GostR3410_2012_512),
     {NULL, NULL, NULL, NULL}};
 
-static const OSSL_ALGORITHM gGsDecoders[] = {{NULL, NULL, NULL, NULL}};
+static const OSSL_ALGORITHM gGsDecoders[] = {
+    DECODER_FROM_STRUCTURE(GostR3410_2012_256, PrivateKeyInfo, Der),
+    DECODER_FROM_STRUCTURE(GostR3410_2012_256, TypeSpecific, Der),
+    {NULL, NULL, NULL, NULL}};
 
 static const OSSL_ALGORITHM gGsSignatures[] = {
     {SN_id_GostR3410_2012_256, "provider=gostone",

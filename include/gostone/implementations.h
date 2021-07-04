@@ -15,7 +15,7 @@ extern const OSSL_DISPATCH gGostR341012_SignatureFunctions[];
 #define STRUCTURE_SubjectPublicKeyInfo "SubjectPublicKeyInfo"
 
 #define ENCODER_FUNCTIONS(name, structure, output)                             \
-    g##name##Of##structure##To##output##Funcs
+    g##name##From##structure##To##output##Funcs
 #define ENCODER_FOR_STRUCTURE(name, structure, output)                         \
     {                                                                          \
         SN_id_##name,                                                          \
@@ -23,19 +23,8 @@ extern const OSSL_DISPATCH gGostR341012_SignatureFunctions[];
             ",structure=" STRUCTURE_##structure,                               \
             ENCODER_FUNCTIONS(name, structure, output), LN_id_##name           \
     }
-
-#define TEXT_ENCODER_FUNCTIONS(name) g##name##ToTextFuncs
-#define TEXT_ENCODER(name)                                                     \
-    {                                                                          \
-        SN_id_##name, "provider=gostone,output=text",                          \
-            TEXT_ENCODER_FUNCTIONS(name), LN_id_##name                         \
-    }
-
 #define DECLARE_ENCODER_FUNCTIONS(name, structure, output)                     \
     extern const OSSL_DISPATCH ENCODER_FUNCTIONS(name, structure, output)[];
-
-#define DECLARE_TEXT_ENCODER_FUNCTIONS(name)                                   \
-    extern const OSSL_DISPATCH TEXT_ENCODER_FUNCTIONS(name)[];
 
 DECLARE_ENCODER_FUNCTIONS(GostR3410_2012_256, PrivateKeyInfo, Der)
 DECLARE_ENCODER_FUNCTIONS(GostR3410_2012_256, PrivateKeyInfo, Pem)
@@ -43,7 +32,6 @@ DECLARE_ENCODER_FUNCTIONS(GostR3410_2012_256, SubjectPublicKeyInfo, Der)
 DECLARE_ENCODER_FUNCTIONS(GostR3410_2012_256, SubjectPublicKeyInfo, Pem)
 DECLARE_ENCODER_FUNCTIONS(GostR3410_2012_256, TypeSpecific, Der)
 DECLARE_ENCODER_FUNCTIONS(GostR3410_2012_256, TypeSpecific, Pem)
-DECLARE_TEXT_ENCODER_FUNCTIONS(GostR3410_2012_256)
 
 DECLARE_ENCODER_FUNCTIONS(GostR3410_2012_512, PrivateKeyInfo, Der)
 DECLARE_ENCODER_FUNCTIONS(GostR3410_2012_512, PrivateKeyInfo, Pem)
@@ -51,4 +39,30 @@ DECLARE_ENCODER_FUNCTIONS(GostR3410_2012_512, SubjectPublicKeyInfo, Der)
 DECLARE_ENCODER_FUNCTIONS(GostR3410_2012_512, SubjectPublicKeyInfo, Pem)
 DECLARE_ENCODER_FUNCTIONS(GostR3410_2012_512, TypeSpecific, Der)
 DECLARE_ENCODER_FUNCTIONS(GostR3410_2012_512, TypeSpecific, Pem)
+
+#define TEXT_ENCODER_FUNCTIONS(name) g##name##ToTextFuncs
+#define TEXT_ENCODER(name)                                                     \
+    {                                                                          \
+        SN_id_##name, "provider=gostone,output=text",                          \
+            TEXT_ENCODER_FUNCTIONS(name), LN_id_##name                         \
+    }
+#define DECLARE_TEXT_ENCODER_FUNCTIONS(name)                                   \
+    extern const OSSL_DISPATCH TEXT_ENCODER_FUNCTIONS(name)[];
+
+DECLARE_TEXT_ENCODER_FUNCTIONS(GostR3410_2012_256)
 DECLARE_TEXT_ENCODER_FUNCTIONS(GostR3410_2012_512)
+
+#define DECODER_FUNCTIONS(name, structure, input)                              \
+    g##name##To##structure##From##input##Funcs
+#define DECODER_FROM_STRUCTURE(name, structure, input)                         \
+    {                                                                          \
+        SN_id_##name,                                                          \
+            "provider=gostone,input=" #input                                   \
+            ",structure=" STRUCTURE_##structure,                               \
+            DECODER_FUNCTIONS(name, structure, input), LN_id_##name            \
+    }
+#define DECLARE_DECODER_FUNCTIONS(name, structure, input)                      \
+    extern const OSSL_DISPATCH DECODER_FUNCTIONS(name, structure, input)[];
+
+DECLARE_DECODER_FUNCTIONS(GostR3410_2012_256, PrivateKeyInfo, Der)
+DECLARE_DECODER_FUNCTIONS(GostR3410_2012_256, TypeSpecific, Der)

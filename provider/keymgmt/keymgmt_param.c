@@ -132,20 +132,23 @@ static GostR3410Params gGostR3410_512_paramset[] = {
 
 int GsParseGroupName(const char* name)
 {
-    if (0 == strcasecmp(name, "GC256A"))
-        return NID_id_tc26_gost_3410_2012_256_paramSetA;
-    else if (0 == strcasecmp(name, "GC256B"))
-        return NID_id_tc26_gost_3410_2012_256_paramSetB;
-    else if (0 == strcasecmp(name, "GC256C"))
-        return NID_id_tc26_gost_3410_2012_256_paramSetC;
-    else if (0 == strcasecmp(name, "GC256D"))
-        return NID_id_tc26_gost_3410_2012_256_paramSetD;
-    else if (0 == strcasecmp(name, "GC512A"))
-        return NID_id_tc26_gost_3410_2012_512_paramSetA;
-    else if (0 == strcasecmp(name, "GC512B"))
-        return NID_id_tc26_gost_3410_2012_512_paramSetB;
-    else if (0 == strcasecmp(name, "GC512C"))
-        return NID_id_tc26_gost_3410_2012_512_paramSetC;
+    if (name)
+    {
+        if (0 == strcasecmp(name, "GC256A"))
+            return NID_id_tc26_gost_3410_2012_256_paramSetA;
+        else if (0 == strcasecmp(name, "GC256B"))
+            return NID_id_tc26_gost_3410_2012_256_paramSetB;
+        else if (0 == strcasecmp(name, "GC256C"))
+            return NID_id_tc26_gost_3410_2012_256_paramSetC;
+        else if (0 == strcasecmp(name, "GC256D"))
+            return NID_id_tc26_gost_3410_2012_256_paramSetD;
+        else if (0 == strcasecmp(name, "GC512A"))
+            return NID_id_tc26_gost_3410_2012_512_paramSetA;
+        else if (0 == strcasecmp(name, "GC512B"))
+            return NID_id_tc26_gost_3410_2012_512_paramSetB;
+        else if (0 == strcasecmp(name, "GC512C"))
+            return NID_id_tc26_gost_3410_2012_512_paramSetC;
+    }
     return NID_undef;
 }
 
@@ -153,6 +156,11 @@ static GostR3410Params* GsGetEcGroupParams(const char* name)
 {
     GostR3410Params* params;
     int nid = OBJ_sn2nid(name);
+
+    if (NID_undef == nid)
+    {
+        nid = GsParseGroupName(name);
+    }
 
     switch (nid)
     {
@@ -172,9 +180,9 @@ static GostR3410Params* GsGetEcGroupParams(const char* name)
         break;
     }
     default:
-        nid = GsParseGroupName(name);
         break;
     }
+
     if (NID_undef != nid)
     {
         params = gGostR3410_512_paramset;
