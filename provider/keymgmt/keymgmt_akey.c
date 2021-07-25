@@ -3,6 +3,7 @@
 #include <openssl/err.h>
 #include <openssl/objects.h>
 #include <gostone/keymgmt/keymgmt_akey.h>
+#include <stdatomic.h>
 
 struct gs_asymm_key_st
 {
@@ -12,6 +13,7 @@ struct gs_asymm_key_st
     EC_GROUP* group;
     EC_POINT* publicKey;
     BIGNUM* privateKey;
+    atomic_int refCount;
 };
 
 GsAsymmKey* GsAsymmKeyNew( void )
@@ -26,18 +28,19 @@ GsAsymmKey* GsAsymmKeyNewInit( OSSL_LIB_CTX* libCtx, int algorithm )
     {
         GsAsymmKeySet0LibCtx( key, libCtx );
         GsAsymmKeySetAlgorithm( key, algorithm );
+        key->refCount = 1;
     }
     return key;
 }
 
 void GsAsymmKeyFree( GsAsymmKey* key )
 {
-    if( key )
+    if( key && 0 == --key->refCount )
     {
         EC_GROUP_free( key->group );
         BN_clear_free( key->privateKey );
         EC_POINT_clear_free( key->publicKey );
-        OPENSSL_free( key );
+        OPENSSL_clear_free( key, sizeof( GsAsymmKey ) );
     }
 }
 
@@ -165,7 +168,7 @@ int GsAsymmKeyGetKeySize( const GsAsymmKey* key )
 
 int GsAsymmKeyGetKeyBits( const GsAsymmKey* key )
 {
-    return GsAsymmKeyGetKeySize( key ) << 8;
+    return GsAsymmKeyGetKeySize( key ) << 3;
 }
 
 int GsAsymmKeyGetDefaultDigest( const GsAsymmKey* key )
@@ -253,4 +256,13 @@ end:
     BN_CTX_end( ctx );
     BN_CTX_free( ctx );
     return ret;
+}
+
+GsAsymmKey* GsAsymmKeyDuplicate( GsAsymmKey* key )
+{
+    if( key )
+    {
+        key->refCount++;
+    }
+    return key;
 }

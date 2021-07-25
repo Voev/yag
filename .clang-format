@@ -1,0 +1,17 @@
+---
+AlignAfterOpenBracket: Align
+AllowShortFunctionsOnASingleLine: false
+BreakBeforeBraces: Allman
+ColumnLimit: '80'
+IndentWidth: '4'
+PointerAlignment: Left
+SortIncludes: 'false'
+SortUsingDeclarations: 'false'
+SpacesInAngles: 'false'
+SpacesInCStyleCastParentheses: 'false'
+SpacesInParentheses: 'false'
+SpacesInSquareBrackets: 'false'
+Standard: Auto
+UseTab: Never
+
+...

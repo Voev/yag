@@ -14,11 +14,21 @@
 #include <gostone/keymgmt/keymgmt_params.h>
 #include <string.h>
 
-void* GsKeyMgmtNew( void* provData )
+void* GsKeyMgmtNew_( void* provData, int algorithm )
 {
     GsProvCtx* provCtx = INTERPRET_AS_PROV_CTX( provData );
     OSSL_LIB_CTX* libCtx = GsProvCtxGet0LibCtx( provCtx );
-    return GsAsymmKeyNewInit( libCtx, NID_id_GostR3410_2012_256 );
+    return GsAsymmKeyNewInit( libCtx, algorithm );
+}
+
+void* GsKeyMgmtNew( void* provData )
+{
+    return GsKeyMgmtNew_( provData, NID_id_GostR3410_2012_256 );
+}
+
+void* GsKeyMgmtNew512( void* provData )
+{
+    return GsKeyMgmtNew_( provData, NID_id_GostR3410_2012_512 );
 }
 
 void GsKeyMgmtFree( void* keyData )
@@ -39,7 +49,7 @@ void* GsKeyMgmtLoad( const void* reference, size_t referenceSize )
     return NULL;
 }
 
-const OSSL_PARAM* GsKeyMgmtGettableParams( void* provCtx ossl_unused )
+const OSSL_PARAM* GsKeyMgmtGettableParams( ossl_unused void* provCtx )
 {
     static const OSSL_PARAM gKeyMgmtGettableParams[] = 
     {
@@ -239,7 +249,7 @@ int GsKeyMgmtExport( void* keyData, int selection,
         {
             ret = paramCb( params, cbArg );
         }
-        OSSL_PARAM_BLD_free_params( params );
+        OSSL_PARAM_free( params );
     }
 end:
     OSSL_PARAM_BLD_free( tmpl );

@@ -1,105 +1,44 @@
 #include <openssl/core_dispatch.h>
 #include <gostone/common.h>
+#include <gostone/implementations.h>
 #include <gostone/encode/encode_impl.h>
 
-const OSSL_DISPATCH gGostR341012_256ToPkcs8DerEncoderFuncs[] =
-{
-    { OSSL_FUNC_ENCODER_NEWCTX, FUNC_PTR( GsEncoderNewCtx ) },
-    { OSSL_FUNC_ENCODER_FREECTX, FUNC_PTR( GsEncoderFreeCtx ) },
-    { OSSL_FUNC_ENCODER_GET_PARAMS, FUNC_PTR( GsEncoderGetPrivateKeyParams256ToDer ) },
-    { OSSL_FUNC_ENCODER_GETTABLE_PARAMS, FUNC_PTR( GsEncoderGettableParams ) },
-    { OSSL_FUNC_ENCODER_SET_CTX_PARAMS, FUNC_PTR( GsEncoderSetCtxParams ) },
-    { OSSL_FUNC_ENCODER_SETTABLE_CTX_PARAMS, FUNC_PTR( GsEncoderSettableCtxParams ) },
-    { OSSL_FUNC_ENCODER_DOES_SELECTION, FUNC_PTR( GsEncoderDoesPrivateKeySelection ) },
-    { OSSL_FUNC_ENCODER_ENCODE, FUNC_PTR( GsEncoderEncodePrivateKeyToDer ) },
-    { OSSL_FUNC_ENCODER_IMPORT_OBJECT, FUNC_PTR( GsEncoderImportObject ) },
-    { OSSL_FUNC_ENCODER_FREE_OBJECT, FUNC_PTR( GsEncoderFreeObject ) },
-    { 0, NULL }
-};
+#define DEFINE_ENCODER_FUNCTIONS(name, structure, output)                      \
+    const OSSL_DISPATCH ENCODER_FUNCTIONS(name, structure, output)[] = {       \
+        {OSSL_FUNC_ENCODER_NEWCTX, FUNC_PTR(GsEncoderNewCtx)},                 \
+        {OSSL_FUNC_ENCODER_FREECTX, FUNC_PTR(GsEncoderFreeCtx)},               \
+        {OSSL_FUNC_ENCODER_SET_CTX_PARAMS, FUNC_PTR(GsEncoderSetCtxParams)},   \
+        {OSSL_FUNC_ENCODER_SETTABLE_CTX_PARAMS,                                \
+         FUNC_PTR(GsEncoderSettableCtxParams)},                                \
+        {OSSL_FUNC_ENCODER_DOES_SELECTION,                                     \
+         FUNC_PTR(GsEncoderDoes##structure##Selection)},                       \
+        {OSSL_FUNC_ENCODER_ENCODE,                                             \
+         FUNC_PTR(GsEncoderEncode##structure##To##output)},                    \
+        {OSSL_FUNC_ENCODER_IMPORT_OBJECT, FUNC_PTR(GsEncoderImportObject)},    \
+        {OSSL_FUNC_ENCODER_FREE_OBJECT, FUNC_PTR(GsEncoderFreeObject)},        \
+        {0, NULL}};
 
-const OSSL_DISPATCH gGostR341012_256ToPkcs8PemEncoderFuncs[] =
-{
-    { OSSL_FUNC_ENCODER_NEWCTX, FUNC_PTR( GsEncoderNewCtx ) },
-    { OSSL_FUNC_ENCODER_FREECTX, FUNC_PTR( GsEncoderFreeCtx ) },
-    { OSSL_FUNC_ENCODER_GET_PARAMS, FUNC_PTR( GsEncoderGetPrivateKeyParams256ToPem ) },
-    { OSSL_FUNC_ENCODER_GETTABLE_PARAMS, FUNC_PTR( GsEncoderGettableParams ) },
-    { OSSL_FUNC_ENCODER_SET_CTX_PARAMS, FUNC_PTR( GsEncoderSetCtxParams ) },
-    { OSSL_FUNC_ENCODER_SETTABLE_CTX_PARAMS, FUNC_PTR( GsEncoderSettableCtxParams ) },
-    { OSSL_FUNC_ENCODER_DOES_SELECTION, FUNC_PTR( GsEncoderDoesPrivateKeySelection ) },
-    { OSSL_FUNC_ENCODER_ENCODE, FUNC_PTR( GsEncoderEncodePrivateKeyToPem ) },
-    { OSSL_FUNC_ENCODER_IMPORT_OBJECT, FUNC_PTR( GsEncoderImportObject ) },
-    { OSSL_FUNC_ENCODER_FREE_OBJECT, FUNC_PTR( GsEncoderFreeObject ) },
-    { 0, NULL }
-};
+#define DEFINE_TEXT_ENCODER_FUNCTIONS(name)                                    \
+    const OSSL_DISPATCH TEXT_ENCODER_FUNCTIONS(name)[] = {                     \
+        {OSSL_FUNC_ENCODER_NEWCTX, FUNC_PTR(GsEncoderToTextNewCtx)},           \
+        {OSSL_FUNC_ENCODER_FREECTX, FUNC_PTR(GsEncoderToTextFreeCtx)},         \
+        {OSSL_FUNC_ENCODER_ENCODE, FUNC_PTR(GsEncoderToTextEncode)},           \
+        {OSSL_FUNC_ENCODER_IMPORT_OBJECT, FUNC_PTR(GsEncoderImportObject)},    \
+        {OSSL_FUNC_ENCODER_FREE_OBJECT, FUNC_PTR(GsEncoderFreeObject)},        \
+        {0, NULL}};
 
-const OSSL_DISPATCH gGostR341012_256ToSubjPubKeyInfoDerEncoderFuncs[] =
-{
-    { OSSL_FUNC_ENCODER_NEWCTX, FUNC_PTR( GsEncoderNewCtx ) },
-    { OSSL_FUNC_ENCODER_FREECTX, FUNC_PTR( GsEncoderFreeCtx ) },
-    { OSSL_FUNC_ENCODER_GET_PARAMS, FUNC_PTR( GsEncoderGetPublicKeyParams256ToDer ) },
-    { OSSL_FUNC_ENCODER_GETTABLE_PARAMS, FUNC_PTR( GsEncoderGettableParams ) },
-    { OSSL_FUNC_ENCODER_SET_CTX_PARAMS, FUNC_PTR( GsEncoderSetCtxParams ) },
-    { OSSL_FUNC_ENCODER_SETTABLE_CTX_PARAMS, FUNC_PTR( GsEncoderSettableCtxParams ) },
-    { OSSL_FUNC_ENCODER_DOES_SELECTION, FUNC_PTR( GsEncoderDoesPublicKeySelection ) },
-    { OSSL_FUNC_ENCODER_ENCODE, FUNC_PTR( GsEncoderEncodePublicKeyToDer ) },
-    { OSSL_FUNC_ENCODER_IMPORT_OBJECT, FUNC_PTR( GsEncoderImportObject ) },
-    { OSSL_FUNC_ENCODER_FREE_OBJECT, FUNC_PTR( GsEncoderFreeObject ) },
-    { 0, NULL }
-};
+DEFINE_ENCODER_FUNCTIONS(GostR3410_2012_256, PrivateKeyInfo, Der)
+DEFINE_ENCODER_FUNCTIONS(GostR3410_2012_256, PrivateKeyInfo, Pem)
+DEFINE_ENCODER_FUNCTIONS(GostR3410_2012_256, SubjectPublicKeyInfo, Der)
+DEFINE_ENCODER_FUNCTIONS(GostR3410_2012_256, SubjectPublicKeyInfo, Pem)
+DEFINE_ENCODER_FUNCTIONS(GostR3410_2012_256, TypeSpecific, Der)
+DEFINE_ENCODER_FUNCTIONS(GostR3410_2012_256, TypeSpecific, Pem)
+DEFINE_TEXT_ENCODER_FUNCTIONS(GostR3410_2012_256)
 
-const OSSL_DISPATCH gGostR341012_256ToSubjPubKeyInfoPemEncoderFuncs[] =
-{
-    { OSSL_FUNC_ENCODER_NEWCTX, FUNC_PTR( GsEncoderNewCtx ) },
-    { OSSL_FUNC_ENCODER_FREECTX, FUNC_PTR( GsEncoderFreeCtx ) },
-    { OSSL_FUNC_ENCODER_GET_PARAMS, FUNC_PTR( GsEncoderGetPublicKeyParams256ToPem ) },
-    { OSSL_FUNC_ENCODER_GETTABLE_PARAMS, FUNC_PTR( GsEncoderGettableParams ) },
-    { OSSL_FUNC_ENCODER_SET_CTX_PARAMS, FUNC_PTR( GsEncoderSetCtxParams ) },
-    { OSSL_FUNC_ENCODER_SETTABLE_CTX_PARAMS, FUNC_PTR( GsEncoderSettableCtxParams ) },
-    { OSSL_FUNC_ENCODER_DOES_SELECTION, FUNC_PTR( GsEncoderDoesPublicKeySelection ) },
-    { OSSL_FUNC_ENCODER_ENCODE, FUNC_PTR( GsEncoderEncodePublicKeyToPem ) },
-    { OSSL_FUNC_ENCODER_IMPORT_OBJECT, FUNC_PTR( GsEncoderImportObject ) },
-    { OSSL_FUNC_ENCODER_FREE_OBJECT, FUNC_PTR( GsEncoderFreeObject ) },
-    { 0, NULL }
-};
-
-const OSSL_DISPATCH gGostR341012_256ToTypeSpecificDerEncoderFuncs[] =
-{
-    { OSSL_FUNC_ENCODER_NEWCTX, FUNC_PTR( GsEncoderNewCtx ) },
-    { OSSL_FUNC_ENCODER_FREECTX, FUNC_PTR( GsEncoderFreeCtx ) },
-    { OSSL_FUNC_ENCODER_GET_PARAMS, FUNC_PTR( GsEncoderGetKeyParams256ToDer ) },
-    { OSSL_FUNC_ENCODER_GETTABLE_PARAMS, FUNC_PTR( GsEncoderGettableParams ) },
-    { OSSL_FUNC_ENCODER_SET_CTX_PARAMS, FUNC_PTR( GsEncoderSetCtxParams ) },
-    { OSSL_FUNC_ENCODER_SETTABLE_CTX_PARAMS, FUNC_PTR( GsEncoderSettableCtxParams ) },
-    { OSSL_FUNC_ENCODER_DOES_SELECTION, FUNC_PTR( GsEncoderDoesKeyParamsSelection ) },
-    { OSSL_FUNC_ENCODER_ENCODE, FUNC_PTR( GsEncoderEncodeKeyParamsToDer ) },
-    { OSSL_FUNC_ENCODER_IMPORT_OBJECT, FUNC_PTR( GsEncoderImportObject ) },
-    { OSSL_FUNC_ENCODER_FREE_OBJECT, FUNC_PTR( GsEncoderFreeObject ) },
-    { 0, NULL }
-};
-
-const OSSL_DISPATCH gGostR341012_256ToTypeSpecificPemEncoderFuncs[] =
-{
-    { OSSL_FUNC_ENCODER_NEWCTX, FUNC_PTR( GsEncoderNewCtx ) },
-    { OSSL_FUNC_ENCODER_FREECTX, FUNC_PTR( GsEncoderFreeCtx ) },
-    { OSSL_FUNC_ENCODER_GET_PARAMS, FUNC_PTR( GsEncoderGetKeyParams256ToPem ) },
-    { OSSL_FUNC_ENCODER_GETTABLE_PARAMS, FUNC_PTR( GsEncoderGettableParams ) },
-    { OSSL_FUNC_ENCODER_SET_CTX_PARAMS, FUNC_PTR( GsEncoderSetCtxParams ) },
-    { OSSL_FUNC_ENCODER_SETTABLE_CTX_PARAMS, FUNC_PTR( GsEncoderSettableCtxParams ) },
-    { OSSL_FUNC_ENCODER_DOES_SELECTION, FUNC_PTR( GsEncoderDoesKeyParamsSelection ) },
-    { OSSL_FUNC_ENCODER_ENCODE, FUNC_PTR( GsEncoderEncodeKeyParamsToPem ) },
-    { OSSL_FUNC_ENCODER_IMPORT_OBJECT, FUNC_PTR( GsEncoderImportObject ) },
-    { OSSL_FUNC_ENCODER_FREE_OBJECT, FUNC_PTR( GsEncoderFreeObject ) },
-    { 0, NULL }
-};
-
-const OSSL_DISPATCH gGostR341012_256ToTextEncoderFuncs[] =
-{
-    { OSSL_FUNC_ENCODER_NEWCTX, FUNC_PTR( GsEncoderToTextNewCtx ) },
-    { OSSL_FUNC_ENCODER_FREECTX, FUNC_PTR( GsEncoderToTextFreeCtx ) },
-    { OSSL_FUNC_ENCODER_GET_PARAMS, FUNC_PTR( GsEncoderToTextGetAllKeyParams256 ) },
-    { OSSL_FUNC_ENCODER_GETTABLE_PARAMS, FUNC_PTR( GsEncoderToTextGettableParams ) },
-    { OSSL_FUNC_ENCODER_ENCODE, FUNC_PTR( GsEncoderToTextEncode ) },
-    { OSSL_FUNC_ENCODER_IMPORT_OBJECT, FUNC_PTR( GsEncoderImportObject ) },
-    { OSSL_FUNC_ENCODER_FREE_OBJECT, FUNC_PTR( GsEncoderFreeObject ) },
-    { 0, NULL }
-};
+DEFINE_ENCODER_FUNCTIONS(GostR3410_2012_512, PrivateKeyInfo, Der)
+DEFINE_ENCODER_FUNCTIONS(GostR3410_2012_512, PrivateKeyInfo, Pem)
+DEFINE_ENCODER_FUNCTIONS(GostR3410_2012_512, SubjectPublicKeyInfo, Der)
+DEFINE_ENCODER_FUNCTIONS(GostR3410_2012_512, SubjectPublicKeyInfo, Pem)
+DEFINE_ENCODER_FUNCTIONS(GostR3410_2012_512, TypeSpecific, Der)
+DEFINE_ENCODER_FUNCTIONS(GostR3410_2012_512, TypeSpecific, Pem)
+DEFINE_TEXT_ENCODER_FUNCTIONS(GostR3410_2012_512)
