@@ -1,13 +1,14 @@
 cmake_minimum_required(VERSION 3.10)
 
 set(LIB_NAME gostone)
-file(GLOB SOURCES
-     *.c
-     ciphers/*.c
-     digests/*.c
-     keymgmt/*.c
-     encode/*.c
-     signature/*.c)
+
+aux_source_directory(${PROJECT_SOURCE_DIR}/provider/ SOURCES)
+aux_source_directory(${PROJECT_SOURCE_DIR}/provider/ciphers SOURCES)
+aux_source_directory(${PROJECT_SOURCE_DIR}/provider/digests SOURCES)
+aux_source_directory(${PROJECT_SOURCE_DIR}/provider/encode SOURCES)
+aux_source_directory(${PROJECT_SOURCE_DIR}/provider/keymgmt SOURCES)
+aux_source_directory(${PROJECT_SOURCE_DIR}/provider/signature SOURCES)
 
 add_library(${LIB_NAME} SHARED ${SOURCES})
 set_target_properties(${LIB_NAME} PROPERTIES PREFIX "")
+
