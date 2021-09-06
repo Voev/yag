@@ -6,6 +6,7 @@ aux_source_directory(${PROJECT_SOURCE_DIR}/provider/ SOURCES)
 aux_source_directory(${PROJECT_SOURCE_DIR}/provider/ciphers SOURCES)
 aux_source_directory(${PROJECT_SOURCE_DIR}/provider/digests SOURCES)
 aux_source_directory(${PROJECT_SOURCE_DIR}/provider/encode SOURCES)
+aux_source_directory(${PROJECT_SOURCE_DIR}/provider/kdfs SOURCES)
 aux_source_directory(${PROJECT_SOURCE_DIR}/provider/keymgmt SOURCES)
 aux_source_directory(${PROJECT_SOURCE_DIR}/provider/signature SOURCES)
 

@@ -100,6 +100,11 @@ static const OSSL_ALGORITHM gGsCiphers[] = {
      "GOST R 34.12-2015 Kuznyechik in ECB mode"},
     {NULL, NULL, NULL, NULL}};
 
+static const OSSL_ALGORITHM gGsKdfs[] = {{"kdf_tree12_256", "provider=gostone",
+                                          gKdfTree12_256Funcs,
+                                          "KDF TREE 2012 256"},
+                                         {NULL, NULL, NULL, NULL}};
+
 static const OSSL_ALGORITHM* GsQuery(OSSL_PROVIDER* prov ossl_unused,
                                      int operation, int* noCache)
 {
@@ -124,11 +129,12 @@ static const OSSL_ALGORITHM* GsQuery(OSSL_PROVIDER* prov ossl_unused,
     case OSSL_OP_CIPHER:
         alg = gGsCiphers;
         break;
-    case OSSL_OP_MAC:
     case OSSL_OP_KDF:
+        alg = gGsKdfs;
+        break;
+    case OSSL_OP_MAC:
     case OSSL_OP_RAND:
     case OSSL_OP_KEYEXCH:
-        break;
     case OSSL_OP_ASYM_CIPHER:
     case OSSL_OP_KEM:
     default:
