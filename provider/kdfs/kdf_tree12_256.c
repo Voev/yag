@@ -60,7 +60,7 @@ void GsKdfTree12_256Free(void* vctx)
     if (ctx)
     {
         GsKdfTree12_256Reset(ctx);
-        OPENSSL_free(ctx);
+        OPENSSL_clear_free(ctx, sizeof(*ctx));
     }
 }
 
@@ -88,7 +88,6 @@ int GsKdfTree12_256Derive(void* vctx, unsigned char* key, size_t keyLen,
     {
         return 0;
     }
-
     if (BUF_MEM_empty(ctx->secret))
     {
         ERR_raise(ERR_LIB_PROV, PROV_R_MISSING_SECRET);
@@ -143,24 +142,6 @@ int GsKdfTree12_256SetCtxParams(void* vctx, const OSSL_PARAM params[])
     p = OSSL_PARAM_locate_const(params, OSSL_KDF_PARAM_SEED);
     if (p != NULL)
     {
-        /*
-        for (; p != NULL;
-             p = OSSL_PARAM_locate_const(p + 1, OSSL_KDF_PARAM_SEED))
-        {
-            if (p->data_size != 0 && p->data != NULL)
-            {
-                size_t oldLen = BUF_MEM_size(ctx->seed);
-                void* ptr = BUF_MEM_shifted_data(ctx->seed, oldLen);
-                size_t usedLen = 0;
-
-                if (!OSSL_PARAM_get_octet_string(p, NULL, 0, &usedLen) ||
-                    !BUF_MEM_grow(ctx->seed, usedLen) ||
-                    !OSSL_PARAM_get_octet_string(p, &ptr, 0, NULL))
-                {
-                    return 0;
-                }
-            }
-        }*/
         size_t usedLen = 0;
 
         if (!OSSL_PARAM_get_octet_string(p, NULL, 0, &usedLen) ||
@@ -206,15 +187,19 @@ const OSSL_PARAM* GsKdfTree12_256GettableCtxParams(ossl_unused void* ctx,
 int GsKdfTree12_256(BUF_MEM* secret, BUF_MEM* label, BUF_MEM* seed, size_t R,
                     unsigned char* key, size_t keyLen)
 {
+    OSSL_PARAM param[] = {OSSL_PARAM_END, OSSL_PARAM_END};
+    const char* alg = SN_id_GostR3411_2012_256;
     unsigned char* LBytes = NULL;
     unsigned char* ptr;
     EVP_MAC* mac;
     EVP_MD* md;
     uint32_t L;
-    size_t iters, LSize = 4;
+    size_t iter, iters, LSize = 4;
     int blockSize, ret = 0;
 
-    md = EVP_MD_fetch(NULL, SN_id_GostR3411_2012_256, NULL);
+    param[0] =
+        OSSL_PARAM_construct_utf8_string(OSSL_MAC_PARAM_DIGEST, (char*)alg, 0);
+    md = EVP_MD_fetch(NULL, alg, NULL);
     if (md == NULL)
     {
         ERR_raise(ERR_LIB_PROV, PROV_R_DIGEST_NOT_ALLOWED);
@@ -239,16 +224,11 @@ int GsKdfTree12_256(BUF_MEM* secret, BUF_MEM* label, BUF_MEM* seed, size_t R,
         ERR_raise(ERR_LIB_PROV, PROV_R_UNSUPPORTED_MAC_TYPE);
         goto end;
     }
-    ptr = key;
 
-    OSSL_PARAM algParam[] = {OSSL_PARAM_END, OSSL_PARAM_END};
-    algParam[0] = OSSL_PARAM_construct_utf8_string(OSSL_MAC_PARAM_DIGEST,
-                                                   SN_id_GostR3411_2012_256, 0);
-
-    for (size_t iter = 1; iter <= iters; ++iter)
+    for (iter = 1, ptr = key; iter <= iters; ++iter)
     {
         const uint8_t zeroByte = 0x00;
-        size_t outl = 0;
+        size_t outSize = 0;
 
         uint32_t i = htonl(iter);
         unsigned char* RBytes = (unsigned char*)&i + (4 - R);
@@ -256,19 +236,19 @@ int GsKdfTree12_256(BUF_MEM* secret, BUF_MEM* label, BUF_MEM* seed, size_t R,
         EVP_MAC_CTX* ctx = EVP_MAC_CTX_new(mac);
         if (ctx == NULL ||
             !EVP_MAC_init(ctx, BUF_MEM_data(secret), BUF_MEM_size(secret),
-                          algParam) ||
+                          param) ||
             !EVP_MAC_update(ctx, RBytes, R) ||
             !EVP_MAC_update(ctx, BUF_MEM_data(label), BUF_MEM_size(label)) ||
             !EVP_MAC_update(ctx, &zeroByte, sizeof(zeroByte)) ||
             !EVP_MAC_update(ctx, BUF_MEM_data(seed), BUF_MEM_size(seed)) ||
             !EVP_MAC_update(ctx, LBytes, LSize) ||
-            !EVP_MAC_final(ctx, ptr, &outl, keyLen))
+            !EVP_MAC_final(ctx, ptr, &outSize, 0))
         {
             EVP_MAC_CTX_free(ctx);
             goto end;
         }
         EVP_MAC_CTX_free(ctx);
-        ptr += outl;
+        ptr += outSize;
     }
     ret = 1;
 end:
