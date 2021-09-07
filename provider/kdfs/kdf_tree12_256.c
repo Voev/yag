@@ -162,7 +162,8 @@ const OSSL_PARAM* GsKdfTree12_256SettableCtxParams(ossl_unused void* ctx,
         OSSL_PARAM_octet_string(OSSL_KDF_PARAM_SECRET, NULL, 0),
         OSSL_PARAM_octet_string(OSSL_KDF_PARAM_SEED, NULL, 0),
         OSSL_PARAM_octet_string(OSSL_KDF_PARAM_LABEL, NULL, 0),
-        OSSL_PARAM_uint64(OSSL_KDF_PARAM_ITER, NULL), OSSL_PARAM_END};
+        OSSL_PARAM_octet_string(OSSL_KDF_PARAM_CONSTANT, NULL, 0),
+        OSSL_PARAM_END};
     return gKnownSettableCtxParams;
 }
 

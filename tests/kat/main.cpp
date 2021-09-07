@@ -5,6 +5,8 @@
 
 int main(int argc, char* argv[])
 {
+    if (argc != 2)
+        return EXIT_FAILURE;
     FileParser::Instance().Parse(argv[1]);
     testing::InitGoogleTest(&argc, argv);
     OSSL_PROVIDER* defaultProv = OSSL_PROVIDER_load(nullptr, "default");

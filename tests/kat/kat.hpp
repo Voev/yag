@@ -12,9 +12,26 @@ class KAT
     virtual ~KAT() = default;
     virtual void Execute() = 0;
 
-    void SetExecutable(bool executable) { executable_ = executable; }
-    bool GetExecutable() const { return executable_; }
-    bool CheckResult() { return actual_ == etalon_; };
+    void SetExecutable(bool executable)
+    {
+        executable_ = executable;
+    }
+    bool GetExecutable() const
+    {
+        return executable_;
+    }
+    bool CheckResult()
+    {
+        return actual_ == expected_;
+    };
+    std::vector<uint8_t> GetActual() const
+    {
+        return actual_;
+    }
+    std::vector<uint8_t> GetExpected() const
+    {
+        return expected_;
+    }
 
   private:
     KAT(const KAT&) = delete;
@@ -25,7 +42,7 @@ class KAT
 
   protected:
     std::vector<uint8_t> actual_;
-    std::vector<uint8_t> etalon_;
+    std::vector<uint8_t> expected_;
 
   private:
     bool executable_ = false;
@@ -38,8 +55,12 @@ class KATExecutor : public testing::TestWithParam<
     KATExecutor() = default;
     ~KATExecutor() = default;
 
-    virtual void SetUp() override {}
-    virtual void TearDown() override {}
+    virtual void SetUp() override
+    {
+    }
+    virtual void TearDown() override
+    {
+    }
 
     static std::unique_ptr<KAT> MakeKnownAnswerTest(
         std::pair<const std::string, FileParser::Section> param);
