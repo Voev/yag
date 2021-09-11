@@ -29,20 +29,12 @@ void* GsKdfTree12_256New(void* provCtx)
     GsKdfTree* ctx = OPENSSL_zalloc(sizeof(*ctx));
     if (ctx == NULL)
     {
-        return NULL;
-    }
-    ctx->label = BUF_MEM_new();
-    if (ctx->label == NULL)
-    {
         goto err;
     }
     ctx->secret = BUF_MEM_new_ex(BUF_MEM_FLAG_SECURE);
-    if (ctx->secret == NULL)
-    {
-        goto err;
-    }
+    ctx->label = BUF_MEM_new();
     ctx->seed = BUF_MEM_new();
-    if (ctx->seed == NULL)
+    if (ctx->secret == NULL || ctx->label == NULL || ctx->seed == NULL)
     {
         goto err;
     }
@@ -60,7 +52,7 @@ void GsKdfTree12_256Free(void* vctx)
     if (ctx)
     {
         GsKdfTree12_256Reset(ctx);
-        OPENSSL_clear_free(ctx, sizeof(*ctx));
+        OPENSSL_free(ctx);
     }
 }
 
@@ -93,6 +85,11 @@ int GsKdfTree12_256Derive(void* vctx, unsigned char* key, size_t keyLen,
         ERR_raise(ERR_LIB_PROV, PROV_R_MISSING_SECRET);
         return 0;
     }
+    if (BUF_MEM_empty(ctx->label))
+    {
+#pragma message "add error log"
+        return 0;
+    }
     if (BUF_MEM_empty(ctx->seed))
     {
         ERR_raise(ERR_LIB_PROV, PROV_R_MISSING_SEED);
@@ -121,6 +118,7 @@ int GsKdfTree12_256SetCtxParams(void* vctx, const OSSL_PARAM params[])
             !OSSL_PARAM_get_octet_string(p, (void**)&ctx->label->data, usedLen,
                                          NULL))
         {
+            ERR_raise(ERR_LIB_PROV, PROV_R_FAILED_TO_SET_PARAMETER);
             return 0;
         }
     }
@@ -135,6 +133,7 @@ int GsKdfTree12_256SetCtxParams(void* vctx, const OSSL_PARAM params[])
             !OSSL_PARAM_get_octet_string(p, (void**)&ctx->secret->data, usedLen,
                                          NULL))
         {
+            ERR_raise(ERR_LIB_PROV, PROV_R_FAILED_TO_SET_PARAMETER);
             return 0;
         }
     }
@@ -149,6 +148,7 @@ int GsKdfTree12_256SetCtxParams(void* vctx, const OSSL_PARAM params[])
             !OSSL_PARAM_get_octet_string(p, (void**)&ctx->seed->data, usedLen,
                                          NULL))
         {
+            ERR_raise(ERR_LIB_PROV, PROV_R_FAILED_TO_SET_PARAMETER);
             return 0;
         }
     }
@@ -192,7 +192,7 @@ int GsKdfTree12_256(BUF_MEM* secret, BUF_MEM* label, BUF_MEM* seed, size_t R,
     const char* alg = SN_id_GostR3411_2012_256;
     unsigned char* LBytes = NULL;
     unsigned char* ptr;
-    EVP_MAC* mac;
+    EVP_MAC* mac = NULL;
     EVP_MD* md;
     uint32_t L;
     size_t iter, iters, LSize = 4;
@@ -208,6 +208,11 @@ int GsKdfTree12_256(BUF_MEM* secret, BUF_MEM* label, BUF_MEM* seed, size_t R,
     }
     blockSize = EVP_MD_size(md);
 
+    if (key == NULL)
+    {
+        ERR_raise(ERR_LIB_PROV, ERR_R_PASSED_NULL_PARAMETER);
+        goto end;
+    }
     if (keyLen == 0 || keyLen % blockSize != 0)
     {
         ERR_raise(ERR_LIB_PROV, PROV_R_UNSUPPORTED_KEY_SIZE);
