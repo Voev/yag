@@ -1,3 +1,4 @@
+#include <vector>
 #include <gtest/gtest.h>
 #include <openssl/core_names.h>
 #include <openssl/err.h>
@@ -5,21 +6,10 @@
 #include <openssl/kdf.h>
 #include <openssl/proverr.h>
 #include <openssl/provider.h>
-#include <vector>
 
 #include <utilities/name_generator.hpp>
 #include <utilities/ossl_pointers.hpp>
 #include <utilities/ossl_tool.hpp>
-
-/*
-static std::string
-BaseNameGenerator(const testing::TestParamInfo<BaseParam>& info)
-{
-    auto param = info.param;
-    std::string name = param.group;
-    NameGeneratorFiltering(name);
-    return name;
-}*/
 
 class KdfTreeTest : public testing::Test
 {
@@ -32,20 +22,19 @@ class KdfTreeTest : public testing::Test
 
     void TearDown()
     {
-#pragma message "delete errors"
         ERR_print_errors_fp(stderr);
     }
     ossl::EvpKdfPtr kdf;
 };
 
-unsigned char secret[] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
-                          0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f,
-                          0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17,
-                          0x18, 0x19, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e, 0x1f};
+static unsigned char secret[] = {
+    0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a,
+    0x0b, 0x0c, 0x0d, 0x0e, 0x0f, 0x10, 0x11, 0x12, 0x13, 0x14, 0x15,
+    0x16, 0x17, 0x18, 0x19, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e, 0x1f};
 
-unsigned char label[] = {0x26, 0xbd, 0xb8, 0x78};
+static unsigned char label[] = {0x26, 0xbd, 0xb8, 0x78};
 
-unsigned char seed[] = {0xaf, 0x21, 0x43, 0x41, 0x45, 0x65, 0x63, 0x78};
+static unsigned char seed[] = {0xaf, 0x21, 0x43, 0x41, 0x45, 0x65, 0x63, 0x78};
 
 TEST_F(KdfTreeTest, GetKdfSize)
 {
@@ -97,7 +86,7 @@ TEST_F(KdfTreeTest, InvalidOutputKeyValue)
     std::vector<uint8_t> key(64);
     ASSERT_EQ(EVP_KDF_derive(ctx.get(), nullptr, key.size(), nullptr), 0);
 
-    auto err = ERR_peek_last_error();
+    auto err = ERR_get_error();
     ASSERT_EQ(ERR_GET_REASON(err), ERR_R_PASSED_NULL_PARAMETER);
 }
 
@@ -119,7 +108,7 @@ TEST_F(KdfTreeTest, InvalidOutputKeyLength)
     std::vector<uint8_t> key(64);
     ASSERT_EQ(EVP_KDF_derive(ctx.get(), key.data(), 0, nullptr), 0);
 
-    auto err = ERR_peek_last_error();
+    auto err = ERR_get_error();
     ASSERT_EQ(ERR_GET_REASON(err), PROV_R_UNSUPPORTED_KEY_SIZE);
 }
 
@@ -139,7 +128,7 @@ TEST_F(KdfTreeTest, MissingSecretParam)
     std::vector<uint8_t> key(64);
     ASSERT_EQ(EVP_KDF_derive(ctx.get(), key.data(), key.size(), nullptr), 0);
 
-    auto err = ERR_peek_last_error();
+    auto err = ERR_get_error();
     ASSERT_EQ(ERR_GET_REASON(err), PROV_R_MISSING_SECRET);
 }
 
@@ -160,7 +149,7 @@ TEST_F(KdfTreeTest, InvalidSecretParam)
     std::vector<uint8_t> key(64);
     ASSERT_EQ(EVP_KDF_derive(ctx.get(), key.data(), key.size(), params), 0);
 
-    auto err = ERR_peek_last_error();
+    auto err = ERR_get_error();
     ASSERT_EQ(ERR_GET_REASON(err), PROV_R_FAILED_TO_SET_PARAMETER);
 }
 
@@ -180,8 +169,8 @@ TEST_F(KdfTreeTest, MissingLabelParam)
     std::vector<uint8_t> key(64);
     ASSERT_EQ(EVP_KDF_derive(ctx.get(), key.data(), key.size(), nullptr), 0);
 
-    // auto err = ERR_peek_last_error();
-    // ASSERT_EQ(ERR_GET_REASON(err), PROV_R_missi);
+    auto err = ERR_get_error();
+    ASSERT_EQ(ERR_GET_REASON(err), PROV_R_INVALID_DATA);
 }
 
 TEST_F(KdfTreeTest, InvalidLabelParam)
@@ -201,7 +190,7 @@ TEST_F(KdfTreeTest, InvalidLabelParam)
     std::vector<uint8_t> key(64);
     ASSERT_EQ(EVP_KDF_derive(ctx.get(), key.data(), key.size(), params), 0);
 
-    auto err = ERR_peek_last_error();
+    auto err = ERR_get_error();
     ASSERT_EQ(ERR_GET_REASON(err), PROV_R_FAILED_TO_SET_PARAMETER);
 }
 
@@ -221,7 +210,7 @@ TEST_F(KdfTreeTest, MissingSeedParam)
     std::vector<uint8_t> key(64);
     ASSERT_EQ(EVP_KDF_derive(ctx.get(), key.data(), key.size(), nullptr), 0);
 
-    auto err = ERR_peek_last_error();
+    auto err = ERR_get_error();
     ASSERT_EQ(ERR_GET_REASON(err), PROV_R_MISSING_SEED);
 }
 
@@ -242,7 +231,7 @@ TEST_F(KdfTreeTest, InvalidSeedParam)
     std::vector<uint8_t> key(64);
     ASSERT_EQ(EVP_KDF_derive(ctx.get(), key.data(), key.size(), params), 0);
 
-    auto err = ERR_peek_last_error();
+    auto err = ERR_get_error();
     ASSERT_EQ(ERR_GET_REASON(err), PROV_R_FAILED_TO_SET_PARAMETER);
 }
 

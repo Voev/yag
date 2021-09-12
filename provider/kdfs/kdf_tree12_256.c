@@ -12,6 +12,8 @@
 #include <gostone/provider_ctx.h>
 #include <gostone/buffer.h>
 
+#pragma message "make set constant"
+
 typedef struct gs_kdf_tree_st
 {
     void* provCtx;
@@ -87,7 +89,7 @@ int GsKdfTree12_256Derive(void* vctx, unsigned char* key, size_t keyLen,
     }
     if (BUF_MEM_empty(ctx->label))
     {
-#pragma message "add error log"
+        ERR_raise(ERR_LIB_PROV, PROV_R_INVALID_DATA);
         return 0;
     }
     if (BUF_MEM_empty(ctx->seed))
