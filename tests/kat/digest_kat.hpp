@@ -1,6 +1,9 @@
+#pragma once
+#include <openssl/evp.h>
+#include <utilities/ossl_pointers.hpp>
+
 #include "file_parser.hpp"
 #include "kat.hpp"
-#include <openssl/evp.h>
 
 class DigestKAT final : public KAT
 {
@@ -10,5 +13,5 @@ class DigestKAT final : public KAT
 
   private:
     std::vector<uint8_t> message_;
-    const EVP_MD* digest_ = nullptr;
+    ossl::EvpMdPtr digest_;
 };

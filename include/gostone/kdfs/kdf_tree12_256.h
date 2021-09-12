@@ -1,0 +1,11 @@
+#pragma once
+#include <openssl/core_dispatch.h>
+
+OSSL_FUNC_kdf_newctx_fn GsKdfTree12_256New;
+OSSL_FUNC_kdf_freectx_fn GsKdfTree12_256Free;
+OSSL_FUNC_kdf_reset_fn GsKdfTree12_256Reset;
+OSSL_FUNC_kdf_derive_fn GsKdfTree12_256Derive;
+OSSL_FUNC_kdf_settable_ctx_params_fn GsKdfTree12_256SettableCtxParams;
+OSSL_FUNC_kdf_set_ctx_params_fn GsKdfTree12_256SetCtxParams;
+OSSL_FUNC_kdf_gettable_ctx_params_fn GsKdfTree12_256GettableCtxParams;
+OSSL_FUNC_kdf_get_ctx_params_fn GsKdfTree12_256GetCtxParams;
