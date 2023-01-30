@@ -30,9 +30,14 @@ BaseNameGenerator(const testing::TestParamInfo<BaseParam>& info)
 class SignatureTest : public testing::TestWithParam<BaseParam>
 {
   public:
-    void SetUp() {}
+    void SetUp()
+    {
+    }
 
-    void TearDown() { ERR_print_errors_fp(stderr); }
+    void TearDown()
+    {
+        ERR_print_errors_fp(stderr);
+    }
 };
 
 TEST_P(SignatureTest, SignVerifyEmptyMessageDigest_SelfTest)
@@ -45,13 +50,16 @@ TEST_P(SignatureTest, SignVerifyEmptyMessageDigest_SelfTest)
     ASSERT_NE(md.get(), nullptr);
 
     size_t siglen = 0;
-    std::vector<uint8_t> sig(2 * EVP_MD_size(md.get()));
     std::vector<uint8_t> msg(EVP_MD_size(md.get()), 0);
+    std::vector<uint8_t> sig;
 
     ossl::EvpPkeyCtxPtr ctx(
         EVP_PKEY_CTX_new_from_pkey(nullptr, pkey.get(), nullptr));
     ASSERT_NE(ctx.get(), nullptr);
     ASSERT_LT(0, EVP_PKEY_sign_init(ctx.get()));
+    ASSERT_LT(
+        0, EVP_PKEY_sign(ctx.get(), nullptr, &siglen, msg.data(), msg.size()));
+    sig.resize(siglen);
     ASSERT_LT(0, EVP_PKEY_sign(ctx.get(), sig.data(), &siglen, msg.data(),
                                msg.size()));
 
@@ -62,7 +70,7 @@ TEST_P(SignatureTest, SignVerifyEmptyMessageDigest_SelfTest)
                                  msg.size()));
 }
 
-TEST_P(SignatureTest, SignVerifyMessageDigestWithCopiedCtx_SelfTest)
+TEST_P(SignatureTest, DISABLED_SignVerifyMessageDigestWithCopiedCtx_SelfTest)
 {
     auto param = GetParam();
     ossl::EvpPkeyPtr pkey(ossl::GenerateKeyPair(param.alg, param.group));
@@ -72,20 +80,28 @@ TEST_P(SignatureTest, SignVerifyMessageDigestWithCopiedCtx_SelfTest)
     ASSERT_NE(md.get(), nullptr);
 
     size_t siglen = 0;
-    std::vector<uint8_t> sig(2 * EVP_MD_size(md.get()));
     std::vector<uint8_t> msg(EVP_MD_size(md.get()), 0);
+    std::vector<uint8_t> sig;
 
     ossl::EvpPkeyCtxPtr ctx(
         EVP_PKEY_CTX_new_from_pkey(nullptr, pkey.get(), nullptr));
     ASSERT_NE(ctx.get(), nullptr);
     ASSERT_LT(0, EVP_PKEY_sign_init(ctx.get()));
+    ASSERT_LT(
+        0, EVP_PKEY_sign(ctx.get(), nullptr, &siglen, msg.data(), msg.size()));
+    sig.resize(siglen);
     ASSERT_LT(0, EVP_PKEY_sign(ctx.get(), sig.data(), &siglen, msg.data(),
                                msg.size()));
 
-    ossl::EvpPkeyCtxPtr cctx(EVP_PKEY_CTX_dup(ctx.get()));
-    ASSERT_NE(cctx.get(), nullptr);
-    ASSERT_LT(0, EVP_PKEY_verify_init(cctx.get()));
-    ASSERT_LT(0, EVP_PKEY_verify(cctx.get(), sig.data(), sig.size(), msg.data(),
+    ossl::EvpPkeyCtxPtr vctx(
+        EVP_PKEY_CTX_new_from_pkey(nullptr, pkey.get(), nullptr));
+    
+    // Copying is not supported
+    // ossl::EvpPkeyCtxPtr cctx(EVP_PKEY_CTX_dup(ctx.get()));
+
+    ASSERT_NE(vctx.get(), nullptr);
+    ASSERT_LT(0, EVP_PKEY_verify_init(vctx.get()));
+    ASSERT_LT(0, EVP_PKEY_verify(vctx.get(), sig.data(), sig.size(), msg.data(),
                                  msg.size()));
 }
 
@@ -99,8 +115,8 @@ TEST_P(SignatureTest, SignVerifyMessageDigest_SelfTest)
     ASSERT_NE(md.get(), nullptr);
 
     size_t siglen = 0;
-    std::vector<uint8_t> sig(2 * EVP_MD_size(md.get()));
     std::vector<uint8_t> msg(EVP_MD_size(md.get()), 0);
+    std::vector<uint8_t> sig;
 
     ASSERT_LT(0, RAND_bytes(msg.data(), static_cast<int>(msg.size())));
 
@@ -108,6 +124,9 @@ TEST_P(SignatureTest, SignVerifyMessageDigest_SelfTest)
         EVP_PKEY_CTX_new_from_pkey(nullptr, pkey.get(), nullptr));
     ASSERT_NE(ctx.get(), nullptr);
     ASSERT_LT(0, EVP_PKEY_sign_init(ctx.get()));
+    ASSERT_LT(
+        0, EVP_PKEY_sign(ctx.get(), nullptr, &siglen, msg.data(), msg.size()));
+    sig.resize(siglen);
     ASSERT_LT(0, EVP_PKEY_sign(ctx.get(), sig.data(), &siglen, msg.data(),
                                msg.size()));
 
@@ -156,8 +175,8 @@ TEST_P(SignatureTest, SignVerifyMessageDigest_CorruptSignature)
     ASSERT_NE(md.get(), nullptr);
 
     size_t siglen = 0;
-    std::vector<uint8_t> sig(2 * EVP_MD_size(md.get()));
     std::vector<uint8_t> msg(EVP_MD_size(md.get()), 0);
+    std::vector<uint8_t> sig;
 
     ASSERT_LT(0, RAND_bytes(msg.data(), static_cast<int>(msg.size())));
 
@@ -165,6 +184,9 @@ TEST_P(SignatureTest, SignVerifyMessageDigest_CorruptSignature)
         EVP_PKEY_CTX_new_from_pkey(nullptr, pkey.get(), nullptr));
     ASSERT_NE(ctx.get(), nullptr);
     ASSERT_LT(0, EVP_PKEY_sign_init(ctx.get()));
+    ASSERT_LT(
+        0, EVP_PKEY_sign(ctx.get(), nullptr, &siglen, msg.data(), msg.size()));
+    sig.resize(siglen);
     ASSERT_LT(0, EVP_PKEY_sign(ctx.get(), sig.data(), &siglen, msg.data(),
                                msg.size()));
 

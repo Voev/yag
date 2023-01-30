@@ -250,7 +250,7 @@ int GsKdfTree12_256(BUF_MEM* secret, BUF_MEM* label, BUF_MEM* seed, size_t R,
             !EVP_MAC_update(ctx, &zeroByte, sizeof(zeroByte)) ||
             !EVP_MAC_update(ctx, BUF_MEM_data(seed), BUF_MEM_size(seed)) ||
             !EVP_MAC_update(ctx, LBytes, LSize) ||
-            !EVP_MAC_final(ctx, ptr, &outSize, 0))
+            !EVP_MAC_final(ctx, ptr, &outSize, blockSize))
         {
             EVP_MAC_CTX_free(ctx);
             goto end;
