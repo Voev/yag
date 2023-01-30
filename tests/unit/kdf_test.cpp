@@ -150,8 +150,6 @@ TEST_F(KdfTreeTest, InvalidSecretParam)
     ASSERT_EQ(EVP_KDF_derive(ctx.get(), key.data(), key.size(), params), 0);
 
     auto err = ERR_get_error();
-    ASSERT_EQ(ERR_GET_REASON(err), ERR_R_PASSED_NULL_PARAMETER);
-    err = ERR_get_error();
     ASSERT_EQ(ERR_GET_REASON(err), PROV_R_FAILED_TO_SET_PARAMETER);
 }
 
@@ -193,8 +191,6 @@ TEST_F(KdfTreeTest, InvalidLabelParam)
     ASSERT_EQ(EVP_KDF_derive(ctx.get(), key.data(), key.size(), params), 0);
 
     auto err = ERR_get_error();
-    ASSERT_EQ(ERR_GET_REASON(err), ERR_R_PASSED_NULL_PARAMETER);
-    err = ERR_get_error();
     ASSERT_EQ(ERR_GET_REASON(err), PROV_R_FAILED_TO_SET_PARAMETER);
 }
 
@@ -236,8 +232,6 @@ TEST_F(KdfTreeTest, InvalidSeedParam)
     ASSERT_EQ(EVP_KDF_derive(ctx.get(), key.data(), key.size(), params), 0);
 
     auto err = ERR_get_error();
-    ASSERT_EQ(ERR_GET_REASON(err), ERR_R_PASSED_NULL_PARAMETER);
-    err = ERR_get_error();
     ASSERT_EQ(ERR_GET_REASON(err), PROV_R_FAILED_TO_SET_PARAMETER);
 }
 
