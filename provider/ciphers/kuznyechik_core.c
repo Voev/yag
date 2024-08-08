@@ -170,7 +170,7 @@ static inline uint8_t* ConstantAt(unsigned index)
 static inline void FeistelRoundWithoutSwap(uint8_t* left, uint8_t const* right,
                                            unsigned constantIndex)
 {
-    uint8_t buffer[BlockLengthInBytes];
+    uint8_t buffer[BlockLengthInBytes] = {0};
 
     CopyBlock(buffer, right);
     XorBlocks(buffer, ConstantAt(constantIndex));

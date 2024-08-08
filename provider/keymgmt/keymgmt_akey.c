@@ -190,7 +190,7 @@ int GsAsymmKeyGeneratePublicKey( GsAsymmKey* key, BN_CTX* ctx )
 {
     const BIGNUM* privateKey = GsAsymmKeyGet0PrivateKey( key );
     const EC_GROUP* group = GsAsymmKeyGet0Group( key );
-    EC_POINT* publicKey;
+    EC_POINT* publicKey = NULL;
     int ret = 0;
 
     if( !group || !privateKey )

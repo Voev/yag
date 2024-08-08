@@ -155,7 +155,8 @@ int GsSignatureSign(void* vctx, unsigned char* sig, size_t* siglen,
     GsSignCtx* ctx = INTERPRET_AS_SIGNCTX(vctx);
     const BIGNUM* privateKey;
     const EC_GROUP* group;
-    BIGNUM *left, *rigth, *k, *s, *x, *r, *order, *e, *alpha;
+    BIGNUM *left, *rigth, *k, *s, *x, *r, *order, *e;
+    BIGNUM *alpha = NULL;
     EC_POINT* C = NULL;
     BN_CTX* bctx = NULL;
     size_t half;
