@@ -7,7 +7,7 @@ class YetAnotherGost(ConanFile):
     package_type = "library"
 
     # Metadata
-    author = "Kirill Voyevodin voev.kirill@gmail.com"
+    author = "Kirill Voyevodin (voev.kirill@gmail.com)"
     description = "Yet another OpenSSL GOST provider"
 
     # Binary configuration
@@ -24,7 +24,7 @@ class YetAnotherGost(ConanFile):
     }
 
     def requirements(self):
-        self.requires("openssl/3.0.9")
+        self.requires("openssl/3.0.14", headers=True, libs=True, run=True)
         self.requires("zlib/1.3.1")
         if self.options.enable_tests:
             self.requires("gtest/1.15.0")

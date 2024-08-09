@@ -14,6 +14,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 include(CompilerSettings)
 include(CreateOptions)
 include(ConfigureOptions)
+include(Dependencies)
 
 # Set OpenSSL settings
 find_package(OpenSSL 3.0 REQUIRED)
@@ -23,11 +24,10 @@ include_directories(${OPENSSL_INCLUDE_DIR})
 include_directories(${PROJECT_SOURCE_DIR}/include)
 
 # Entry point for provider sources
-add_subdirectory(provider)
+add_subdirectory(src)
 
 # Entry point for provider tests
 if (ENABLE_TESTS)
-  find_package(GTest REQUIRED)
   enable_testing()
   add_subdirectory(tests)
 endif (ENABLE_TESTS)

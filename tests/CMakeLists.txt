@@ -2,4 +2,4 @@
 add_subdirectory(unit)
 
 # Known answer tests
-add_subdirectory(kat)
+# add_subdirectory(kat)

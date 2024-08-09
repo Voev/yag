@@ -52,9 +52,9 @@ TEST_P(KATExecutor, KATs)
             SUCCEED() << "Not supported";
         }
         kat->Execute();
-        ASSERT_TRUE(kat->CheckResult())
-            << "  Actual: " << kat->GetActual() << "\n"
-            << "Expected: " << kat->GetExpected();
+        ASSERT_TRUE(kat->CheckResult());
+            //<< "  Actual: " << kat->GetActual() << "\n"
+            //<< "Expected: " << kat->GetExpected();
         SUCCEED();
     }
     catch (std::exception& exc)

@@ -10,6 +10,7 @@ Implementation of GOST cryptography provided as an OpenSSL 3.x provider.
 
 * conan (minimum 2.6.0)
 * CMake (minimum 3.18)
+* Compiler (GCC, minimum 11.x)
 
 ### Base dependencies
 
@@ -24,5 +25,11 @@ Implementation of GOST cryptography provided as an OpenSSL 3.x provider.
 1. Download and prepare dependencies (from project root directory):
  
 ```bash
-$ conan install . --output-folder build
+$ conan install .
+```
+
+2. Build project (from project root directory):
+ 
+```bash
+$ conan build .
 ```

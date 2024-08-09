@@ -1,11 +1,10 @@
 if (ENABLE_TESTS)
     enable_testing()
-    find_package(GTest REQUIRED)
 endif (ENABLE_TESTS)
 
 if (ENABLE_CODE_COVERAGE)
-  include(CodeCoverage)
-  append_coverage_compiler_flags()
+    include(CodeCoverage)
+    append_coverage_compiler_flags()
 endif (ENABLE_CODE_COVERAGE)
 
 if (ENABLE_ADDRESS_SANITIZER)
