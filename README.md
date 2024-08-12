@@ -1,4 +1,4 @@
-# Yet another OpenSSL GOST provider
+# Yet another GOST
 
 ## Description
 
