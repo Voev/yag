@@ -1,5 +1,5 @@
-#include <gostone/common.h>
-#include <gostone/kdfs/kdf_tree12_256.h>
+#include <yag/common.h>
+#include <yag/kdfs/kdf_tree12_256.h>
 
 const OSSL_DISPATCH gKdfTree12_256Funcs[] = {
     {OSSL_FUNC_KDF_NEWCTX, FUNC_PTR(GsKdfTree12_256New)},

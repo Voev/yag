@@ -11,7 +11,7 @@ int main(int argc, char* argv[])
     testing::InitGoogleTest(&argc, argv);
 
     OSSL_PROVIDER* defaultProv = OSSL_PROVIDER_load(nullptr, "default");
-    OSSL_PROVIDER* prov = OSSL_PROVIDER_load(nullptr, "gostone");
+    OSSL_PROVIDER* prov = OSSL_PROVIDER_load(nullptr, "yag");
     if (!prov) {
        ERR_print_errors_fp(stderr);
        return EXIT_FAILURE;

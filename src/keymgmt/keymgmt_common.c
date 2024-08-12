@@ -6,12 +6,12 @@
 #include <openssl/ec.h>
 #include <openssl/err.h>
 #include <openssl/objects.h>
-#include <gostone/common.h>
-#include <gostone/provider_ctx.h>
-#include <gostone/implementations.h>
-#include <gostone/keymgmt/keymgmt_akey.h>
-#include <gostone/keymgmt/keymgmt_impl.h>
-#include <gostone/keymgmt/keymgmt_params.h>
+#include <yag/common.h>
+#include <yag/provider_ctx.h>
+#include <yag/implementations.h>
+#include <yag/keymgmt/keymgmt_akey.h>
+#include <yag/keymgmt/keymgmt_impl.h>
+#include <yag/keymgmt/keymgmt_params.h>
 #include <string.h>
 
 void* GsKeyMgmtNew_( void* provData, int algorithm )

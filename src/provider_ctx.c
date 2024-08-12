@@ -1,7 +1,7 @@
 #include <openssl/bio.h>
 #include <openssl/core.h>
 #include <openssl/crypto.h>
-#include <gostone/provider_ctx.h>
+#include <yag/provider_ctx.h>
 
 struct gs_prov_ctx_st
 {

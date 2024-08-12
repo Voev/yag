@@ -6,11 +6,11 @@
 #include <openssl/bn.h>
 #include <openssl/err.h>
 
-#include <gostone/provider_bio.h>
-#include <gostone/keymgmt/keymgmt_akey.h>
-#include <gostone/encode/encode_impl.h>
-#include <gostone/encode/encode_common.h>
-#include <gostone/encode/encode_pubkey.h>
+#include <yag/provider_bio.h>
+#include <yag/keymgmt/keymgmt_akey.h>
+#include <yag/encode/encode_impl.h>
+#include <yag/encode/encode_common.h>
+#include <yag/encode/encode_pubkey.h>
 
 static int GsEncodeToText(BIO* out, const void* keyData, int selection)
 {

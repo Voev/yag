@@ -1,7 +1,7 @@
 #include <openssl/core_dispatch.h>
-#include <gostone/signature/signature_impl.h>
-#include <gostone/common.h>
-#include <gostone/implementations.h>
+#include <yag/signature/signature_impl.h>
+#include <yag/common.h>
+#include <yag/implementations.h>
 
 const OSSL_DISPATCH gGostR341012_SignatureFunctions[] = 
 {

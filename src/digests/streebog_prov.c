@@ -5,9 +5,9 @@
 #include <openssl/evp.h>
 #include <openssl/params.h>
 
-#include <gostone/common.h>
-#include <gostone/implementations.h>
-#include <gostone/digests/streebog_core.h>
+#include <yag/common.h>
+#include <yag/implementations.h>
+#include <yag/digests/streebog_core.h>
 
 static void* StreebogNewCtx( void* provCtx );
 static void StreebogFreeCtx( void* ctx );

@@ -1,6 +1,6 @@
 #include <string.h>
 #include <openssl/buffer.h>
-#include <gostone/buffer.h>
+#include <yag/buffer.h>
 
 size_t BUF_MEM_size(const BUF_MEM* buf)
 {

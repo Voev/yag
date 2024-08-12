@@ -1,6 +1,6 @@
 #pragma once
 
-#include <gostone/provider_ctx.h>
+#include <yag/provider_ctx.h>
 
 int GsProvBioFromDispatch( const OSSL_DISPATCH* funcs );
 

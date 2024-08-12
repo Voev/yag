@@ -2,10 +2,10 @@
 #include <openssl/evp.h>
 #include <openssl/err.h>
 #include <openssl/proverr.h>
-#include <gostone/provider_ctx.h>
-#include <gostone/ciphers/kuznyechik_core.h>
-#include <gostone/ciphers/kuznyechik_defs.h>
-#include <gostone/ciphers/kuznyechik_funcs.h>
+#include <yag/provider_ctx.h>
+#include <yag/ciphers/kuznyechik_core.h>
+#include <yag/ciphers/kuznyechik_defs.h>
+#include <yag/ciphers/kuznyechik_funcs.h>
 
 const OSSL_PARAM* GsKuznyechikGettableParams(ossl_unused void* provCtx)
 {

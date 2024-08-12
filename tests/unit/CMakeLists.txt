@@ -1,5 +1,5 @@
 # Application name
-set(TEST_NAME gostone_unit_tests)
+set(TEST_NAME yag_unit_tests)
 
 # Sources
 file(GLOB_RECURSE SOURCES RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" *.cpp)

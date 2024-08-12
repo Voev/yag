@@ -9,12 +9,12 @@
 #include <openssl/ec.h>
 #include <openssl/pkcs12.h>
 
-#include <gostone/common.h>
-#include <gostone/provider_ctx.h>
-#include <gostone/encode/encode_impl.h>
-#include <gostone/encode/encode_common.h>
-#include <gostone/encode/encode_params.h>
-#include <gostone/keymgmt/keymgmt_akey.h>
+#include <yag/common.h>
+#include <yag/provider_ctx.h>
+#include <yag/encode/encode_impl.h>
+#include <yag/encode/encode_common.h>
+#include <yag/encode/encode_params.h>
+#include <yag/keymgmt/keymgmt_akey.h>
 
 static int GsSerializePrivateKey(const GsAsymmKey* key, unsigned char** buffer)
 {

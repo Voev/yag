@@ -1,6 +1,6 @@
 ﻿#include <string.h>
-#include <gostone/digests/streebog_defs.h>
-#include <gostone/digests/streebog_core.h>
+#include <yag/digests/streebog_defs.h>
+#include <yag/digests/streebog_core.h>
 
 struct gs_streebog_ctx_st
 {

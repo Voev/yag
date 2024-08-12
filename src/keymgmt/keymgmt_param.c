@@ -2,7 +2,7 @@
 #include <openssl/ec.h>
 #include <openssl/err.h>
 #include <openssl/objects.h>
-#include <gostone/keymgmt/keymgmt_params.h>
+#include <yag/keymgmt/keymgmt_params.h>
 
 struct GostR3410Params_st
 {

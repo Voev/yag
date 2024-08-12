@@ -8,9 +8,9 @@
 #include <openssl/params.h>
 #include <openssl/obj_mac.h>
 #include <openssl/evp.h>
-#include <gostone/kdfs/kdf_tree12_256.h>
-#include <gostone/provider_ctx.h>
-#include <gostone/buffer.h>
+#include <yag/kdfs/kdf_tree12_256.h>
+#include <yag/provider_ctx.h>
+#include <yag/buffer.h>
 
 #pragma message "make set constant"
 

@@ -4,10 +4,10 @@
 #include <openssl/ec.h>
 #include <openssl/err.h>
 
-#include <gostone/common.h>
-#include <gostone/provider_ctx.h>
-#include <gostone/keymgmt/keymgmt_akey.h>
-#include <gostone/keymgmt/keymgmt_impl.h>
+#include <yag/common.h>
+#include <yag/provider_ctx.h>
+#include <yag/keymgmt/keymgmt_akey.h>
+#include <yag/keymgmt/keymgmt_impl.h>
 
 int GsKeyMgmtMatch( const void* keyDataA, const void* keyDataB, int selection )
 {

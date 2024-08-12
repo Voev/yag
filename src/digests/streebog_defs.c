@@ -1,4 +1,4 @@
-#include <gostone/digests/streebog_defs.h>
+#include <yag/digests/streebog_defs.h>
 
 const uint64_t gConst0[] =
 {

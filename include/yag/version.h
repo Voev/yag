@@ -1,6 +1,6 @@
 #pragma once
 
-#define PROJECT_NAME "gostone"
+#define PROJECT_NAME "yag"
 
 #define PROJECT_VERSION_MAJOR (0UL)
 

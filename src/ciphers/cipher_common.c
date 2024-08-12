@@ -3,8 +3,8 @@
 #include <openssl/proverr.h>
 #include <openssl/core_names.h>
 #include <openssl/params.h>
-#include <gostone/provider_ctx.h>
-#include <gostone/ciphers/cipher_common.h>
+#include <yag/provider_ctx.h>
+#include <yag/ciphers/cipher_common.h>
 
 GsCipherCtx* GsCipherCtxNew(void)
 {

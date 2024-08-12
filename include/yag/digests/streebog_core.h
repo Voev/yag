@@ -1,6 +1,6 @@
 #pragma once
 #include <stddef.h>
-#include <gostone/digests/streebog_defs.h>
+#include <yag/digests/streebog_defs.h>
 
 typedef struct gs_streebog_ctx_st GsStreebogCtx;
 

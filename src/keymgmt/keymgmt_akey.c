@@ -2,7 +2,7 @@
 #include <openssl/ec.h>
 #include <openssl/err.h>
 #include <openssl/objects.h>
-#include <gostone/keymgmt/keymgmt_akey.h>
+#include <yag/keymgmt/keymgmt_akey.h>
 #include <stdatomic.h>
 
 struct gs_asymm_key_st
