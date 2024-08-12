@@ -8,14 +8,14 @@
 #include <openssl/pem.h>
 #include <openssl/types.h>
 
-#include <gostone/common.h>
-#include <gostone/encode/encode_common.h>
-#include <gostone/encode/encode_impl.h>
-#include <gostone/keymgmt/keymgmt_akey.h>
-#include <gostone/keymgmt/keymgmt_impl.h>
-#include <gostone/keymgmt/keymgmt_params.h>
-#include <gostone/provider_bio.h>
-#include <gostone/provider_ctx.h>
+#include <yag/common.h>
+#include <yag/encode/encode_common.h>
+#include <yag/encode/encode_impl.h>
+#include <yag/keymgmt/keymgmt_akey.h>
+#include <yag/keymgmt/keymgmt_impl.h>
+#include <yag/keymgmt/keymgmt_params.h>
+#include <yag/provider_bio.h>
+#include <yag/provider_ctx.h>
 
 struct gs_encoder_ctx_st
 {

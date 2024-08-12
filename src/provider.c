@@ -5,10 +5,10 @@
 #include <openssl/core_names.h>
 #include <openssl/params.h>
 #include <openssl/obj_mac.h>
-#include <gostone/common.h>
-#include <gostone/implementations.h>
-#include <gostone/provider_bio.h>
-#include <gostone/provider_ctx.h>
+#include <yag/common.h>
+#include <yag/implementations.h>
+#include <yag/provider_bio.h>
+#include <yag/provider_ctx.h>
 
 OSSL_provider_init_fn OSSL_provider_init;
 
@@ -56,16 +56,16 @@ static int GsGetParams(const OSSL_PROVIDER* prov ossl_unused,
 }
 
 static const OSSL_ALGORITHM gGsDigests[] = {
-    {SN_id_GostR3411_2012_256, "provider=gostone", gGostR341112_256Funcs,
+    {SN_id_GostR3411_2012_256, "provider=yag", gGostR341112_256Funcs,
      LN_id_GostR3411_2012_256},
-    {SN_id_GostR3411_2012_512, "provider=gostone", gGostR341112_512Funcs,
+    {SN_id_GostR3411_2012_512, "provider=yag", gGostR341112_512Funcs,
      LN_id_GostR3411_2012_512},
     {NULL, NULL, NULL, NULL}};
 
 static const OSSL_ALGORITHM gGsKeyMgmts[] = {
-    {SN_id_GostR3410_2012_256, "provider=gostone", gGostR341012_256Funcs,
+    {SN_id_GostR3410_2012_256, "provider=yag", gGostR341012_256Funcs,
      LN_id_GostR3410_2012_256},
-    {SN_id_GostR3410_2012_512, "provider=gostone", gGostR341012_512Funcs,
+    {SN_id_GostR3410_2012_512, "provider=yag", gGostR341012_512Funcs,
      LN_id_GostR3410_2012_512},
     {NULL, NULL, NULL, NULL}};
 
@@ -89,18 +89,18 @@ static const OSSL_ALGORITHM gGsEncoders[] = {
 static const OSSL_ALGORITHM gGsDecoders[] = {{NULL, NULL, NULL, NULL}};
 
 static const OSSL_ALGORITHM gGsSignatures[] = {
-    {SN_id_GostR3410_2012_256, "provider=gostone",
+    {SN_id_GostR3410_2012_256, "provider=yag",
      gGostR341012_SignatureFunctions, LN_id_GostR3410_2012_256},
-    {SN_id_GostR3410_2012_512, "provider=gostone",
+    {SN_id_GostR3410_2012_512, "provider=yag",
      gGostR341012_SignatureFunctions, LN_id_GostR3410_2012_512},
     {NULL, NULL, NULL, NULL}};
 
 static const OSSL_ALGORITHM gGsCiphers[] = {
-    {SN_kuznyechik_ecb, "provider=gostone", gKuznyechikECBFuncs,
+    {SN_kuznyechik_ecb, "provider=yag", gKuznyechikECBFuncs,
      "GOST R 34.12-2015 Kuznyechik in ECB mode"},
     {NULL, NULL, NULL, NULL}};
 
-static const OSSL_ALGORITHM gGsKdfs[] = {{"kdf_tree12_256", "provider=gostone",
+static const OSSL_ALGORITHM gGsKdfs[] = {{"kdf_tree12_256", "provider=yag",
                                           gKdfTree12_256Funcs,
                                           "KDF TREE 2012 256"},
                                          {NULL, NULL, NULL, NULL}};

@@ -1,7 +1,7 @@
 #include <openssl/core_dispatch.h>
-#include <gostone/common.h>
-#include <gostone/implementations.h>
-#include <gostone/encode/encode_impl.h>
+#include <yag/common.h>
+#include <yag/implementations.h>
+#include <yag/encode/encode_impl.h>
 
 #define DEFINE_ENCODER_FUNCTIONS(name, structure, output)                      \
     const OSSL_DISPATCH ENCODER_FUNCTIONS(name, structure, output)[] = {       \

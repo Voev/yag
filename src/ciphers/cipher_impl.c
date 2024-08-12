@@ -1,8 +1,8 @@
 #include <openssl/core_dispatch.h>
-#include <gostone/common.h>
-#include <gostone/implementations.h>
-#include <gostone/ciphers/cipher_common.h>
-#include <gostone/ciphers/kuznyechik_funcs.h>
+#include <yag/common.h>
+#include <yag/implementations.h>
+#include <yag/ciphers/cipher_common.h>
+#include <yag/ciphers/kuznyechik_funcs.h>
 
 #define IMPLEMENT_KUZNYECHIK_CIPHER(mode)                                      \
     const OSSL_DISPATCH gKuznyechik##mode##Funcs[] = {                         \

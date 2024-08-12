@@ -1,6 +1,6 @@
 #pragma once
 #include <openssl/core_dispatch.h>
-#include <gostone/ciphers/cipher_common.h>
+#include <yag/ciphers/cipher_common.h>
 
 typedef struct gs_kuznyechik_ctx_st
 {

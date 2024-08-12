@@ -7,9 +7,9 @@
 #include <openssl/evp.h>
 #include <openssl/err.h>
 
-#include <gostone/keymgmt/keymgmt_akey.h>
-#include <gostone/signature/signature_impl.h>
-#include <gostone/provider_ctx.h>
+#include <yag/keymgmt/keymgmt_akey.h>
+#include <yag/signature/signature_impl.h>
+#include <yag/provider_ctx.h>
 
 #define GS_MAX_DIGEST_NAME_SIZE 128
 

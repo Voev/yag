@@ -19,7 +19,7 @@ extern const OSSL_DISPATCH gGostR341012_SignatureFunctions[];
 #define ENCODER_FOR_STRUCTURE(name, structure, output)                         \
     {                                                                          \
         SN_id_##name,                                                          \
-            "provider=gostone,output=" #output                                 \
+            "provider=yag,output=" #output                                 \
             ",structure=" STRUCTURE_##structure,                               \
             ENCODER_FUNCTIONS(name, structure, output), LN_id_##name           \
     }
@@ -27,7 +27,7 @@ extern const OSSL_DISPATCH gGostR341012_SignatureFunctions[];
 #define TEXT_ENCODER_FUNCTIONS(name) g##name##ToTextFuncs
 #define TEXT_ENCODER(name)                                                     \
     {                                                                          \
-        SN_id_##name, "provider=gostone,output=text",                          \
+        SN_id_##name, "provider=yag,output=text",                          \
             TEXT_ENCODER_FUNCTIONS(name), LN_id_##name                         \
     }
 

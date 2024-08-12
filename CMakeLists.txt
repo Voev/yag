@@ -1,14 +1,14 @@
 cmake_minimum_required(VERSION 3.20)
 
 file(STRINGS "VERSION.md" VERSION_STRING)
-project(gostone LANGUAGES C CXX VERSION ${VERSION_STRING})
+project(yag LANGUAGES C CXX VERSION ${VERSION_STRING})
 
 # Set path to CMake modules
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 configure_file(
   ${CMAKE_CURRENT_SOURCE_DIR}/include/${PROJECT_NAME}/version.h.in
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/gostone/version.h)
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/yag/version.h)
 
 # Configure result directories
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)

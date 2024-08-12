@@ -1,6 +1,6 @@
 #include <openssl/bio.h>
 #include <openssl/core_dispatch.h>
-#include <gostone/provider_ctx.h>
+#include <yag/provider_ctx.h>
 
 static OSSL_FUNC_BIO_new_file_fn*    CoreBioNewFile   = NULL;
 static OSSL_FUNC_BIO_new_membuf_fn*  CoreBioNewMembuf = NULL;

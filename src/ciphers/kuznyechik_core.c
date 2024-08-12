@@ -1,6 +1,6 @@
 #include <openssl/crypto.h>
-#include <gostone/ciphers/kuznyechik_core.h>
-#include <gostone/ciphers/kuznyechik_defs.h>
+#include <yag/ciphers/kuznyechik_core.h>
+#include <yag/ciphers/kuznyechik_defs.h>
 
 static inline int IsAligned(const void* ptr, size_t alignment)
 {
