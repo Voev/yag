@@ -1,9 +1,11 @@
+#include <iomanip>
 #include "kat.hpp"
 #include "digest_kat.hpp"
 #include "kdf_kat.hpp"
 #include "file_parser.hpp"
 #include <gtest/gtest.h>
 #include <utilities/name_generator.hpp>
+
 
 static std::string
 NameGenerator(const testing::TestParamInfo<
@@ -50,9 +52,9 @@ TEST_P(KATExecutor, KATs)
             SUCCEED() << "Not supported";
         }
         kat->Execute();
-        ASSERT_TRUE(kat->CheckResult())
-            << "  Actual: " << kat->GetActual() << "\n"
-            << "Expected: " << kat->GetExpected();
+        ASSERT_TRUE(kat->CheckResult());
+            //<< "  Actual: " << kat->GetActual() << "\n"
+            //<< "Expected: " << kat->GetExpected();
         SUCCEED();
     }
     catch (std::exception& exc)

@@ -1,0 +1,12 @@
+#pragma once
+
+#define PROJECT_NAME "gostone"
+
+#define PROJECT_VERSION_MAJOR (0UL)
+
+#define PROJECT_VERSION_MINOR (0UL)
+
+#define PROJECT_VERSION_PATCH (1UL)
+
+#define PROJECT_VERSION_STRING "0.0.1"
+

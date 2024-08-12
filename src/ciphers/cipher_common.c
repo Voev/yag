@@ -107,9 +107,8 @@ int GsCipherCtxSetIv(GsCipherCtx* ctx, const unsigned char* iv, size_t ivLength)
     return 1;
 }
 
-size_t ossl_cipher_fillblock(unsigned char* buf, size_t* buflen,
-                             size_t blocksize, const unsigned char** in,
-                             size_t* inlen)
+size_t FillBlock(unsigned char* buf, size_t* buflen, size_t blocksize,
+                 const unsigned char** in, size_t* inlen)
 {
     size_t blockmask = ~(blocksize - 1);
     size_t bufremain = blocksize - *buflen;
@@ -127,9 +126,8 @@ size_t ossl_cipher_fillblock(unsigned char* buf, size_t* buflen,
     return *inlen & blockmask;
 }
 
-int ossl_cipher_trailingdata(unsigned char* buf, size_t* buflen,
-                             size_t blocksize, const unsigned char** in,
-                             size_t* inlen)
+int TrailData(unsigned char* buf, size_t* buflen, size_t blocksize,
+              const unsigned char** in, size_t* inlen)
 {
     if (*inlen == 0)
         return 1;
@@ -156,8 +154,7 @@ int GsCipherBlockUpdate(void* vctx, unsigned char* out, size_t* outl,
     size_t nextblocks;
 
     if (ctx->bufferSize != 0)
-        nextblocks = ossl_cipher_fillblock(ctx->buffer, &ctx->bufferSize, blksz,
-                                           &in, &inl);
+        nextblocks = FillBlock(ctx->buffer, &ctx->bufferSize, blksz, &in, &inl);
     else
         nextblocks = inl & ~(blksz - 1);
 
@@ -210,8 +207,7 @@ int GsCipherBlockUpdate(void* vctx, unsigned char* out, size_t* outl,
         in += nextblocks;
         inl -= nextblocks;
     }
-    if (inl != 0 && !ossl_cipher_trailingdata(ctx->buffer, &ctx->bufferSize,
-                                              blksz, &in, &inl))
+    if (inl != 0 && !TrailData(ctx->buffer, &ctx->bufferSize, blksz, &in, &inl))
     {
         /* ERR_raise already called */
         return 0;
@@ -222,7 +218,7 @@ int GsCipherBlockUpdate(void* vctx, unsigned char* out, size_t* outl,
 }
 
 /* Pad the final block for encryption */
-void ossl_cipher_padblock(unsigned char* buf, size_t* buflen, size_t blocksize)
+void MakeBlockPadding(unsigned char* buf, size_t* buflen, size_t blocksize)
 {
     size_t i;
     unsigned char pad = (unsigned char)(blocksize - *buflen);
@@ -231,7 +227,7 @@ void ossl_cipher_padblock(unsigned char* buf, size_t* buflen, size_t blocksize)
         buf[i] = pad;
 }
 
-int ossl_cipher_unpadblock(unsigned char* buf, size_t* buflen, size_t blocksize)
+int MakeBlockUnpadding(unsigned char* buf, size_t* buflen, size_t blocksize)
 {
     size_t pad, i;
     size_t len = *buflen;
@@ -274,7 +270,7 @@ int GsCipherBlockFinal(void* vctx, unsigned char* out, size_t* outl,
     {
         if (ctx->pad)
         {
-            ossl_cipher_padblock(ctx->buffer, &ctx->bufferSize, blksz);
+            MakeBlockPadding(ctx->buffer, &ctx->bufferSize, blksz);
         }
         else if (ctx->bufferSize == 0)
         {
@@ -320,8 +316,7 @@ int GsCipherBlockFinal(void* vctx, unsigned char* out, size_t* outl,
         return 0;
     }
 
-    if (ctx->pad &&
-        !ossl_cipher_unpadblock(ctx->buffer, &ctx->bufferSize, blksz))
+    if (ctx->pad && !MakeBlockUnpadding(ctx->buffer, &ctx->bufferSize, blksz))
     {
         /* ERR_raise already called */
         return 0;
@@ -366,29 +361,33 @@ int GsCipherGetParams(OSSL_PARAM params[], unsigned int mode,
     OSSL_PARAM* p;
 
     p = OSSL_PARAM_locate(params, OSSL_CIPHER_PARAM_MODE);
-    if (NULL != p && !OSSL_PARAM_set_uint(p, mode))
+    if (p != NULL && !OSSL_PARAM_set_uint(p, mode))
     {
         ERR_raise(ERR_LIB_PROV, PROV_R_FAILED_TO_SET_PARAMETER);
         return 0;
     }
+
     p = OSSL_PARAM_locate(params, OSSL_CIPHER_PARAM_KEYLEN);
-    if (NULL != p && !OSSL_PARAM_set_size_t(p, keyBits / 8))
+    if (p != NULL && !OSSL_PARAM_set_size_t(p, keyBits / 8))
     {
         ERR_raise(ERR_LIB_PROV, PROV_R_FAILED_TO_SET_PARAMETER);
         return 0;
     }
+
     p = OSSL_PARAM_locate(params, OSSL_CIPHER_PARAM_BLOCK_SIZE);
-    if (NULL != p && !OSSL_PARAM_set_size_t(p, blockBits / 8))
+    if (p != NULL && !OSSL_PARAM_set_size_t(p, blockBits / 8))
     {
         ERR_raise(ERR_LIB_PROV, PROV_R_FAILED_TO_SET_PARAMETER);
         return 0;
     }
+
     p = OSSL_PARAM_locate(params, OSSL_CIPHER_PARAM_IVLEN);
-    if (NULL != p && !OSSL_PARAM_set_size_t(p, ivBits / 8))
+    if (p != NULL && !OSSL_PARAM_set_size_t(p, ivBits / 8))
     {
         ERR_raise(ERR_LIB_PROV, PROV_R_FAILED_TO_SET_PARAMETER);
         return 0;
     }
+
     return 1;
 }
 
@@ -403,12 +402,14 @@ int GsCipherGetCtxParams(void* vctx, OSSL_PARAM params[])
         ERR_raise(ERR_LIB_PROV, PROV_R_FAILED_TO_SET_PARAMETER);
         return 0;
     }
+
     p = OSSL_PARAM_locate(params, OSSL_CIPHER_PARAM_PADDING);
     if (p != NULL && !OSSL_PARAM_set_uint(p, ctx->pad))
     {
         ERR_raise(ERR_LIB_PROV, PROV_R_FAILED_TO_SET_PARAMETER);
         return 0;
     }
+
     /*
     p = OSSL_PARAM_locate(params, OSSL_CIPHER_PARAM_IV);
     if (p != NULL && !OSSL_PARAM_set_octet_ptr(p, &ctx->oiv, ctx->ivLength) &&
@@ -417,6 +418,7 @@ int GsCipherGetCtxParams(void* vctx, OSSL_PARAM params[])
         ERR_raise(ERR_LIB_PROV, PROV_R_FAILED_TO_SET_PARAMETER);
         return 0;
     }*/
+
     p = OSSL_PARAM_locate(params, OSSL_CIPHER_PARAM_UPDATED_IV);
     if (p != NULL && !OSSL_PARAM_set_octet_ptr(p, &ctx->iv, ctx->ivLength) &&
         !OSSL_PARAM_set_octet_string(p, &ctx->iv, ctx->ivLength))
@@ -424,18 +426,21 @@ int GsCipherGetCtxParams(void* vctx, OSSL_PARAM params[])
         ERR_raise(ERR_LIB_PROV, PROV_R_FAILED_TO_SET_PARAMETER);
         return 0;
     }
+
     p = OSSL_PARAM_locate(params, OSSL_CIPHER_PARAM_NUM);
     if (p != NULL && !OSSL_PARAM_set_uint(p, ctx->num))
     {
         ERR_raise(ERR_LIB_PROV, PROV_R_FAILED_TO_SET_PARAMETER);
         return 0;
     }
+
     p = OSSL_PARAM_locate(params, OSSL_CIPHER_PARAM_KEYLEN);
     if (p != NULL && !OSSL_PARAM_set_size_t(p, ctx->keyLength))
     {
         ERR_raise(ERR_LIB_PROV, PROV_R_FAILED_TO_SET_PARAMETER);
         return 0;
     }
+
     /*
     p = OSSL_PARAM_locate(params, OSSL_CIPHER_PARAM_TLS_MAC);
     if (p != NULL && !OSSL_PARAM_set_octet_ptr(p, ctx->tlsmac, ctx->tlsmacsize))
@@ -443,6 +448,7 @@ int GsCipherGetCtxParams(void* vctx, OSSL_PARAM params[])
         ERR_raise(ERR_LIB_PROV, PROV_R_FAILED_TO_SET_PARAMETER);
         return 0;
     }*/
+
     return 1;
 }
 

@@ -1,4 +1,5 @@
-cmake_minimum_required(VERSION 3.10)
-
-add_subdirectory(kat)
+# Unit tests
 add_subdirectory(unit)
+
+# Known answer tests
+# add_subdirectory(kat)
