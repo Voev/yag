@@ -7,6 +7,7 @@
 #include <openssl/x509.h>
 #include <vector>
 
+#include <utilities/crypto_manager.hpp>
 #include <utilities/name_generator.hpp>
 #include <utilities/ossl_pointers.hpp>
 #include <utilities/ossl_tool.hpp>
@@ -43,18 +44,18 @@ class SignatureTest : public testing::TestWithParam<BaseParam>
 TEST_P(SignatureTest, SignVerifyEmptyMessageDigest_SelfTest)
 {
     auto param = GetParam();
-    ossl::EvpPkeyPtr pkey(ossl::GenerateKeyPair(param.alg, param.group));
+
+    auto pkey = ossl::GenerateKeyPair(param.alg, param.group);
     ASSERT_NE(pkey.get(), nullptr);
 
-    ossl::EvpMdPtr md(EVP_MD_fetch(nullptr, param.digest, nullptr));
+    auto md = ossl::CryptoManager::getInstance().fetchDigest(param.digest);
     ASSERT_NE(md.get(), nullptr);
 
     size_t siglen = 0;
     std::vector<uint8_t> msg(EVP_MD_size(md.get()), 0);
     std::vector<uint8_t> sig;
 
-    ossl::EvpPkeyCtxPtr ctx(
-        EVP_PKEY_CTX_new_from_pkey(nullptr, pkey.get(), nullptr));
+    auto ctx = ossl::CryptoManager::getInstance().createKeyContext(pkey.get());
     ASSERT_NE(ctx.get(), nullptr);
     ASSERT_LT(0, EVP_PKEY_sign_init(ctx.get()));
     ASSERT_LT(
@@ -63,7 +64,7 @@ TEST_P(SignatureTest, SignVerifyEmptyMessageDigest_SelfTest)
     ASSERT_LT(0, EVP_PKEY_sign(ctx.get(), sig.data(), &siglen, msg.data(),
                                msg.size()));
 
-    ctx.reset(EVP_PKEY_CTX_new_from_pkey(nullptr, pkey.get(), nullptr));
+    ctx = ossl::CryptoManager::getInstance().createKeyContext(pkey.get());
     ASSERT_NE(ctx.get(), nullptr);
     ASSERT_LT(0, EVP_PKEY_verify_init(ctx.get()));
     ASSERT_LT(0, EVP_PKEY_verify(ctx.get(), sig.data(), sig.size(), msg.data(),
@@ -76,15 +77,14 @@ TEST_P(SignatureTest, DISABLED_SignVerifyMessageDigestWithCopiedCtx_SelfTest)
     ossl::EvpPkeyPtr pkey(ossl::GenerateKeyPair(param.alg, param.group));
     ASSERT_NE(pkey.get(), nullptr);
 
-    ossl::EvpMdPtr md(EVP_MD_fetch(nullptr, param.digest, nullptr));
+    auto md = ossl::CryptoManager::getInstance().fetchDigest(param.digest);
     ASSERT_NE(md.get(), nullptr);
 
     size_t siglen = 0;
     std::vector<uint8_t> msg(EVP_MD_size(md.get()), 0);
     std::vector<uint8_t> sig;
 
-    ossl::EvpPkeyCtxPtr ctx(
-        EVP_PKEY_CTX_new_from_pkey(nullptr, pkey.get(), nullptr));
+    auto ctx = ossl::CryptoManager::getInstance().createKeyContext(pkey.get());
     ASSERT_NE(ctx.get(), nullptr);
     ASSERT_LT(0, EVP_PKEY_sign_init(ctx.get()));
     ASSERT_LT(
@@ -93,9 +93,8 @@ TEST_P(SignatureTest, DISABLED_SignVerifyMessageDigestWithCopiedCtx_SelfTest)
     ASSERT_LT(0, EVP_PKEY_sign(ctx.get(), sig.data(), &siglen, msg.data(),
                                msg.size()));
 
-    ossl::EvpPkeyCtxPtr vctx(
-        EVP_PKEY_CTX_new_from_pkey(nullptr, pkey.get(), nullptr));
-    
+    auto vctx = ossl::CryptoManager::getInstance().createKeyContext(pkey.get());
+
     // Copying is not supported
     // ossl::EvpPkeyCtxPtr cctx(EVP_PKEY_CTX_dup(ctx.get()));
 
@@ -111,7 +110,7 @@ TEST_P(SignatureTest, SignVerifyMessageDigest_SelfTest)
     ossl::EvpPkeyPtr pkey(ossl::GenerateKeyPair(param.alg, param.group));
     ASSERT_NE(pkey.get(), nullptr);
 
-    ossl::EvpMdPtr md(EVP_MD_fetch(nullptr, param.digest, nullptr));
+    auto md = ossl::CryptoManager::getInstance().fetchDigest(param.digest);
     ASSERT_NE(md.get(), nullptr);
 
     size_t siglen = 0;
@@ -120,8 +119,7 @@ TEST_P(SignatureTest, SignVerifyMessageDigest_SelfTest)
 
     ASSERT_LT(0, RAND_bytes(msg.data(), static_cast<int>(msg.size())));
 
-    ossl::EvpPkeyCtxPtr ctx(
-        EVP_PKEY_CTX_new_from_pkey(nullptr, pkey.get(), nullptr));
+    auto ctx = ossl::CryptoManager::getInstance().createKeyContext(pkey.get());
     ASSERT_NE(ctx.get(), nullptr);
     ASSERT_LT(0, EVP_PKEY_sign_init(ctx.get()));
     ASSERT_LT(
@@ -130,7 +128,7 @@ TEST_P(SignatureTest, SignVerifyMessageDigest_SelfTest)
     ASSERT_LT(0, EVP_PKEY_sign(ctx.get(), sig.data(), &siglen, msg.data(),
                                msg.size()));
 
-    ctx.reset(EVP_PKEY_CTX_new_from_pkey(nullptr, pkey.get(), nullptr));
+    ctx = ossl::CryptoManager::getInstance().createKeyContext(pkey.get());
     ASSERT_NE(ctx.get(), nullptr);
     ASSERT_LT(0, EVP_PKEY_verify_init(ctx.get()));
     ASSERT_LT(0, EVP_PKEY_verify(ctx.get(), sig.data(), sig.size(), msg.data(),
@@ -140,7 +138,8 @@ TEST_P(SignatureTest, SignVerifyMessageDigest_SelfTest)
 TEST_P(SignatureTest, SignVerifyMessage_SelfTest)
 {
     auto param = GetParam();
-    ossl::EvpPkeyPtr pkey(ossl::GenerateKeyPair(param.alg, param.group));
+
+    auto pkey = ossl::GenerateKeyPair(param.alg, param.group);
     ASSERT_NE(pkey.get(), nullptr);
 
     std::vector<uint8_t> msg(4096);
@@ -148,19 +147,21 @@ TEST_P(SignatureTest, SignVerifyMessage_SelfTest)
 
     size_t siglen = 0;
     std::vector<uint8_t> sig;
+
     ossl::EvpMdCtxPtr mdCtx(EVP_MD_CTX_new());
     ASSERT_NE(mdCtx.get(), nullptr);
+
+    auto libctx = ossl::CryptoManager::getInstance().getContext();
     ASSERT_LT(0, EVP_DigestSignInit_ex(mdCtx.get(), nullptr, param.digest,
-                                       nullptr, nullptr, pkey.get(), nullptr));
+                                       libctx, nullptr, pkey.get(), nullptr));
     ASSERT_LT(0, EVP_DigestSignUpdate(mdCtx.get(), msg.data(), msg.size()));
     ASSERT_LT(0, EVP_DigestSignFinal(mdCtx.get(), nullptr, &siglen));
     sig.resize(siglen);
     ASSERT_LT(0, EVP_DigestSignFinal(mdCtx.get(), sig.data(), &siglen));
 
     EVP_MD_CTX_reset(mdCtx.get());
-    ASSERT_LT(0,
-              EVP_DigestVerifyInit_ex(mdCtx.get(), nullptr, param.digest,
-                                      nullptr, nullptr, pkey.get(), nullptr));
+    ASSERT_LT(0, EVP_DigestVerifyInit_ex(mdCtx.get(), nullptr, param.digest,
+                                         libctx, nullptr, pkey.get(), nullptr));
     ASSERT_LT(0, EVP_DigestVerifyUpdate(mdCtx.get(), msg.data(), msg.size()));
     ASSERT_LT(0, EVP_DigestVerifyFinal(mdCtx.get(), sig.data(), sig.size()));
 }
@@ -168,10 +169,11 @@ TEST_P(SignatureTest, SignVerifyMessage_SelfTest)
 TEST_P(SignatureTest, SignVerifyMessageDigest_CorruptSignature)
 {
     auto param = GetParam();
-    ossl::EvpPkeyPtr pkey(ossl::GenerateKeyPair(param.alg, param.group));
+
+    auto pkey = ossl::GenerateKeyPair(param.alg, param.group);
     ASSERT_NE(pkey.get(), nullptr);
 
-    ossl::EvpMdPtr md(EVP_MD_fetch(nullptr, param.digest, nullptr));
+    auto md = ossl::CryptoManager::getInstance().fetchDigest(param.digest);
     ASSERT_NE(md.get(), nullptr);
 
     size_t siglen = 0;
@@ -180,9 +182,9 @@ TEST_P(SignatureTest, SignVerifyMessageDigest_CorruptSignature)
 
     ASSERT_LT(0, RAND_bytes(msg.data(), static_cast<int>(msg.size())));
 
-    ossl::EvpPkeyCtxPtr ctx(
-        EVP_PKEY_CTX_new_from_pkey(nullptr, pkey.get(), nullptr));
+    auto ctx = ossl::CryptoManager::getInstance().createKeyContext(pkey.get());
     ASSERT_NE(ctx.get(), nullptr);
+
     ASSERT_LT(0, EVP_PKEY_sign_init(ctx.get()));
     ASSERT_LT(
         0, EVP_PKEY_sign(ctx.get(), nullptr, &siglen, msg.data(), msg.size()));
@@ -192,7 +194,7 @@ TEST_P(SignatureTest, SignVerifyMessageDigest_CorruptSignature)
 
     sig[0] += 1;
 
-    ctx.reset(EVP_PKEY_CTX_new_from_pkey(nullptr, pkey.get(), nullptr));
+    ctx = ossl::CryptoManager::getInstance().createKeyContext(pkey.get());
     ASSERT_NE(ctx.get(), nullptr);
     ASSERT_LT(0, EVP_PKEY_verify_init(ctx.get()));
     ASSERT_EQ(0, EVP_PKEY_verify(ctx.get(), sig.data(), sig.size(), msg.data(),
@@ -203,7 +205,8 @@ TEST_P(SignatureTest, SignVerifyMessageDigest_CorruptSignature)
 TEST_P(SignatureTest, SignVerifyMessage_CorruptSignature)
 {
     auto param = GetParam();
-    ossl::EvpPkeyPtr pkey(ossl::GenerateKeyPair(param.alg, param.group));
+
+    auto pkey = ossl::GenerateKeyPair(param.alg, param.group);
     ASSERT_NE(pkey.get(), nullptr);
 
     std::vector<uint8_t> msg(4096);
@@ -211,10 +214,13 @@ TEST_P(SignatureTest, SignVerifyMessage_CorruptSignature)
 
     size_t siglen = 0;
     std::vector<uint8_t> sig;
+
     ossl::EvpMdCtxPtr mdCtx(EVP_MD_CTX_new());
     ASSERT_NE(mdCtx.get(), nullptr);
+
+    auto libctx = ossl::CryptoManager::getInstance().getContext();
     ASSERT_LT(0, EVP_DigestSignInit_ex(mdCtx.get(), nullptr, param.digest,
-                                       nullptr, nullptr, pkey.get(), nullptr));
+                                       libctx, nullptr, pkey.get(), nullptr));
     ASSERT_LT(0, EVP_DigestSignUpdate(mdCtx.get(), msg.data(), msg.size()));
     ASSERT_LT(0, EVP_DigestSignFinal(mdCtx.get(), nullptr, &siglen));
     sig.resize(siglen);
@@ -223,9 +229,8 @@ TEST_P(SignatureTest, SignVerifyMessage_CorruptSignature)
     sig[0] += 1;
 
     EVP_MD_CTX_reset(mdCtx.get());
-    ASSERT_LT(0,
-              EVP_DigestVerifyInit_ex(mdCtx.get(), nullptr, param.digest,
-                                      nullptr, nullptr, pkey.get(), nullptr));
+    ASSERT_LT(0, EVP_DigestVerifyInit_ex(mdCtx.get(), nullptr, param.digest,
+                                         libctx, nullptr, pkey.get(), nullptr));
     ASSERT_LT(0, EVP_DigestVerifyUpdate(mdCtx.get(), msg.data(), msg.size()));
     ASSERT_EQ(0, EVP_DigestVerifyFinal(mdCtx.get(), sig.data(), sig.size()));
     ERR_clear_error();

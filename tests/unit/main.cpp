@@ -1,26 +1,58 @@
 #include <gtest/gtest.h>
+
 #include <openssl/err.h>
 #include <openssl/provider.h>
 
+#include <utilities/crypto_manager.hpp>
+
+void ParseCommandLine(int argc, char* argv[])
+{
+    for (int i = 1; i < argc; ++i)
+    {
+        std::string_view arg{argv[i]};
+
+        if (arg == "--provider-path")
+        {
+            if (i + 1 < argc)
+            {
+                ossl::CryptoManager::getInstance().setProviderPath(argv[++i]);
+            }
+            else
+            {
+                throw std::runtime_error("Error: Missing value for " +
+                                         std::string(arg));
+            }
+        }
+        else if (arg == "--provider")
+        {
+            if (i + 1 < argc)
+            {
+                ossl::CryptoManager::getInstance().loadProvider(argv[++i]);
+            }
+            else
+            {
+                throw std::runtime_error("Error: Missing value for " +
+                                         std::string(arg));
+            }
+        }
+    }
+}
+
+
 int main(int argc, char* argv[])
 {
-    if (argc < 2)
-        return EXIT_FAILURE;
-    OSSL_PROVIDER_set_default_search_path(nullptr, argv[1]);
-    
-    testing::InitGoogleTest(&argc, argv);
-
-    OSSL_PROVIDER* defaultProv = OSSL_PROVIDER_load(nullptr, "default");
-    OSSL_PROVIDER* prov = OSSL_PROVIDER_load(nullptr, "yag");
-    if (!prov) {
-       ERR_print_errors_fp(stderr);
-       return EXIT_FAILURE;
+    int ret{EXIT_SUCCESS};
+    try
+    {
+        ::ParseCommandLine(argc, argv);
+        testing::InitGoogleTest(&argc, argv);
+        ret = RUN_ALL_TESTS();
     }
-
-    int ret = RUN_ALL_TESTS();
-
-    OSSL_PROVIDER_unload(prov);
-    OSSL_PROVIDER_unload(defaultProv);
-
+    catch (const std::exception& e)
+    {
+        std::cerr << e.what() << std::endl;
+        ERR_print_errors_fp(stderr);
+        ret = EXIT_FAILURE;
+    }
     return ret;
 }
