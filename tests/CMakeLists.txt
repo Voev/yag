@@ -1,5 +1,9 @@
 # Unit tests
-add_subdirectory(unit)
+if (ENABLE_UNIT)
+  add_subdirectory(unit)
+endif ()
 
 # Known answer tests
-# add_subdirectory(kat)
+if (ENABLE_KAT)
+  add_subdirectory(kat)
+endif ()

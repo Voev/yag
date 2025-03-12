@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <iostream>
 #include <utilities/ossl_pointers.hpp>
+#include <utilities/crypto_manager.hpp>
 
 static constexpr const char* digestAlg = "algorithm";
 static constexpr const char* digestInput = "message";
@@ -13,21 +14,18 @@ DigestKAT::DigestKAT(const FileParser::Section& section)
     {
         if (0 == sectionPair.first.compare(digestAlg))
         {
-            digest_.reset(
-                EVP_MD_fetch(nullptr, sectionPair.second.c_str(), nullptr));
+            digest_ = ossl::CryptoManager::getInstance().fetchDigest(sectionPair.second.c_str());
         }
         else if (0 == sectionPair.first.compare(digestInput))
         {
             long size = 0;
-            uint8_t* ptr =
-                OPENSSL_hexstr2buf(sectionPair.second.c_str(), &size);
+            uint8_t* ptr = OPENSSL_hexstr2buf(sectionPair.second.c_str(), &size);
             message_.assign(ptr, ptr + size);
         }
         else if (0 == sectionPair.first.compare(digestEtalon))
         {
             long size = 0;
-            uint8_t* ptr =
-                OPENSSL_hexstr2buf(sectionPair.second.c_str(), &size);
+            uint8_t* ptr = OPENSSL_hexstr2buf(sectionPair.second.c_str(), &size);
             expected_.assign(ptr, ptr + size);
         }
     }

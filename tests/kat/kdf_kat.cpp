@@ -1,4 +1,5 @@
 #include <utilities/ossl_param.hpp>
+#include <utilities/crypto_manager.hpp>
 #include "kdf_kat.hpp"
 
 static constexpr const char* kdfAlg = "algorithm";
@@ -12,8 +13,7 @@ KdfKAT::KdfKAT(const FileParser::Section& section)
     {
         if (0 == sectionPair.first.compare(kdfAlg))
         {
-            kdf_.reset(
-                EVP_KDF_fetch(nullptr, sectionPair.second.c_str(), nullptr));
+            kdf_ = ossl::CryptoManager::getInstance().fetchKdf(sectionPair.second.c_str());
         }
         else if (0 == sectionPair.first.compare(kdfKeySize))
         {
@@ -22,8 +22,7 @@ KdfKAT::KdfKAT(const FileParser::Section& section)
         else if (0 == sectionPair.first.compare(kdfEtalon))
         {
             long size = 0;
-            uint8_t* ptr =
-                OPENSSL_hexstr2buf(sectionPair.second.c_str(), &size);
+            uint8_t* ptr = OPENSSL_hexstr2buf(sectionPair.second.c_str(), &size);
             expected_.assign(ptr, ptr + size);
         }
         else if (0 == sectionPair.first.rfind(kdfParam))

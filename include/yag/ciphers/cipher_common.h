@@ -2,12 +2,15 @@
 #include <openssl/evp.h>
 #include <openssl/core_names.h>
 
+#include <yag/provider.h>
+
 typedef struct gs_cipher_ctx_st GsCipherCtx;
 typedef struct gs_cipher_specific_st GsCipherSpec;
 #define INTERPRET_AS_CIPHER_CTX(x) ((GsCipherCtx*)x)
 
 struct gs_cipher_ctx_st
 {
+    GsProvCtx* provCtx;
     unsigned char iv[EVP_MAX_IV_LENGTH];
     int ivSetted;
     int enc;
