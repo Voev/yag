@@ -24,14 +24,14 @@ static int GsSerializePrivateKey(const GsAsymmKey* key, unsigned char** buffer)
 
     if (!buffer)
     {
-        ERR_raise(ERR_LIB_PROV, ERR_R_PASSED_INVALID_ARGUMENT);
+        ErrRaise(GsAsymmKeyGet0ProvCtx(key), ERR_R_PASSED_INVALID_ARGUMENT);
         return 0;
     }
     *buffer = NULL;
 
     if (!privateKey)
     {
-        ERR_raise(ERR_LIB_PROV, ERR_R_PASSED_NULL_PARAMETER);
+        ErrRaise(GsAsymmKeyGet0ProvCtx(key), ERR_R_PASSED_NULL_PARAMETER);
         return 0;
     }
 
@@ -39,7 +39,7 @@ static int GsSerializePrivateKey(const GsAsymmKey* key, unsigned char** buffer)
     buf = (unsigned char*)OPENSSL_zalloc(bufSize);
     if (!buf)
     {
-        ERR_raise(ERR_LIB_PROV, ERR_R_MALLOC_FAILURE);
+        ErrRaise(GsAsymmKeyGet0ProvCtx(key), ERR_R_MALLOC_FAILURE);
         return 0;
     }
     bufSize = BN_bn2bin(privateKey, buf);
@@ -58,7 +58,7 @@ static PKCS8_PRIV_KEY_INFO* GsEncodeKeyAsKeyBag(const void* keyData,
 
     if (!key)
     {
-        ERR_raise(ERR_LIB_PROV, ERR_R_PASSED_NULL_PARAMETER);
+        ErrRaise(GsAsymmKeyGet0ProvCtx(key), ERR_R_PASSED_NULL_PARAMETER);
         goto end;
     }
     keyNid = GsAsymmKeyGetAlgorithm(key);
@@ -66,7 +66,7 @@ static PKCS8_PRIV_KEY_INFO* GsEncodeKeyAsKeyBag(const void* keyData,
     p8info = PKCS8_PRIV_KEY_INFO_new();
     if (!p8info)
     {
-        ERR_raise(ERR_LIB_PROV, ERR_R_MALLOC_FAILURE);
+        ErrRaise(GsAsymmKeyGet0ProvCtx(key), ERR_R_MALLOC_FAILURE);
         goto end;
     }
 
@@ -99,7 +99,6 @@ static X509_SIG* GsEncodeKeyAsShroudedKeyBag(const void* keyData,
 
     if (!cipher)
     {
-        ERR_raise(ERR_LIB_PROV, ERR_R_PASSED_INVALID_ARGUMENT);
         goto end;
     }
 

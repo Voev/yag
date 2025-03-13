@@ -15,7 +15,7 @@
 
 typedef struct gs_sign_ctx_st
 {
-    OSSL_LIB_CTX* libCtx;
+    GsProvCtx* provCtx;
     char* property;
     GsAsymmKey* key;
 
@@ -37,7 +37,7 @@ void* GsSignatureNewCtx(void* provCtx, const char* property)
     {
         goto err;
     }
-    ctx->libCtx = GsProvCtxGet0LibCtx(provCtx);
+    ctx->provCtx = (GsProvCtx*)provCtx;
     if (property)
     {
         ctx->property = OPENSSL_strdup(property);
@@ -48,7 +48,7 @@ void* GsSignatureNewCtx(void* provCtx, const char* property)
     }
     return ctx;
 err:
-    ERR_raise(ERR_LIB_PROV, ERR_R_MALLOC_FAILURE);
+    ErrRaise(provCtx, ERR_R_MALLOC_FAILURE);
     OPENSSL_free(ctx);
     return NULL;
 }
@@ -87,7 +87,7 @@ void* GsSignatureDupCtx(void* vctx)
     GsSignCtx* dstCtx = OPENSSL_zalloc(sizeof(*srcCtx));
     if (!dstCtx)
     {
-        ERR_raise(ERR_LIB_PROV, ERR_R_MALLOC_FAILURE);
+        ErrRaise(srcCtx->provCtx, ERR_R_MALLOC_FAILURE);
         return NULL;
     }
 
@@ -137,7 +137,6 @@ int GsSignatureSignVerifyInit(void* vctx, void* keyData,
     GsSignCtx* ctx = INTERPRET_AS_SIGNCTX(vctx);
     if (!ctx)
     {
-        ERR_raise(ERR_LIB_PROV, ERR_R_PASSED_NULL_PARAMETER);
         return 0;
     }
     if (keyData)
@@ -162,15 +161,15 @@ int GsSignatureSign(void* vctx, unsigned char* sig, size_t* siglen,
     size_t half;
     int ret = 0;
 
-    if (!ctx || !siglen)
+    if (!siglen)
     {
-        ERR_raise(ERR_LIB_PROV, ERR_R_PASSED_NULL_PARAMETER);
+        ErrRaise(ctx->provCtx, ERR_R_PASSED_NULL_PARAMETER);
         return 0;
     }
 
     if (tbslen != 32 && tbslen != 64)
     {
-        ERR_raise(ERR_LIB_PROV, ERR_R_PASSED_INVALID_ARGUMENT);
+        ErrRaise(ctx->provCtx, ERR_R_PASSED_INVALID_ARGUMENT);
         ERR_add_error_data(1, "incorrect to be signed message length");
         return 0;
     }
@@ -183,7 +182,7 @@ int GsSignatureSign(void* vctx, unsigned char* sig, size_t* siglen,
 
     if (sigSize < *siglen)
     {
-        ERR_raise(ERR_LIB_PROV, ERR_R_PASSED_INVALID_ARGUMENT);
+        ErrRaise(ctx->provCtx, ERR_R_PASSED_INVALID_ARGUMENT);
         return 0;
     }
 
@@ -195,7 +194,7 @@ int GsSignatureSign(void* vctx, unsigned char* sig, size_t* siglen,
     bctx = BN_CTX_new();
     if (!bctx)
     {
-        ERR_raise(ERR_LIB_PROV, ERR_R_MALLOC_FAILURE);
+        ErrRaise(ctx->provCtx, ERR_R_MALLOC_FAILURE);
         return 0;
     }
     BN_CTX_start(bctx);
@@ -303,16 +302,16 @@ int GsSignatureVerify(void* vctx, const unsigned char* sig, size_t siglen,
     size_t half;
     int ret = 0;
 
-    if (!ctx || !tbs)
+    if (!tbs)
     {
-        ERR_raise(ERR_LIB_PROV, ERR_R_PASSED_NULL_PARAMETER);
+        ErrRaise(ctx->provCtx, ERR_R_PASSED_NULL_PARAMETER);
         goto end;
     }
 
     bctx = BN_CTX_new();
     if (!bctx)
     {
-        ERR_raise(ERR_LIB_PROV, ERR_R_MALLOC_FAILURE);
+        ErrRaise(ctx->provCtx, ERR_R_MALLOC_FAILURE);
         goto end;
     }
     BN_CTX_start(bctx);
@@ -396,8 +395,7 @@ int GsSignatureVerify(void* vctx, const unsigned char* sig, size_t siglen,
      */
     if (0 != BN_cmp(R, r))
     {
-        ERR_raise(ERR_LIB_PROV, ERR_R_INTERNAL_ERROR);
-        ERR_add_error_data(1, "invalid signature");
+        ErrRaiseData(ctx->provCtx, ERR_R_INTERNAL_ERROR, "invalid signature");
         goto end;
     }
 
@@ -419,12 +417,12 @@ int GsSignatureDigestSignVerifyInit(void* vctx, const char* mdName,
         return 0;
     }
 
-    ctx->md = EVP_MD_fetch(ctx->libCtx, mdName, ctx->property);
+    ctx->md = EVP_MD_fetch(GsProvCtxGet0LibCtx(ctx->provCtx), mdName, ctx->property);
     ctx->mdSize = EVP_MD_size(ctx->md);
     ctx->mdCtx = EVP_MD_CTX_new();
     if (!ctx->mdCtx)
     {
-        ERR_raise(ERR_LIB_PROV, ERR_R_MALLOC_FAILURE);
+        ErrRaise(ctx->provCtx, ERR_R_MALLOC_FAILURE);
         goto err;
     }
 
@@ -442,9 +440,9 @@ int GsSignatureDigestSignVerifyUpdate(void* vctx, const unsigned char* data,
                                       size_t datalen)
 {
     GsSignCtx* ctx = INTERPRET_AS_SIGNCTX(vctx);
-    if (!ctx || !ctx->mdCtx)
+    if (!ctx->mdCtx)
     {
-        ERR_raise(ERR_LIB_PROV, ERR_R_PASSED_NULL_PARAMETER);
+        ErrRaise(ctx->provCtx, ERR_R_PASSED_NULL_PARAMETER);
         return 0;
     }
     return EVP_DigestUpdate(ctx->mdCtx, data, datalen);
@@ -457,9 +455,9 @@ int GsSignatureDigestSignFinal(void* vctx, unsigned char* sig, size_t* siglen,
     unsigned char digest[EVP_MAX_MD_SIZE] = {0};
     unsigned int dlen = 0;
 
-    if (!ctx || !ctx->mdCtx)
+    if (!ctx->mdCtx)
     {
-        ERR_raise(ERR_LIB_PROV, ERR_R_PASSED_NULL_PARAMETER);
+        ErrRaise(ctx->provCtx, ERR_R_PASSED_NULL_PARAMETER);
         return 0;
     }
     if (sig)
@@ -483,9 +481,9 @@ int GsSignatureDigestVerifyFinal(void* vctx, const unsigned char* sig,
     unsigned char digest[EVP_MAX_MD_SIZE] = {0};
     unsigned int dlen = 0;
 
-    if (!ctx || !ctx->mdCtx)
+    if (!ctx->mdCtx)
     {
-        ERR_raise(ERR_LIB_PROV, ERR_R_PASSED_NULL_PARAMETER);
+        ErrRaise(ctx->provCtx, ERR_R_PASSED_NULL_PARAMETER);
         return 0;
     }
     if (!EVP_DigestFinal_ex(ctx->mdCtx, digest, &dlen))
@@ -500,9 +498,9 @@ int GsSignatureGetCtxParams(void* vctx, OSSL_PARAM* params)
     GsSignCtx* ctx = INTERPRET_AS_SIGNCTX(vctx);
     OSSL_PARAM* p;
 
-    if (!ctx || !params)
+    if (!params)
     {
-        ERR_raise(ERR_LIB_PROV, ERR_R_PASSED_NULL_PARAMETER);
+        ErrRaise(ctx->provCtx, ERR_R_PASSED_NULL_PARAMETER);
         return 0;
     }
 
@@ -542,9 +540,9 @@ const OSSL_PARAM* GsSignatureGettableCtxParams(ossl_unused void* ctx,
 int GsSignatureGetCtxMdParams(void* vctx, OSSL_PARAM* params)
 {
     GsSignCtx* ctx = INTERPRET_AS_SIGNCTX(vctx);
-    if (!ctx || !ctx->mdCtx)
+    if (!ctx->mdCtx)
     {
-        ERR_raise(ERR_LIB_PROV, ERR_R_PASSED_INVALID_ARGUMENT);
+        ErrRaise(ctx->provCtx, ERR_R_PASSED_INVALID_ARGUMENT);
         return 0;
     }
     return EVP_MD_CTX_get_params(ctx->mdCtx, params);
@@ -553,9 +551,9 @@ int GsSignatureGetCtxMdParams(void* vctx, OSSL_PARAM* params)
 const OSSL_PARAM* GsSignatureGettableCtxMdParams(void* vctx)
 {
     GsSignCtx* ctx = INTERPRET_AS_SIGNCTX(vctx);
-    if (!ctx || !ctx->md)
+    if (!ctx->md)
     {
-        ERR_raise(ERR_LIB_PROV, ERR_R_PASSED_INVALID_ARGUMENT);
+        ErrRaise(ctx->provCtx, ERR_R_PASSED_INVALID_ARGUMENT);
         return 0;
     }
     return EVP_MD_gettable_ctx_params(ctx->md);
@@ -567,9 +565,9 @@ int GsSignatureSetCtxParams(void* vctx, const OSSL_PARAM params[])
     const OSSL_PARAM* p;
     char* mdName;
 
-    if (!ctx || !params)
+    if (!params)
     {
-        ERR_raise(ERR_LIB_PROV, ERR_R_PASSED_NULL_PARAMETER);
+        ErrRaise(ctx->provCtx, ERR_R_PASSED_NULL_PARAMETER);
         return 0;
     }
 
@@ -596,7 +594,7 @@ int GsSignatureSetCtxParams(void* vctx, const OSSL_PARAM params[])
         {
             return 0;
         }
-        ctx->md = EVP_MD_fetch(ctx->libCtx, mdName, ctx->property);
+        ctx->md = EVP_MD_fetch(GsProvCtxGet0LibCtx(ctx->provCtx), mdName, ctx->property);
         ctx->mdSize = EVP_MD_size(ctx->md);
     }
     return 1;
@@ -615,9 +613,9 @@ const OSSL_PARAM* GsSignatureSettableCtxParams(ossl_unused void* vpeddsactx,
 int GsSignatureSetCtxMdParams(void* vctx, const OSSL_PARAM params[])
 {
     GsSignCtx* ctx = INTERPRET_AS_SIGNCTX(vctx);
-    if (!ctx || !ctx->mdCtx)
+    if (!ctx->mdCtx)
     {
-        ERR_raise(ERR_LIB_PROV, ERR_R_PASSED_INVALID_ARGUMENT);
+        ErrRaise(ctx->provCtx, ERR_R_PASSED_INVALID_ARGUMENT);
         return 0;
     }
     return EVP_MD_CTX_set_params(ctx->mdCtx, params);
@@ -626,9 +624,9 @@ int GsSignatureSetCtxMdParams(void* vctx, const OSSL_PARAM params[])
 const OSSL_PARAM* GsSignatureSettableCtxMdParams(void* vctx)
 {
     GsSignCtx* ctx = INTERPRET_AS_SIGNCTX(vctx);
-    if (!ctx || !ctx->md)
+    if (!ctx->md)
     {
-        ERR_raise(ERR_LIB_PROV, ERR_R_PASSED_INVALID_ARGUMENT);
+        ErrRaise(ctx->provCtx, ERR_R_PASSED_INVALID_ARGUMENT);
         return 0;
     }
     return EVP_MD_settable_ctx_params(ctx->md);

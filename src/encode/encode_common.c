@@ -16,6 +16,7 @@
 #include <yag/keymgmt/keymgmt_params.h>
 #include <yag/provider_bio.h>
 #include <yag/provider_ctx.h>
+#include <yag/provider.h>
 
 struct gs_encoder_ctx_st
 {
@@ -130,12 +131,12 @@ int GsEncoderEncode(GsEncoderCtx* ctx, OSSL_CORE_BIO* cout, const void* keyData,
 
     if (keyAbstract || !(selection & selectionMask))
     {
-        ERR_raise(ERR_LIB_PROV, ERR_R_PASSED_INVALID_ARGUMENT);
+        ErrRaise(ctx->provCtx, ERR_R_PASSED_INVALID_ARGUMENT);
         return 0;
     }
     if (!keyData)
     {
-        ERR_raise(ERR_LIB_PROV, ERR_R_PASSED_NULL_PARAMETER);
+        ErrRaise(ctx->provCtx, ERR_R_PASSED_NULL_PARAMETER);
     }
     else
     {

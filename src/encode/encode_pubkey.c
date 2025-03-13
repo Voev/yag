@@ -25,6 +25,7 @@ int GsSerializePublicKey(const void* keyData, unsigned char** buffer)
     const EC_POINT* publicKey = GsAsymmKeyGet0PublicKey(key);
     const EC_GROUP* group = GsAsymmKeyGet0Group(key);
     const BIGNUM* order = EC_GROUP_get0_order(group);
+    GsProvCtx* provCtx = GsAsymmKeyGet0ProvCtx(key);
     unsigned char* encPoint;
     int pointSize = 0;
     BN_CTX* ctx = NULL;
@@ -33,15 +34,15 @@ int GsSerializePublicKey(const void* keyData, unsigned char** buffer)
 
     if (!buffer)
     {
-        ERR_raise(ERR_LIB_PROV, ERR_R_PASSED_NULL_PARAMETER);
+        ErrRaise(provCtx, ERR_R_PASSED_NULL_PARAMETER);
         goto end;
     }
     *buffer = NULL;
 
-    ctx = BN_CTX_new_ex(GsAsymmKeyGet0LibCtx(key));
+    ctx = BN_CTX_new_ex(GsProvCtxGet0LibCtx(provCtx));
     if (!ctx)
     {
-        ERR_raise(ERR_LIB_PROV, ERR_R_MALLOC_FAILURE);
+        ErrRaise(provCtx, ERR_R_MALLOC_FAILURE);
         goto end;
     }
     BN_CTX_start(ctx);
@@ -56,7 +57,7 @@ int GsSerializePublicKey(const void* keyData, unsigned char** buffer)
     encPoint = OPENSSL_zalloc(pointSize);
     if (!encPoint)
     {
-        ERR_raise(ERR_LIB_PROV, ERR_R_MALLOC_FAILURE);
+        ErrRaise(provCtx, ERR_R_MALLOC_FAILURE);
         goto end;
     }
     BN_bn2bin(X, encPoint + BN_num_bytes(order));
@@ -92,7 +93,6 @@ int GsEncodeAsOctetString(const void* key, unsigned char** buffer)
     encOctet = ASN1_OCTET_STRING_new();
     if (!encOctet)
     {
-        ERR_raise(ERR_LIB_PROV, ERR_R_MALLOC_FAILURE);
         goto end;
     }
 
@@ -122,7 +122,6 @@ static X509_PUBKEY* GsEncodeKeyAsX509PubKey(const void* keyData,
         !X509_PUBKEY_set0_param(xpk, OBJ_nid2obj(GsAsymmKeyGetAlgorithm(key)),
                                 V_ASN1_SEQUENCE, params, der, derlen))
     {
-        ERR_raise(ERR_LIB_PROV, ERR_R_MALLOC_FAILURE);
         X509_PUBKEY_free(xpk);
         OPENSSL_free(der);
         xpk = NULL;

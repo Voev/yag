@@ -207,7 +207,6 @@ int GsCipherBlockUpdate(void* vctx, unsigned char* out, size_t* outl,
     }
     if (inl != 0 && !TrailData(ctx->provCtx, ctx->buffer, &ctx->bufferSize, blksz, &in, &inl))
     {
-        /* ERR_raise already called */
         return 0;
     }
 
@@ -315,7 +314,6 @@ int GsCipherBlockFinal(void* vctx, unsigned char* out, size_t* outl, size_t outs
 
     if (ctx->pad && !MakeBlockUnpadding(ctx->provCtx, ctx->buffer, &ctx->bufferSize, blksz))
     {
-        /* ERR_raise already called */
         return 0;
     }
 
