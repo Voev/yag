@@ -61,14 +61,12 @@ static GostKeyParams* GsEncoderCreateParams(const void* keyData)
 
     if (!group)
     {
-        ERR_raise(ERR_LIB_PROV, ERR_R_PASSED_NULL_PARAMETER);
         return 0;
     }
 
     params = GostKeyParams_new();
     if (!params)
     {
-        ERR_raise(ERR_LIB_PROV, ERR_R_MALLOC_FAILURE);
         return 0;
     }
 

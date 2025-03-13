@@ -15,18 +15,20 @@ class YetAnotherGost(ConanFile):
 
     options = {
         "shared": [True, False],
-        "enable_tests": [True, False]
+        "enable_unit": [True, False],
+        "enable_kat": [True, False],
     }
 
     default_options = {
         "shared": True,
-        "enable_tests": True
+        "enable_unit": False,
+        "enable_kat": False
     }
 
     def requirements(self):
         self.requires("openssl/3.0.14", headers=True, libs=True, run=True)
         self.requires("zlib/1.3.1")
-        if self.options.enable_tests:
+        if self.options.enable_unit or self.options.enable_kat:
             self.requires("gtest/1.15.0")
 
     def config_options(self):
@@ -49,10 +51,14 @@ class YetAnotherGost(ConanFile):
     def build(self):
         cmake_vars = {}
         cmake = CMake(self)
-        if self.options.enable_tests:
-            cmake_vars["ENABLE_TESTS"] = "ON"
+        if self.options.enable_unit:
+            cmake_vars["ENABLE_UNIT"] = "ON"
+        if self.options.enable_kat:
+            cmake_vars["ENABLE_KAT"] = "ON"
         cmake.configure(variables=cmake_vars)
         cmake.build()
-        if self.options.enable_tests:
+        if self.options.enable_unit:
             cmake.test()
+        if self.options.enable_kat:
+            self.run(f"cmake --build . --target run_kat")
 

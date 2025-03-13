@@ -18,7 +18,7 @@ static int GsEncodeToText(BIO* out, const void* keyData, int selection)
 
     if (!out || !key)
     {
-        ERR_raise(ERR_LIB_PROV, ERR_R_PASSED_NULL_PARAMETER);
+        ErrRaise(GsAsymmKeyGet0ProvCtx(key), ERR_R_PASSED_NULL_PARAMETER);
         return 0;
     }
 

@@ -11,6 +11,7 @@
 #include <yag/kdfs/kdf_tree12_256.h>
 #include <yag/provider_ctx.h>
 #include <yag/buffer.h>
+#include <yag/provider.h>
 
 #pragma message "make set constant"
 
@@ -23,8 +24,7 @@ typedef struct gs_kdf_tree_st
     size_t counter;
 } GsKdfTree;
 
-static int GsKdfTree12_256(BUF_MEM* secret, BUF_MEM* label, BUF_MEM* seed,
-                           size_t R, unsigned char* key, size_t keyLen);
+static int GsKdfTree12_256(GsKdfTree* ctx, size_t R, unsigned char* key, size_t keyLen);
 
 void* GsKdfTree12_256New(void* provCtx)
 {
@@ -43,7 +43,7 @@ void* GsKdfTree12_256New(void* provCtx)
     ctx->provCtx = provCtx;
     return ctx;
 err:
-    ERR_raise(ERR_LIB_PROV, ERR_R_MALLOC_FAILURE);
+    ErrRaise(provCtx, ERR_R_MALLOC_FAILURE);
     GsKdfTree12_256Free(ctx);
     return NULL;
 }
@@ -72,10 +72,8 @@ void GsKdfTree12_256Reset(void* vctx)
     }
 }
 
-int GsKdfTree12_256Derive(void* vctx, unsigned char* key, size_t keyLen,
-                          const OSSL_PARAM params[])
+int GsKdfTree12_256Derive(void* vctx, unsigned char* key, size_t keyLen, const OSSL_PARAM params[])
 {
-
     GsKdfTree* ctx = (GsKdfTree*)vctx;
 
     if (!GsKdfTree12_256SetCtxParams(ctx, params))
@@ -84,20 +82,20 @@ int GsKdfTree12_256Derive(void* vctx, unsigned char* key, size_t keyLen,
     }
     if (BUF_MEM_empty(ctx->secret))
     {
-        ERR_raise(ERR_LIB_PROV, PROV_R_MISSING_SECRET);
+        ErrRaise(ctx->provCtx, PROV_R_MISSING_SECRET);
         return 0;
     }
     if (BUF_MEM_empty(ctx->label))
     {
-        ERR_raise(ERR_LIB_PROV, PROV_R_INVALID_DATA);
+        ErrRaise(ctx->provCtx, PROV_R_INVALID_DATA);
         return 0;
     }
     if (BUF_MEM_empty(ctx->seed))
     {
-        ERR_raise(ERR_LIB_PROV, PROV_R_MISSING_SEED);
+        ErrRaise(ctx->provCtx, PROV_R_MISSING_SEED);
         return 0;
     }
-    return GsKdfTree12_256(ctx->secret, ctx->label, ctx->seed, 1, key, keyLen);
+    return GsKdfTree12_256(ctx, 1, key, keyLen);
 }
 
 int GsKdfTree12_256SetCtxParams(void* vctx, const OSSL_PARAM params[])
@@ -117,10 +115,9 @@ int GsKdfTree12_256SetCtxParams(void* vctx, const OSSL_PARAM params[])
 
         if (!OSSL_PARAM_get_octet_string(p, NULL, 0, &usedLen) ||
             !BUF_MEM_grow_clean(ctx->label, usedLen) ||
-            !OSSL_PARAM_get_octet_string(p, (void**)&ctx->label->data, usedLen,
-                                         NULL))
+            !OSSL_PARAM_get_octet_string(p, (void**)&ctx->label->data, usedLen, NULL))
         {
-            ERR_raise(ERR_LIB_PROV, PROV_R_FAILED_TO_SET_PARAMETER);
+            ErrRaise(ctx->provCtx, PROV_R_FAILED_TO_SET_PARAMETER);
             return 0;
         }
     }
@@ -132,10 +129,9 @@ int GsKdfTree12_256SetCtxParams(void* vctx, const OSSL_PARAM params[])
 
         if (!OSSL_PARAM_get_octet_string(p, NULL, 0, &usedLen) ||
             !BUF_MEM_grow_clean(ctx->secret, usedLen) ||
-            !OSSL_PARAM_get_octet_string(p, (void**)&ctx->secret->data, usedLen,
-                                         NULL))
+            !OSSL_PARAM_get_octet_string(p, (void**)&ctx->secret->data, usedLen, NULL))
         {
-            ERR_raise(ERR_LIB_PROV, PROV_R_FAILED_TO_SET_PARAMETER);
+            ErrRaise(ctx->provCtx, PROV_R_FAILED_TO_SET_PARAMETER);
             return 0;
         }
     }
@@ -147,25 +143,22 @@ int GsKdfTree12_256SetCtxParams(void* vctx, const OSSL_PARAM params[])
 
         if (!OSSL_PARAM_get_octet_string(p, NULL, 0, &usedLen) ||
             !BUF_MEM_grow_clean(ctx->seed, usedLen) ||
-            !OSSL_PARAM_get_octet_string(p, (void**)&ctx->seed->data, usedLen,
-                                         NULL))
+            !OSSL_PARAM_get_octet_string(p, (void**)&ctx->seed->data, usedLen, NULL))
         {
-            ERR_raise(ERR_LIB_PROV, PROV_R_FAILED_TO_SET_PARAMETER);
+            ErrRaise(ctx->provCtx, PROV_R_FAILED_TO_SET_PARAMETER);
             return 0;
         }
     }
     return 1;
 }
 
-const OSSL_PARAM* GsKdfTree12_256SettableCtxParams(ossl_unused void* ctx,
-                                                   ossl_unused void* provCtx)
+const OSSL_PARAM* GsKdfTree12_256SettableCtxParams(ossl_unused void* ctx, ossl_unused void* provCtx)
 {
     static const OSSL_PARAM gKnownSettableCtxParams[] = {
         OSSL_PARAM_octet_string(OSSL_KDF_PARAM_SECRET, NULL, 0),
         OSSL_PARAM_octet_string(OSSL_KDF_PARAM_SEED, NULL, 0),
         OSSL_PARAM_octet_string(OSSL_KDF_PARAM_LABEL, NULL, 0),
-        OSSL_PARAM_octet_string(OSSL_KDF_PARAM_CONSTANT, NULL, 0),
-        OSSL_PARAM_END};
+        OSSL_PARAM_octet_string(OSSL_KDF_PARAM_CONSTANT, NULL, 0), OSSL_PARAM_END};
     return gKnownSettableCtxParams;
 }
 
@@ -179,16 +172,14 @@ int GsKdfTree12_256GetCtxParams(ossl_unused void* vctx, OSSL_PARAM params[])
     return -2;
 }
 
-const OSSL_PARAM* GsKdfTree12_256GettableCtxParams(ossl_unused void* ctx,
-                                                   ossl_unused void* provCtx)
+const OSSL_PARAM* GsKdfTree12_256GettableCtxParams(ossl_unused void* ctx, ossl_unused void* provCtx)
 {
     static const OSSL_PARAM gKnownGettableCtxParams[] = {
         OSSL_PARAM_size_t(OSSL_KDF_PARAM_SIZE, NULL), OSSL_PARAM_END};
     return gKnownGettableCtxParams;
 }
 
-int GsKdfTree12_256(BUF_MEM* secret, BUF_MEM* label, BUF_MEM* seed, size_t R,
-                    unsigned char* key, size_t keyLen)
+int GsKdfTree12_256(GsKdfTree* ctx, size_t R, unsigned char* key, size_t keyLen)
 {
     OSSL_PARAM param[] = {OSSL_PARAM_END, OSSL_PARAM_END};
     const char* alg = SN_id_GostR3411_2012_256;
@@ -199,25 +190,25 @@ int GsKdfTree12_256(BUF_MEM* secret, BUF_MEM* label, BUF_MEM* seed, size_t R,
     uint32_t L;
     size_t iter, iters, LSize = 4;
     int blockSize, ret = 0;
+    OSSL_LIB_CTX* libctx = GsProvCtxGet0LibCtx(ctx->provCtx);
 
-    param[0] =
-        OSSL_PARAM_construct_utf8_string(OSSL_MAC_PARAM_DIGEST, (char*)alg, 0);
-    md = EVP_MD_fetch(NULL, alg, NULL);
+    param[0] = OSSL_PARAM_construct_utf8_string(OSSL_MAC_PARAM_DIGEST, (char*)alg, 0);
+    md = EVP_MD_fetch(libctx, alg, NULL);
     if (md == NULL)
     {
-        ERR_raise(ERR_LIB_PROV, PROV_R_DIGEST_NOT_ALLOWED);
+        ErrRaise(ctx->provCtx, PROV_R_DIGEST_NOT_ALLOWED);
         goto end;
     }
     blockSize = EVP_MD_size(md);
 
     if (key == NULL)
     {
-        ERR_raise(ERR_LIB_PROV, ERR_R_PASSED_NULL_PARAMETER);
+        ErrRaise(ctx->provCtx, ERR_R_PASSED_NULL_PARAMETER);
         goto end;
     }
     if (keyLen == 0 || keyLen % blockSize != 0)
     {
-        ERR_raise(ERR_LIB_PROV, PROV_R_UNSUPPORTED_KEY_SIZE);
+        ErrRaise(ctx->provCtx, PROV_R_UNSUPPORTED_KEY_SIZE);
         goto end;
     }
     iters = keyLen / blockSize;
@@ -226,10 +217,10 @@ int GsKdfTree12_256(BUF_MEM* secret, BUF_MEM* label, BUF_MEM* seed, size_t R,
     for (LBytes = (unsigned char*)&L; *LBytes == 0; ++LBytes)
         LSize--;
 
-    mac = EVP_MAC_fetch(NULL, OSSL_MAC_NAME_HMAC, NULL);
+    mac = EVP_MAC_fetch(libctx, OSSL_MAC_NAME_HMAC, NULL);
     if (mac == NULL)
     {
-        ERR_raise(ERR_LIB_PROV, PROV_R_UNSUPPORTED_MAC_TYPE);
+        ErrRaise(ctx->provCtx, PROV_R_UNSUPPORTED_MAC_TYPE);
         goto end;
     }
 
@@ -241,21 +232,19 @@ int GsKdfTree12_256(BUF_MEM* secret, BUF_MEM* label, BUF_MEM* seed, size_t R,
         uint32_t i = htonl(iter);
         unsigned char* RBytes = (unsigned char*)&i + (4 - R);
 
-        EVP_MAC_CTX* ctx = EVP_MAC_CTX_new(mac);
-        if (ctx == NULL ||
-            !EVP_MAC_init(ctx, BUF_MEM_data(secret), BUF_MEM_size(secret),
-                          param) ||
-            !EVP_MAC_update(ctx, RBytes, R) ||
-            !EVP_MAC_update(ctx, BUF_MEM_data(label), BUF_MEM_size(label)) ||
-            !EVP_MAC_update(ctx, &zeroByte, sizeof(zeroByte)) ||
-            !EVP_MAC_update(ctx, BUF_MEM_data(seed), BUF_MEM_size(seed)) ||
-            !EVP_MAC_update(ctx, LBytes, LSize) ||
-            !EVP_MAC_final(ctx, ptr, &outSize, blockSize))
+        EVP_MAC_CTX* mctx = EVP_MAC_CTX_new(mac);
+        if (mctx == NULL ||
+            !EVP_MAC_init(mctx, BUF_MEM_data(ctx->secret), BUF_MEM_size(ctx->secret), param) ||
+            !EVP_MAC_update(mctx, RBytes, R) ||
+            !EVP_MAC_update(mctx, BUF_MEM_data(ctx->label), BUF_MEM_size(ctx->label)) ||
+            !EVP_MAC_update(mctx, &zeroByte, sizeof(zeroByte)) ||
+            !EVP_MAC_update(mctx, BUF_MEM_data(ctx->seed), BUF_MEM_size(ctx->seed)) ||
+            !EVP_MAC_update(mctx, LBytes, LSize) || !EVP_MAC_final(mctx, ptr, &outSize, blockSize))
         {
-            EVP_MAC_CTX_free(ctx);
+            EVP_MAC_CTX_free(mctx);
             goto end;
         }
-        EVP_MAC_CTX_free(ctx);
+        EVP_MAC_CTX_free(mctx);
         ptr += outSize;
     }
     ret = 1;

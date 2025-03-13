@@ -1,7 +1,3 @@
-if (ENABLE_TESTS)
-    enable_testing()
-endif (ENABLE_TESTS)
-
 if (ENABLE_CODE_COVERAGE)
     include(CodeCoverage)
     append_coverage_compiler_flags()
@@ -48,4 +44,8 @@ if (ENABLE_UB_SANITIZER)
         message(SEND_ERROR "Could not enable the undefined behavior sanitizer!")
     endif ()
 endif (ENABLE_UB_SANITIZER)
+
+message(STATUS "ENABLE_KAT = ${ENABLE_KAT}")
+message(STATUS "ENABLE_UNIT = ${ENABLE_UNIT}")
+message(STATUS "ENABLE_CODE_COVERAGE = ${ENABLE_CODE_COVERAGE}")
 

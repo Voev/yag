@@ -2,7 +2,7 @@
 AlignAfterOpenBracket: Align
 AllowShortFunctionsOnASingleLine: false
 BreakBeforeBraces: Allman
-ColumnLimit: '80'
+ColumnLimit: '100'
 IndentWidth: '4'
 PointerAlignment: Left
 SortIncludes: 'false'

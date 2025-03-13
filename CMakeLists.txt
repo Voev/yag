@@ -32,7 +32,4 @@ include_directories(${PROJECT_SOURCE_DIR}/include)
 add_subdirectory(src)
 
 # Entry point for provider tests
-if (ENABLE_TESTS)
-  enable_testing()
-  add_subdirectory(tests)
-endif (ENABLE_TESTS)
+add_subdirectory(tests)

@@ -7,6 +7,7 @@
 #include <openssl/proverr.h>
 #include <openssl/provider.h>
 
+#include <utilities/crypto_manager.hpp>
 #include <utilities/name_generator.hpp>
 #include <utilities/ossl_pointers.hpp>
 #include <utilities/ossl_tool.hpp>
@@ -16,7 +17,7 @@ class KdfTreeTest : public testing::Test
   public:
     void SetUp()
     {
-        kdf.reset(EVP_KDF_fetch(nullptr, "kdf_tree12_256", nullptr));
+        kdf = ossl::CryptoManager::getInstance().fetchKdf("kdf_tree12_256");
         ASSERT_NE(kdf.get(), nullptr);
     }
 
@@ -24,6 +25,7 @@ class KdfTreeTest : public testing::Test
     {
         ERR_print_errors_fp(stderr);
     }
+
     ossl::EvpKdfPtr kdf;
 };
 

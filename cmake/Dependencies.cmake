@@ -1,6 +1,7 @@
 find_package(OpenSSL 3.0 REQUIRED)
 
-if (ENABLE_TESTS)
+if (ENABLE_KAT STREQUAL "ON" OR ENABLE_UNIT STREQUAL "ON")
   find_package(GTest REQUIRED)
   include(GoogleTest)
-endif (ENABLE_TESTS)
+  enable_testing()
+endif ()

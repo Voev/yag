@@ -4,38 +4,35 @@
 #include <openssl/evp.h>
 #include <openssl/x509.h>
 #include <utilities/ossl_pointers.hpp>
+#include <utilities/crypto_manager.hpp>
 
 namespace ossl
 {
 
-inline
-EVP_PKEY* GenerateKeyPair( const char* alg, const char* group )
+inline EvpPkeyPtr GenerateKeyPair(const char* alg, const char* group)
 {
     EVP_PKEY* pkey = nullptr;
-    ossl::EvpPkeyCtxPtr ctx( EVP_PKEY_CTX_new_from_name( nullptr, alg, nullptr ) );
-    if( !ctx.get() ||
-        !EVP_PKEY_keygen_init( ctx.get() ) ||
-        !EVP_PKEY_CTX_ctrl_str( ctx.get(), OSSL_PKEY_PARAM_GROUP_NAME, group ) ||
-        !EVP_PKEY_keygen( ctx.get(), &pkey ) )
+    auto ctx = CryptoManager::getInstance().createKeyContext(alg);
+    if (!ctx.get() || !EVP_PKEY_keygen_init(ctx.get()) ||
+        !EVP_PKEY_CTX_ctrl_str(ctx.get(), OSSL_PKEY_PARAM_GROUP_NAME, group) ||
+        !EVP_PKEY_keygen(ctx.get(), &pkey))
     {
         return nullptr;
     }
-    return pkey;
+    return EvpPkeyPtr{pkey};
 }
 
-inline
-EVP_PKEY* GenerateParameters( const char* alg, const char* group )
+inline EvpPkeyPtr GenerateParameters(const char* alg, const char* group)
 {
     EVP_PKEY* pkey = nullptr;
-    ossl::EvpPkeyCtxPtr ctx( EVP_PKEY_CTX_new_from_name( nullptr, alg, nullptr ) );
-    if( !ctx.get() ||
-        !EVP_PKEY_paramgen_init( ctx.get() ) ||
-        !EVP_PKEY_CTX_ctrl_str( ctx.get(), OSSL_PKEY_PARAM_GROUP_NAME, group ) ||
-        !EVP_PKEY_paramgen( ctx.get(), &pkey ) )
+    auto ctx = CryptoManager::getInstance().createKeyContext(alg);
+    if (!ctx.get() || !EVP_PKEY_paramgen_init(ctx.get()) ||
+        !EVP_PKEY_CTX_ctrl_str(ctx.get(), OSSL_PKEY_PARAM_GROUP_NAME, group) ||
+        !EVP_PKEY_paramgen(ctx.get(), &pkey))
     {
         return nullptr;
     }
-    return pkey;
+    return EvpPkeyPtr{pkey};
 }
 
-} // ossl
+} // namespace ossl

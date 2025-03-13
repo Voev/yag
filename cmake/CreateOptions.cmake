@@ -1,5 +1,6 @@
 # testing
-option(ENABLE_TESTS "enable unit tests and known answer tests" OFF)
+option(ENABLE_UNIT "enable unit tests and known answer tests" OFF)
+option(ENABLE_KAT "enable known answer tests" OFF)
 option(ENABLE_CODE_COVERAGE "enable code coverage support" OFF)
 
 # debugging

@@ -1,10 +1,11 @@
+#include <vector>
 #include <gtest/gtest.h>
 #include <openssl/err.h>
 #include <openssl/evp.h>
 #include <openssl/provider.h>
+#include <utilities/crypto_manager.hpp>
 #include <utilities/name_generator.hpp>
 #include <utilities/ossl_pointers.hpp>
-#include <vector>
 
 static std::string
 NameGenerator(const testing::TestParamInfo<const char*>& info)
@@ -17,9 +18,14 @@ NameGenerator(const testing::TestParamInfo<const char*>& info)
 class DigestTest : public testing::TestWithParam<const char*>
 {
   public:
-    void SetUp() {}
+    void SetUp()
+    {
+    }
 
-    void TearDown() { ERR_print_errors_fp(stderr); }
+    void TearDown()
+    {
+        ERR_print_errors_fp(stderr);
+    }
 
   protected:
     OSSL_PROVIDER* prov_ = nullptr;
@@ -27,7 +33,7 @@ class DigestTest : public testing::TestWithParam<const char*>
 
 TEST_P(DigestTest, DigestInit)
 {
-    ossl::EvpMdPtr md(EVP_MD_fetch(nullptr, GetParam(), nullptr));
+    auto md = ossl::CryptoManager::getInstance().fetchDigest(GetParam());
     ASSERT_NE(md.get(), nullptr);
 
     ossl::EvpMdCtxPtr ctx(EVP_MD_CTX_new());
@@ -37,7 +43,7 @@ TEST_P(DigestTest, DigestInit)
 
 TEST_P(DigestTest, DigestUpdate)
 {
-    ossl::EvpMdPtr md(EVP_MD_fetch(nullptr, GetParam(), nullptr));
+    auto md = ossl::CryptoManager::getInstance().fetchDigest(GetParam());
     ASSERT_NE(md.get(), nullptr);
 
     ossl::EvpMdCtxPtr ctx(EVP_MD_CTX_new());
@@ -50,7 +56,7 @@ TEST_P(DigestTest, DigestUpdate)
 
 TEST_P(DigestTest, DigestUpdateNullArgument)
 {
-    ossl::EvpMdPtr md(EVP_MD_fetch(nullptr, GetParam(), nullptr));
+    auto md = ossl::CryptoManager::getInstance().fetchDigest(GetParam());
     ASSERT_NE(md.get(), nullptr);
 
     ossl::EvpMdCtxPtr ctx(EVP_MD_CTX_new());
@@ -64,7 +70,7 @@ TEST_P(DigestTest, DigestUpdateNullArgument)
 
 TEST_P(DigestTest, DigestUpdateZeroLength)
 {
-    ossl::EvpMdPtr md(EVP_MD_fetch(nullptr, GetParam(), nullptr));
+    auto md = ossl::CryptoManager::getInstance().fetchDigest(GetParam());
     ASSERT_NE(md.get(), nullptr);
 
     ossl::EvpMdCtxPtr ctx(EVP_MD_CTX_new());
@@ -77,7 +83,7 @@ TEST_P(DigestTest, DigestUpdateZeroLength)
 
 TEST_P(DigestTest, DigestFinal)
 {
-    ossl::EvpMdPtr md(EVP_MD_fetch(nullptr, GetParam(), nullptr));
+    auto md = ossl::CryptoManager::getInstance().fetchDigest(GetParam());
     ASSERT_NE(md.get(), nullptr);
 
     ossl::EvpMdCtxPtr ctx(EVP_MD_CTX_new());
@@ -95,7 +101,7 @@ TEST_P(DigestTest, DigestFinal)
 
 TEST_P(DigestTest, DigestFinalNullArgument)
 {
-    ossl::EvpMdPtr md(EVP_MD_fetch(nullptr, GetParam(), nullptr));
+    auto md = ossl::CryptoManager::getInstance().fetchDigest(GetParam());
     ASSERT_NE(md.get(), nullptr);
 
     ossl::EvpMdCtxPtr ctx(EVP_MD_CTX_new());
@@ -112,7 +118,7 @@ TEST_P(DigestTest, DigestFinalNullArgument)
 
 TEST_P(DigestTest, DigestFinalZeroLength)
 {
-    ossl::EvpMdPtr md(EVP_MD_fetch(nullptr, GetParam(), nullptr));
+    auto md = ossl::CryptoManager::getInstance().fetchDigest(GetParam());
     ASSERT_NE(md.get(), nullptr);
 
     ossl::EvpMdCtxPtr ctx(EVP_MD_CTX_new());
