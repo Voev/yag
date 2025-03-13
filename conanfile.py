@@ -57,6 +57,8 @@ class YetAnotherGost(ConanFile):
             cmake_vars["ENABLE_KAT"] = "ON"
         cmake.configure(variables=cmake_vars)
         cmake.build()
-        if self.options.enable_unit or self.options.enable_kat:
+        if self.options.enable_unit:
             cmake.test()
+        if self.options.enable_kat:
+            self.run(f"cmake --build . --target run_kat")
 
